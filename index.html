@@ -95,7 +95,7 @@ const PLANS={
 };
 const PT_STATUS={requested:'신청',scheduled:'예정',completed:'완료',canceled:'취소'};
 const GOALS=['근력·체력','다이어트','체형 교정','재활·통증 관리','건강 유지'];
-const IB=[['weight','체중','kg','#8b7bff'],['muscle','골격근량','kg','#4ade80'],['fat_pct','체지방률','%','#fbbf24']];
+const IB=[['weight','체중','kg','#8b7bff'],['muscle','골격근량','kg','#4ade80'],['fat_mass','체지방량','kg','#f87171'],['fat_pct','체지방률','%','#fbbf24']];
 
 /* ===== 상태 / 유틸 ===== */
 const $=s=>document.querySelector(s);
@@ -168,7 +168,7 @@ async function loadData(){
   }
   const tid=targetId();
   st.logs=tid?await fetchAll(()=>sb.from('workout_logs').select('*').eq('user_id',tid).order('log_date',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];
-  try{st.inbody=tid?await fetchAll(()=>sb.from('inbody_records').select('*').eq('user_id',tid).order('measured_on',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];st.needMig=!('goal' in st.me)}
+  try{st.inbody=tid?await fetchAll(()=>sb.from('inbody_records').select('*').eq('user_id',tid).order('measured_on',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];st.needMig=!('goal' in st.me)||(st.inbody.length>0&&!('fat_mass' in st.inbody[0]))}
   catch(e){st.inbody=[];st.needMig=true}   /* migration_002 미실행 */
   st.pts=[];st.reqs=[];st.myTrainer=null;
   if(coaching())st.reqs=ok(await sb.from('pt_schedules').select('*').eq('trainer_id',me.id).eq('status','requested').order('pt_date').order('pt_time'));
@@ -237,7 +237,7 @@ const tabList=()=>coaching()?[['members','👥','회원'],['record','✏️','�
 const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${st.tab===k?'on':''}" onclick="go('${k}')"><i>${i}</i>${l}</button>`).join('')}</nav>`;
 const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${esc(m.name)} (${esc(m.level)})</option>`).join('')}</select>`:'';
 const noMember=()=>`<div class="card center muted">담당 회원이 없어요.<br>회원 탭에서 이메일로 등록하거나,<br>마이 탭의 강사 코드를 회원에게 알려주세요.</div>`;
-const migHint=()=>`<div class="card warn">⚠️ DB 업데이트가 필요해요. Supabase SQL Editor에서 <b>supabase/migration_002_mypage_inbody.sql</b>을 실행해 주세요. (인바디 · 내 정보 · 강사 코드 · PT 신청 · 노트 기능)</div>`;
+const migHint=()=>`<div class="card warn">⚠️ DB 업데이트가 필요해요. Supabase SQL Editor에서 <b>supabase/migration_002_mypage_inbody.sql</b>과 <b>migration_003_inbody_fields.sql</b>을 순서대로 실행해 주세요. (인바디 · 내 정보 · 강사 코드 · PT 신청 · 노트 기능)</div>`;
 
 function nextPT(){return st.pts.filter(p=>p.status==='scheduled'&&p.pt_date>=today())}
 function homeView(){
@@ -435,23 +435,30 @@ function spark(vals,color){
 const dlt=(a,b)=>{if(a==null||b==null)return '-';const d=Math.round((a-b)*10)/10;return d>0?`+${d}`:`${d}`};
 function inbodyView(){
   if(coaching()&&!st.sel)return `<h2>인바디</h2>${noMember()}`;
-  const rec=st.inbody,asc=[...rec].reverse(),num=x=>x==null?null:+x;
+  const rec=st.inbody,asc=[...rec].reverse(),num=x=>x==null?null:+x,h=+(targetProfile()?.height_cm||0);
   const lastOf=k=>rec.find(r=>r[k]!=null),firstOf=k=>asc.find(r=>r[k]!=null),prevOf=k=>rec.filter(r=>r[k]!=null)[1];
+  const bmi=w=>h&&w?` · BMI ${(w/((h/100)**2)).toFixed(1)}`:'';
+  const f1=x=>x==null?'-':x;
   return `<h2>${coaching()?`${esc(st.sel.name)} 회원 인바디`:'인바디'}</h2>${coaching()?memberSelect():''}${st.needMig?migHint():''}
   <div class="card"><h3>인바디 기록하기</h3><label class="lbl">측정일</label><input id="ib-date" type="date" class="input" value="${today()}">
-  <div class="grid3">${IB.map(([k,l,u])=>`<div><label class="lbl">${l} (${u})</label><input id="ib-${k}" type="number" inputmode="decimal" step="0.1" class="input"></div>`).join('')}</div>
+  <div class="grid2"><div><label class="lbl">체중 (kg)</label><input id="ib-weight" type="number" inputmode="decimal" step="0.1" class="input"></div><div><label class="lbl">골격근량 (kg)</label><input id="ib-muscle" type="number" inputmode="decimal" step="0.1" class="input"></div></div>
+  <div class="grid2"><div><label class="lbl">체지방량 (kg)</label><input id="ib-fat_mass" type="number" inputmode="decimal" step="0.1" class="input"></div><div><label class="lbl">내장지방 레벨</label><input id="ib-visceral_fat" type="number" inputmode="numeric" class="input"></div></div>
+  <div class="small muted" style="margin-top:10px">체중만 재도 괜찮아요. 체지방률은 체중과 체지방량으로 자동 계산돼요.</div>
   <button class="btn primary" onclick="saveInbody()">저장하기</button></div>
   ${rec.length?IB.map(([k,l,u,c])=>{const L=lastOf(k);if(!L)return '';const P=prevOf(k),F=firstOf(k);
-    return `<div class="card"><div class="metric"><div><div class="small muted">${l}</div><b>${num(L[k])}<span class="small muted"> ${u}</span></b></div><div class="small muted">지난번 대비 ${dlt(num(L[k]),P?num(P[k]):null)}<br>처음 대비 ${dlt(num(L[k]),num(F[k]))}</div></div>${spark(asc.map(r=>num(r[k])),c)}</div>`}).join('')
-  +`<div class="card" style="padding:8px 12px"><div class="row between" style="padding:6px 4px"><b>측정 기록 ${rec.length}건</b><button class="chip ${st.hf.edit?'on':''}" style="min-height:36px" onclick="hfEdit()">🗑 삭제 모드 ${st.hf.edit?'ON':'OFF'}</button></div>
-  <table class="tbl"><thead><tr><th>날짜</th><th>체중</th><th>골격근</th><th>체지방률</th><th></th></tr></thead><tbody>${rec.map(r=>`<tr><td class="d">${fmtShort(r.measured_on)}</td><td>${r.weight??'-'}</td><td>${r.muscle??'-'}</td><td>${r.fat_pct!=null?r.fat_pct+'%':'-'}</td><td>${st.hf.edit?`<button class="btn sm danger" onclick="delInbody('${r.id}')">삭제</button>`:''}</td></tr>`).join('')}</tbody></table></div>`
+    return `<div class="card"><div class="metric"><div><div class="small muted">${l} · ${fmtShort(L.measured_on)}</div><b>${num(L[k])}<span class="small muted"> ${u}${k==='weight'?bmi(num(L[k])):''}</span></b></div><div class="small muted">지난번 대비 ${dlt(num(L[k]),P?num(P[k]):null)}<br>처음 대비 ${dlt(num(L[k]),num(F[k]))}</div></div>${spark(asc.map(r=>num(r[k])),c)}</div>`}).join('')
+  +`<div class="card" style="padding:8px 10px"><div class="row between" style="padding:6px 4px"><b>측정 기록 ${rec.length}건</b><button class="chip ${st.hf.edit?'on':''}" style="min-height:36px" onclick="hfEdit()">🗑 삭제 모드 ${st.hf.edit?'ON':'OFF'}</button></div>
+  <table class="tbl" style="font-size:12px"><thead><tr><th>날짜</th><th>체중</th><th>골격근</th><th>체지방</th><th>체지방률</th><th>내장</th>${st.hf.edit?'<th></th>':''}</tr></thead><tbody>${rec.map(r=>`<tr><td class="d">${fmtShort(r.measured_on)}</td><td>${f1(r.weight)}</td><td>${f1(r.muscle)}</td><td>${f1(r.fat_mass)}</td><td>${r.fat_pct!=null?r.fat_pct+'%':'-'}</td><td>${f1(r.visceral_fat)}</td>${st.hf.edit?`<td><button class="btn sm danger" onclick="delInbody('${r.id}')">삭제</button></td>`:''}</tr>`).join('')}</tbody></table></div>`
   :'<div class="card center muted">아직 인바디 기록이 없어요</div>'}`;
 }
 function saveInbody(){return run(async()=>{
   const tid=targetId();if(!tid)return toast('회원을 먼저 선택해주세요');
   const v=k=>{const x=$('#ib-'+k).value;return x===''?null:+x};
-  const row={user_id:tid,measured_on:$('#ib-date').value||today(),weight:v('weight'),muscle:v('muscle'),fat_pct:v('fat_pct')};
-  if(row.weight==null&&row.muscle==null&&row.fat_pct==null)return toast('값을 하나 이상 입력해주세요');
+  const row={user_id:tid,measured_on:$('#ib-date').value||today(),weight:v('weight'),muscle:v('muscle')};
+  const fm=v('fat_mass'),vf=v('visceral_fat');
+  if(fm!=null){row.fat_mass=fm;if(row.weight)row.fat_pct=Math.round(fm/row.weight*1000)/10}
+  if(vf!=null)row.visceral_fat=vf;
+  if(row.weight==null&&row.muscle==null&&fm==null&&vf==null)return toast('값을 하나 이상 입력해주세요');
   ok(await sb.from('inbody_records').insert(row));await loadData();render();toast('인바디를 저장했어요');
 })}
 function delInbody(id){const r=st.inbody.find(x=>x.id===id);if(!confirm(`${r?fmtDate(r.measured_on)+' ':''}인바디 기록을 삭제할까요? 되돌릴 수 없어요.`))return;run(async()=>{ok(await sb.from('inbody_records').delete().eq('id',id));await loadData();render()})}
