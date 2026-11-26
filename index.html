@@ -125,8 +125,8 @@ const ICON={home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/>',record:'
   my:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',members:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c.8-3.5 3.3-5 7-5s6.2 1.5 7 5M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2 .6 3.4 2.2 4 5"/>',
   msg:'<path d="M4 5h16v11H9l-5 4z"/>'};
 const ico=(k,n=22)=>`<svg viewBox="0 0 24 24" width="${n}" height="${n}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true">${ICON[k]}</svg>`;
-/* 믓 심볼: 굵은 기하 글자 (ㅁ · ㅡ · ㅅ) */
-const logoSvg=n=>`<svg class="mark" viewBox="0 0 64 64" width="${n}" height="${n}" role="img" aria-label="믓"><g fill="none" stroke="var(--chalk)" stroke-width="7" stroke-linecap="square" stroke-linejoin="miter"><path d="M14 6H50V28H14Z"/><path d="M6 39H58"/><path d="M32 44L18 57M32 44L46 57"/></g></svg>`;
+/* 믓 심볼: Pretendard Black의 "믓" 글리프 윤곽 (OFL) */
+const logoSvg=n=>`<svg class="mark" viewBox="0 0 64 64" width="${n}" height="${n}" role="img" aria-label="믓"><path transform="translate(3.905 53.975) scale(0.03171 -0.03171)" fill="var(--chalk)" d="M1518 1576H246V918H1518ZM558 1328H1202V1168H558ZM1730 810H42V562H1730ZM1046 456V480H720V456C720 296 592 104 144 52L256 -190C564 -153 768 -45 884 104C997 -45 1201 -153 1512 -190L1626 52C1174 104 1046 296 1046 456Z"/></svg>`;
 const EYEBROW={home:'TODAY',record:'LOG',history:'HISTORY',inbody:'INBODY',class:'CLASS',my:'MY',members:'MEMBERS',pt:'PT SCHEDULE'};
 
 /* ===== 상태 / 유틸 ===== */
