@@ -30,7 +30,7 @@ textarea.input{min-height:96px;resize:vertical}
 .btn{display:block;width:100%;min-height:52px;padding:0 16px;border:none;border-radius:14px;font-size:16px;font-weight:700;margin-top:12px;cursor:pointer;background:var(--card2);color:var(--t);font-family:inherit}
 .btn.primary{background:var(--p);color:#fff}.btn.primary:active{background:var(--pd)}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--p)}
-.btn.sm{width:auto;min-height:40px;padding:0 14px;font-size:14px;margin-top:0}
+.btn.danger{background:#3a1a1a;color:var(--bad)}.btn.sm{width:auto;min-height:40px;padding:0 14px;font-size:14px;margin-top:0}
 .btn:disabled{opacity:.5}
 .x{border:none;background:none;color:var(--m);font-size:14px;padding:10px;cursor:pointer;font-family:inherit}.x.del{color:var(--bad)}
 .set{display:grid;grid-template-columns:26px 1fr 1fr 28px;gap:8px;align-items:center;margin-bottom:10px}
@@ -98,7 +98,7 @@ const ok=r=>{if(r.error)throw r.error;return r.data};
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600)}
 async function run(fn){try{await fn()}catch(e){toast(e.message||String(e))}}
 
-const st={hf:{q:'',part:'',ex:'',limit:60,sort:'desc'},exercises:{},me:null,tab:'home',mode:'trainer',authMode:'login',members:[],sel:null,logs:[],pts:[],myTrainer:null,found:undefined,draft:null};
+const st={hf:{q:'',part:'',ex:'',limit:60,sort:'desc',edit:false},exercises:{},me:null,tab:'home',mode:'trainer',authMode:'login',members:[],sel:null,logs:[],pts:[],myTrainer:null,found:undefined,draft:null};
 const isTrainer=()=>st.me?.role==='trainer';
 const coaching=()=>isTrainer()&&st.mode==='trainer';
 const targetId=()=>coaching()?st.sel?.id:st.me.id;
@@ -289,11 +289,11 @@ function saveLog(){return run(async()=>{
   st.draft=newDraft();st.draft.date=d.date;await loadData();render();toast('저장했어요 💪');
 })}
 
-const resetHF=()=>{st.hf={q:'',part:'',ex:'',limit:60,sort:'desc'}};
+const resetHF=()=>{st.hf={q:'',part:'',ex:'',limit:60,sort:'desc',edit:false}};
 const setsHtml=l=>l.sets.map((x,i)=>`<span class="pill"><b>${i+1}세트</b> ${+x.w?x.w+'kg':'맨몸'} × ${x.r}회</span>`).join('');
 function tgFb(b){const e=b.nextElementSibling;e.hidden=!e.hidden;b.textContent=e.hidden?'💬 피드백 ▸':'💬 피드백 ▾'}
 function tgFbRow(b){const r=b.closest('tr').nextElementSibling;r.hidden=!r.hidden}
-function logCard(l){return `<div class="card" style="padding:14px"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(partLabel(l.part))}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div><button class="x del" onclick="delLog('${l.id}')">삭제</button></div>
+function logCard(l){return `<div class="card" style="padding:14px"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(partLabel(l.part))}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div>${st.hf.edit?`<button class="btn sm danger" onclick="delLog('${l.id}')">삭제</button>`:''}</div>
   <div>${setsHtml(l)}</div>${l.feedback?`<button class="x fbtn" onclick="tgFb(this)">💬 피드백 ▸</button><div class="fb" hidden>${esc(l.feedback)}</div>`:''}</div>`}
 function filteredLogs(){const {q,part,ex}=st.hf,qq=q.trim().toLowerCase();
   return st.logs.filter(l=>(!part||l.part===part)&&(!ex||l.exercise===ex)&&(!qq||l.exercise.toLowerCase().includes(qq)||(l.feedback||'').toLowerCase().includes(qq)))}
@@ -311,7 +311,7 @@ function exDetail(list,limit){
   <table class="tbl"><thead><tr><th>세트</th><th>최소</th><th>최대</th><th>횟수</th></tr></thead><tbody>${mm.map(m=>`<tr><td>${m.n}set</td><td>${kg(m.min)}</td><td>${kg(m.max)}</td><td>${m.cnt}번</td></tr>`).join('')}</tbody></table></div>
   <div class="card" style="padding:8px 12px"><table class="tbl"><thead><tr><th>날짜</th><th>세트 (kg × 횟수)</th><th></th></tr></thead><tbody>${list.slice(0,limit).map(l=>
     `<tr><td class="d">${fmtShort(l.log_date)}${l.is_pt?'<div class="pt">PT</div>':''}</td><td>${l.sets.map(x=>`<span class="pr"><b>${+x.w?x.w:'맨몸'}</b><i>×</i>${x.r}</span>`).join('')}</td>
-    <td style="white-space:nowrap;text-align:right">${l.feedback?'<button class="x" style="padding:0 6px" onclick="tgFbRow(this)">💬</button>':''}<button class="x del" style="padding:0 4px" onclick="delLog(\''+l.id+'\')">✕</button></td></tr>`
+    <td style="white-space:nowrap;text-align:right">${l.feedback?'<button class="x" style="padding:0 6px" onclick="tgFbRow(this)">💬</button>':''}${st.hf.edit?`<button class="btn sm danger" style="margin-left:6px" onclick="delLog('${l.id}')">삭제</button>`:''}</td></tr>`
     +(l.feedback?`<tr class="fbr" hidden><td colspan="3">${esc(l.feedback)}</td></tr>`:'')).join('')}</tbody></table></div>`;
 }
 function histResults(){
@@ -332,16 +332,17 @@ function historyView(){
   return `<h2>${coaching()?`${esc(st.sel.name)} 회원 히스토리`:'내 운동 히스토리'}</h2>${coaching()?memberSelect():''}
   <div class="card"><input class="input" type="search" placeholder="🔍 종목 · 피드백 검색" value="${esc(hf.q)}" oninput="hfQ(this.value)">
   <div class="chips" style="margin-top:12px"><button class="chip ${hf.part?'':'on'}" onclick="hfPart('')">전체</button>${parts.map(p=>`<button class="chip ${hf.part===p?'on':''}" onclick="hfPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
-  <div class="row between" style="margin-top:12px"><span class="small muted">정렬</span><button class="chip on" style="min-height:40px" onclick="hfSort()">${hf.sort==='asc'?'날짜 ↑ 오래된순':'날짜 ↓ 최신순'}</button></div>
+  <div class="row between" style="margin-top:12px"><button class="chip on" style="min-height:40px" onclick="hfSort()">${hf.sort==='asc'?'날짜 ↑ 오래된순':'날짜 ↓ 최신순'}</button><button class="chip ${hf.edit?'on':''}" style="min-height:40px" onclick="hfEdit()">🗑 삭제 모드 ${hf.edit?'ON':'OFF'}</button></div>
   <select class="input" style="margin-top:12px" onchange="hfEx(this.value)"><option value="">전체 종목 (${exs.length})</option>${exs.map(e=>`<option value="${esc(e)}" ${hf.ex===e?'selected':''}>${esc(e)} · ${cnt[e]}회</option>`).join('')}</select></div>
   <div id="hres">${histResults()}</div>`;
 }
+function hfEdit(){st.hf.edit=!st.hf.edit;render()}
 function hfSort(){st.hf.sort=st.hf.sort==='asc'?'desc':'asc';render()}
 function hfPart(p){st.hf.part=p;st.hf.ex='';st.hf.limit=60;render()}
 function hfEx(e){st.hf.ex=e;st.hf.limit=60;render()}
 function hfQ(v){st.hf.q=v;st.hf.limit=60;$('#hres').innerHTML=histResults()}
 function moreHist(){st.hf.limit+=60;$('#hres').innerHTML=histResults()}
-function delLog(id){if(!confirm('이 기록을 삭제할까요?'))return;run(async()=>{ok(await sb.from('workout_logs').delete().eq('id',id));await loadData();render()})}
+function delLog(id){const l=st.logs.find(x=>x.id===id);if(!confirm(`${l?fmtDate(l.log_date)+' '+l.exercise+' ':''}기록을 삭제할까요? 되돌릴 수 없어요.`))return;run(async()=>{ok(await sb.from('workout_logs').delete().eq('id',id));await loadData();render()})}
 
 function membersView(){
   const f=st.found,s=st.sel;
