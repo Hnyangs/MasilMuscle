@@ -14,12 +14,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&display=swap">
 <style>
 /* 믓 MOVE & STRENGTH — 디자인 시스템 토큰 (brand/README.md)
-   비율: 아이언 블랙 55 · 초크 화이트 30 · 필드 그린 10 · 러스트 오렌지 5 */
+   비율: 아이언 블랙 55 · 초크 화이트 30 · 필드 그린 10 · 펄스 틸 5 */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --iron:#171717;--graphite:#333333;--chalk:#F2F0E9;--green:#B5C49C;--rust:#E87543;--concrete:#77736D;
+  --iron:#171717;--graphite:#333333;--chalk:#F2F0E9;--green:#B5C49C;--accent:#4FB3A0;--concrete:#77736D;
   --bg:var(--iron);--card:#222222;--card2:#2C2C2B;--line:var(--graphite);--t:var(--chalk);--m:#9A958D;
-  --p:var(--rust);--pd:#CF6132;--ok:var(--green);--warn:var(--rust);--bad:#F2A99E;--badbg:#3A1E1A;
+  --p:var(--accent);--pd:#3E9A88;--ok:var(--green);--warn:#D9A05B;--bad:#F2A99E;--badbg:#3A1E1A;
   --r:6px;--r-sm:4px;--gut:20px;
   --sans:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
@@ -33,21 +33,21 @@ h2{font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin:4
 .sub{color:var(--m);font-size:14px;margin:-10px 0 16px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 16px;margin-bottom:12px}
 .card.hl{--t:var(--iron);--m:#5F5B55;--card2:#E6E3DA;--line:#D6D2C8;background:var(--chalk);border-color:var(--chalk);color:var(--t)}
-.card.warn{border-color:var(--rust);color:var(--t)}.card.warn b{color:var(--rust)}
+.card.warn{border-color:var(--warn);color:var(--t)}.card.warn b{color:var(--warn)}
 .muted{color:var(--m)}.small{font-size:13px}.center{text-align:center;padding:24px 16px}
 .row{display:flex;align-items:center;gap:8px}.between{justify-content:space-between}
 .tag{display:inline-block;background:var(--card2);color:var(--m);font-size:12px;font-weight:600;padding:3px 8px;border-radius:var(--r-sm);margin-left:4px}
-.tag.pt{background:transparent;border:1px solid var(--rust);color:var(--rust);font-family:var(--mono);font-weight:700;letter-spacing:.06em}
+.tag.pt{background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:var(--mono);font-weight:700;letter-spacing:.06em}
 .card.hl .tag.pt{background:var(--iron);border-color:var(--iron);color:var(--chalk)}
 .lbl{display:block;font-size:13px;font-weight:600;color:var(--m);margin:16px 0 8px}.lbl:first-child{margin-top:0}
 .input,select.input,textarea.input{width:100%;min-height:48px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);font-size:16px;background:var(--card2);color:var(--t);font-family:inherit}
 textarea.input{min-height:96px;resize:vertical}
-.input:focus,.btn:focus-visible,.chip:focus-visible,nav button:focus-visible{outline:2px solid var(--rust);outline-offset:1px;border-color:transparent}
+.input:focus,.btn:focus-visible,.chip:focus-visible,nav button:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{min-height:44px;padding:0 14px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--card2);color:var(--t);font-size:15px;font-family:inherit;cursor:pointer}
 .chip.on{background:var(--chalk);border-color:var(--chalk);color:var(--iron);font-weight:700}
 .btn{display:block;width:100%;min-height:52px;padding:0 16px;border:none;border-radius:var(--r);font-size:16px;font-weight:700;margin-top:16px;cursor:pointer;background:var(--card2);color:var(--t);font-family:inherit;transition:background .12s}
-.btn.primary{background:var(--rust);color:var(--iron)}.btn.primary:active{background:var(--pd)}
+.btn.primary{background:var(--accent);color:var(--iron)}.btn.primary:active{background:var(--pd)}
 .card.hl .btn.primary{background:var(--iron);color:var(--chalk)}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--t)}
 .btn.danger{background:var(--badbg);color:var(--bad)}.btn.sm{white-space:nowrap;flex-shrink:0;width:auto;min-height:40px;padding:0 14px;font-size:14px;margin-top:0}
@@ -57,7 +57,7 @@ textarea.input{min-height:96px;resize:vertical}
 .sn{width:26px;height:26px;border-radius:var(--r-sm);background:var(--card2);color:var(--green);font-family:var(--mono);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
 .stp{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;background:var(--card2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden}
 .stp button{height:52px;border:none;background:var(--graphite);color:var(--t);font-size:22px;font-weight:700;cursor:pointer}
-.stp button:active{background:var(--rust);color:var(--iron)}
+.stp button:active{background:var(--accent);color:var(--iron)}
 .stp input{width:100%;height:52px;border:none;background:transparent;color:var(--t);text-align:center;font-size:19px;font-weight:800;font-family:inherit;min-width:0}
 .stp input:focus{outline:none}
 .item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;border-top:1px solid var(--line)}.item:first-of-type{border-top:none}
@@ -66,7 +66,7 @@ textarea.input{min-height:96px;resize:vertical}
 .pre{white-space:pre-wrap;line-height:1.55}
 nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--iron);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
 nav button{flex:1;min-height:62px;border:none;background:none;color:var(--m);font-size:11px;font-weight:600;padding:0;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
-nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav button.on svg{color:var(--rust)}
+nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav button.on svg{color:var(--accent)}
 .login{padding:56px var(--gut) 40px}
 .login h1{line-height:0}.login .mark{display:block}
 .login .en{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.16em;margin-top:20px}
@@ -76,15 +76,15 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .cfg{background:var(--badbg);color:var(--bad);border:1px solid var(--bad);border-radius:var(--r);padding:12px;font-size:13px;margin-top:16px}
 #toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(16px);background:var(--chalk);color:var(--iron);font-weight:700;padding:12px 18px;border-radius:var(--r);font-size:14px;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s cubic-bezier(.2,.8,.2,1);max-width:90%;z-index:9}#toast.show{opacity:1;transform:translateX(-50%)}
 .pill{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);padding:5px 9px;font-size:13px;margin:6px 6px 0 0}.pill b{font-family:var(--mono);color:var(--green);margin-right:4px}
-.tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl th{font-family:var(--mono);color:var(--m);font-weight:500;font-size:11px;letter-spacing:.06em;text-align:left;padding:6px 4px}.tbl td{padding:10px 4px;border-top:1px solid var(--line);vertical-align:top}.tbl .fbr td{border-top:none;padding:0 4px 10px;font-size:12px;color:var(--m);white-space:pre-wrap}.tbl .pt{font-family:var(--mono);color:var(--rust);font-weight:700;font-size:11px}.tbl .d{white-space:nowrap;font-family:var(--mono);font-size:12px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl th{font-family:var(--mono);color:var(--m);font-weight:500;font-size:11px;letter-spacing:.06em;text-align:left;padding:6px 4px}.tbl td{padding:10px 4px;border-top:1px solid var(--line);vertical-align:top}.tbl .fbr td{border-top:none;padding:0 4px 10px;font-size:12px;color:var(--m);white-space:pre-wrap}.tbl .pt{font-family:var(--mono);color:var(--accent);font-weight:700;font-size:11px}.tbl .d{white-space:nowrap;font-family:var(--mono);font-size:12px}
 .fbtn{display:block;padding:10px 0 0;color:var(--m);font-size:13px}.fb[hidden],tr[hidden]{display:none}.pr{display:inline-block;margin:0 10px 4px 0;white-space:nowrap}.pr b{font-weight:800}.pr i{font-style:normal;color:var(--m);margin:0 1px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.grid2 .lbl:first-child,.grid3 .lbl:first-child{margin-top:16px}
 .avatar{width:56px;height:56px;border-radius:var(--r);background:var(--iron);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;margin-right:14px;color:var(--chalk);flex-shrink:0}
-.code{font-family:var(--mono);font-size:44px;font-weight:700;letter-spacing:12px;color:var(--rust);margin:6px 0}.code-in{font-family:var(--mono);font-size:28px;text-align:center;letter-spacing:16px;font-weight:700}
+.code{font-family:var(--mono);font-size:44px;font-weight:700;letter-spacing:12px;color:var(--accent);margin:6px 0}.code-in{font-family:var(--mono);font-size:28px;text-align:center;letter-spacing:16px;font-weight:700}
 .sec{font-family:var(--mono);margin:28px 2px 10px;font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--m)}
 .wk{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px}.wk button{border:none;background:none;color:var(--t);font-family:inherit;padding:4px 0;cursor:pointer}
-.wk button span{display:block;font-size:12px;color:var(--m)}.wk button b{display:block;font-size:16px;font-weight:700;width:36px;height:36px;line-height:36px;margin:4px auto;border-radius:var(--r)}.wk button.today b{background:var(--rust);color:var(--iron)}
-.wk i{display:flex;justify-content:center;gap:3px;height:6px}em.dw,em.dp,em.db{display:inline-block;width:6px;height:6px;border-radius:1px}em.dw{background:var(--green)}em.dp{background:var(--rust)}em.db{background:var(--chalk)}
+.wk button span{display:block;font-size:12px;color:var(--m)}.wk button b{display:block;font-size:16px;font-weight:700;width:36px;height:36px;line-height:36px;margin:4px auto;border-radius:var(--r)}.wk button.today b{background:var(--accent);color:var(--iron)}
+.wk i{display:flex;justify-content:center;gap:3px;height:6px}em.dw,em.dp,em.db{display:inline-block;width:6px;height:6px;border-radius:1px}em.dw{background:var(--green)}em.dp{background:var(--accent)}em.db{background:var(--chalk)}
 .legend{display:flex;gap:4px;align-items:center;justify-content:center;font-size:12px;color:var(--m);margin-top:12px}.legend em{margin-left:10px}
 .metric{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}.metric b{font-size:36px;font-weight:800;letter-spacing:-.03em;line-height:1.1}.metric .small{text-align:right}
 .stats{display:flex;gap:8px}.stats div{flex:1;text-align:center}.stats b{display:block;white-space:nowrap;font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15}.stats span{font-size:12px;color:var(--m)}
@@ -118,15 +118,15 @@ const PLANS={
 };
 const PT_STATUS={requested:'신청',scheduled:'예정',completed:'완료',canceled:'취소'};
 const GOALS=['근력·체력','다이어트','체형 교정','재활·통증 관리','건강 유지'];
-const IB=[['weight','체중','kg','var(--chalk)'],['muscle','골격근량','kg','var(--green)'],['fat_mass','체지방량','kg','var(--rust)'],['fat_pct','체지방률','%','var(--m)']];
+const IB=[['weight','체중','kg','var(--chalk)'],['muscle','골격근량','kg','var(--green)'],['fat_mass','체지방량','kg','var(--accent)'],['fat_pct','체지방률','%','var(--m)']];
 /* 2px 라인 아이콘 · 자체 심볼 */
 const ICON={home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/>',record:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',history:'<path d="M4 6h16M4 12h16M4 18h10"/>',
   inbody:'<path d="M4 20h16"/><path d="m4 16 5-5 4 3 7-8"/>',class:'<path d="M4 5h16v15H4zM4 10h16M9 3v4M15 3v4"/>',pt:'<path d="M4 5h16v15H4zM4 10h16M9 3v4M15 3v4"/>',
   my:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',members:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c.8-3.5 3.3-5 7-5s6.2 1.5 7 5M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2 .6 3.4 2.2 4 5"/>',
   msg:'<path d="M4 5h16v11H9l-5 4z"/>'};
 const ico=(k,n=22)=>`<svg viewBox="0 0 24 24" width="${n}" height="${n}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true">${ICON[k]}</svg>`;
-/* 믓 심볼: 철봉(ㅁ 윗변) · 팔과 어깨(ㅁ) · 머리 · ㅡ · 다리(ㅅ) */
-const logoSvg=n=>`<svg class="mark" viewBox="0 0 64 64" width="${n}" height="${n}" role="img" aria-label="믓"><g fill="none" stroke="var(--chalk)" stroke-width="6" stroke-linecap="square"><path d="M6 10H58"/><path d="M18 10V30H46V10"/><path d="M10 41H54"/><path d="M32 47L20 59M32 47L44 59"/></g><circle cx="32" cy="20.5" r="4.5" fill="var(--rust)"/></svg>`;
+/* 믓 심볼: 굵은 기하 글자 (ㅁ · ㅡ · ㅅ) */
+const logoSvg=n=>`<svg class="mark" viewBox="0 0 64 64" width="${n}" height="${n}" role="img" aria-label="믓"><g fill="none" stroke="var(--chalk)" stroke-width="7" stroke-linecap="square" stroke-linejoin="miter"><path d="M14 6H50V28H14Z"/><path d="M6 39H58"/><path d="M32 44L18 57M32 44L46 57"/></g></svg>`;
 const EYEBROW={home:'TODAY',record:'LOG',history:'HISTORY',inbody:'INBODY',class:'CLASS',my:'MY',members:'MEMBERS',pt:'PT SCHEDULE'};
 
 /* ===== 상태 / 유틸 ===== */
