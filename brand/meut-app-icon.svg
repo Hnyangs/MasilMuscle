@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512"><title>믓 app icon</title><rect width="64" height="64" rx="6" fill="#171717"/><g transform="translate(9.6 9.6) scale(.7)">
-  <g fill="none" stroke="#F2F0E9" stroke-width="6" stroke-linecap="square" stroke-linejoin="miter">
-    <path d="M6 10H58"/>
-    <path d="M18 10V30H46V10"/>
-    <path d="M10 41H54"/>
-    <path d="M32 47L20 59M32 47L44 59"/>
-  </g>
-  <circle cx="32" cy="20.5" r="4.5" fill="#E87543"/>
-</g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512"><title>믓 app icon</title><rect width="64" height="64" rx="6" fill="#171717"/><g transform="translate(11.2 11.2) scale(.65)"><g fill="none" stroke="#F2F0E9" stroke-width="7" stroke-linecap="square" stroke-linejoin="miter"><path d="M14 6H50V28H14Z"/><path d="M6 39H58"/><path d="M32 44L18 57M32 44L46 57"/></g></g><rect x="11.2" y="54.5" width="41.6" height="2.5" fill="#4FB3A0"/></svg>
