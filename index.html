@@ -70,20 +70,15 @@ const CONFIG_OK=new URL(SUPABASE_URL).hostname.split('.').length>=3;
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
 /* ===== 기본 데이터 ===== */
-const PARTS=['가슴','등','하체','어깨','팔'];
-const DEFAULT_EX={
-  가슴:['벤치프레스','인클라인 덤벨프레스','체스트 프레스 머신','펙덱 플라이','딥스'],
-  등:['랫풀다운','바벨로우','시티드 케이블로우','풀업','데드리프트'],
-  하체:['스쿼트','레그프레스','레그 익스텐션','레그컬','루마니안 데드리프트'],
-  어깨:['오버헤드프레스','사이드 레터럴 레이즈','리어델트 플라이','페이스풀'],
-  팔:['바벨컬','케이블 푸시다운','해머컬','오버헤드 익스텐션']
-};
+/* 부위·종목은 Supabase exercises 테이블에서 불러옵니다 (supabase/exercises.sql). 아래는 부위 표시 순서/라벨 */
+const PARTS=['전신','하체','등','가슴','어깨','이두','삼두','복근_신전근','필라테스','애니멀플로우','BASIC'];
+const partLabel=p=>p==='복근_신전근'?'복근·신전근':p;
 const LEVELS=['초급','중급','고급'];
 const TARGET_REPS={초급:12,중급:10,고급:8};
 const PLANS={
-  초급:[{label:'상체',parts:['가슴','등','어깨','팔']},{label:'하체',parts:['하체']}],
-  중급:[{label:'밀기',parts:['가슴','어깨']},{label:'당기기',parts:['등','팔']},{label:'하체',parts:['하체']}],
-  고급:[{label:'가슴',parts:['가슴']},{label:'등',parts:['등']},{label:'하체',parts:['하체']},{label:'어깨+팔',parts:['어깨','팔']}]
+  초급:[{label:'상체',parts:['가슴','등','어깨','이두','삼두']},{label:'하체',parts:['하체']}],
+  중급:[{label:'밀기',parts:['가슴','어깨','삼두']},{label:'당기기',parts:['등','이두']},{label:'하체',parts:['하체']}],
+  고급:[{label:'가슴',parts:['가슴']},{label:'등',parts:['등']},{label:'하체',parts:['하체']},{label:'어깨+팔',parts:['어깨','이두','삼두']}]
 };
 const PT_STATUS={scheduled:'예정',completed:'완료',canceled:'취소'};
 
@@ -99,7 +94,7 @@ const ok=r=>{if(r.error)throw r.error;return r.data};
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600)}
 async function run(fn){try{await fn()}catch(e){toast(e.message||String(e))}}
 
-const st={me:null,tab:'home',mode:'trainer',authMode:'login',members:[],sel:null,logs:[],pts:[],myTrainer:null,found:undefined,draft:null};
+const st={exercises:{},me:null,tab:'home',mode:'trainer',authMode:'login',members:[],sel:null,logs:[],pts:[],myTrainer:null,found:undefined,draft:null};
 const isTrainer=()=>st.me?.role==='trainer';
 const coaching=()=>isTrainer()&&st.mode==='trainer';
 const targetId=()=>coaching()?st.sel?.id:st.me.id;
@@ -120,7 +115,7 @@ async function afterLogin(user){
   if(!p){const m=user.user_metadata||{};
     p=ok(await sb.from('profiles').insert({id:user.id,email:(user.email||'').toLowerCase(),name:m.name||'',role:m.role==='trainer'?'trainer':'member',level:LEVELS.includes(m.level)?m.level:'초급'}).select().single())}
   st.me=p;st.mode=isTrainer()?'trainer':'personal';st.tab=coaching()?'members':'home';st.draft=newDraft();
-  await loadData();
+  await loadExercises();await loadData();
 }
 async function doLogin(){await run(async()=>{
   const email=$('#a-email').value.trim(),password=$('#a-pw').value;
@@ -141,6 +136,11 @@ async function logout(){await sb.auth.signOut();Object.assign(st,{me:null,member
 function setAuth(m){st.authMode=m;render()}
 
 /* ===== 데이터 로드 ===== */
+async function loadExercises(){
+  try{const rows=ok(await sb.from('exercises').select('body_part,name').order('id').range(0,4999));
+    st.exercises={};rows.forEach(r=>(st.exercises[r.body_part]??=[]).push(r.name))}
+  catch(e){toast('종목 목록을 불러오지 못했어요 (직접 입력은 가능해요)')}
+}
 async function loadData(){
   const me=st.me;
   if(coaching()){
@@ -164,12 +164,13 @@ function toggleMode(){st.mode=coaching()?'personal':'trainer';st.tab=coaching()?
 function selectMember(id){st.sel=st.members.find(m=>m.id===id)||null;st.draft=newDraft();reload()}
 
 /* ===== 추천 로직 ===== */
-const exercisesOf=p=>[...new Set([...DEFAULT_EX[p],...st.logs.filter(l=>l.part===p).map(l=>l.exercise)])];
+const exercisesOf=p=>[...new Set([...(st.exercises[p]||[]),...st.logs.filter(l=>l.part===p).map(l=>l.exercise)])];
 const lastRec=ex=>st.logs.find(l=>l.exercise===ex);
-const restDays=p=>{const l=st.logs.find(x=>x.part===p);return l?daysSince(l.log_date):999};
+const restDays=p=>{const l=st.logs.find(x=>x.part===p||(x.part==='팔'&&(p==='이두'||p==='삼두')));  /* '팔'은 이전 버전 기록 호환 */
+  return l?daysSince(l.log_date):999};
 function topExercises(p,n){
   const cnt={};st.logs.filter(l=>l.part===p).forEach(l=>cnt[l.exercise]=(cnt[l.exercise]||0)+1);
-  return [...new Set([...Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]),...DEFAULT_EX[p]])].slice(0,n);
+  return [...new Set([...Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]),...exercisesOf(p)])].slice(0,n);
 }
 function suggest(ex){
   const level=targetProfile()?.level||'초급',tr=TARGET_REPS[level],last=lastRec(ex);
@@ -228,8 +229,8 @@ function homeView(){
   return `<h2>오늘의 운동</h2>${card}
   ${r.warns.map(l=>`<div class="card warn">⚠️ 직전 피드백에 통증/부상 언급이 있어요 (${esc(l.exercise)}): “${esc(l.feedback)}”<br>무리하지 말고 무게를 낮추거나 해당 부위를 쉬어가세요.</div>`).join('')}
   <div class="card"><div class="row between"><h3 style="margin:0">오늘의 추천 · ${esc(r.pick.label)}</h3><span class="tag">${esc(r.level)}</span></div>
-  <div class="small muted" style="margin:6px 0 4px">${r.pick.parts.map(p=>`${p} ${fmtRest(restDays(p))}`).join(' · ')} → 가장 오래 쉰 분할이에요</div>
-  ${r.items.map(i=>`<div class="item"><div><b>${esc(i.ex)}</b> <span class="tag">${i.part}</span><div class="small muted">${esc(i.text)}</div></div><button class="btn sm primary" onclick="startEx('${i.part}','${esc(i.ex).replace(/'/g,"\\'")}')">기록</button></div>`).join('')}</div>`;
+  <div class="small muted" style="margin:6px 0 4px">${r.pick.parts.map(p=>`${partLabel(p)} ${fmtRest(restDays(p))}`).join(' · ')} → 가장 오래 쉰 분할이에요</div>
+  ${r.items.map(i=>`<div class="item"><div><b>${esc(i.ex)}</b> <span class="tag">${esc(partLabel(i.part))}</span><div class="small muted">${esc(i.text)}</div></div><button class="btn sm primary" onclick="startEx('${i.part}','${esc(i.ex).replace(/'/g,"\\'")}')">기록</button></div>`).join('')}</div>`;
 }
 function startEx(p,e){st.draft=newDraft();st.draft.part=p;pickEx(e);st.tab='record';render();window.scrollTo(0,0)}
 
@@ -239,7 +240,7 @@ function recordView(){
   const cur=d.custom?'__custom':d.exercise;
   return `<h2>${coaching()?`${esc(st.sel.name)} 회원 대신 기록`:'운동 기록'}</h2>${coaching()?memberSelect():''}
   <div class="card"><label class="lbl">날짜</label><input type="date" class="input" value="${d.date}" onchange="st.draft.date=this.value">
-  <label class="lbl">부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" onclick="pickPart('${p}')">${p}</button>`).join('')}</div>
+  <label class="lbl">부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" onclick="pickPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
   <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)"><option value="">종목을 선택하세요</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>✏️ 직접 입력</option></select>
   ${d.custom?`<input class="input" style="margin-top:8px" placeholder="종목 이름" value="${esc(d.customName)}" oninput="st.draft.customName=this.value">`:''}
   <label class="lbl">세트 (무게 kg · 횟수)</label>
@@ -266,9 +267,14 @@ function saveLog(){return run(async()=>{
   const d=st.draft,tid=targetId(),exercise=(d.custom?d.customName:d.exercise).trim();
   if(!tid)return toast('회원을 먼저 선택해주세요');
   if(!exercise)return toast('종목을 선택하거나 입력해주세요');
+  if(exercise.length>60)return toast('종목 이름은 60자 이내로 입력해주세요');
   const sets=d.sets.filter(s=>+s.r>0).map(s=>({w:+s.w||0,r:+s.r}));
   if(!sets.length)return toast('횟수를 1회 이상 입력해주세요');
   ok(await sb.from('workout_logs').insert({user_id:tid,log_date:d.date,part:d.part,exercise,sets,feedback:d.feedback.trim(),is_pt:coaching()}));
+  if(!(st.exercises[d.part]||[]).includes(exercise)){   /* 새 종목이면 exercises 테이블에도 자동 저장 */
+    try{ok(await sb.from('exercises').upsert({body_part:d.part,name:exercise},{onConflict:'body_part,name',ignoreDuplicates:true}));(st.exercises[d.part]??=[]).push(exercise)}
+    catch(e){console.warn('exercise save failed',e)}
+  }
   st.draft=newDraft();st.draft.date=d.date;await loadData();render();toast('저장했어요 💪');
 })}
 
@@ -277,7 +283,7 @@ function historyView(){
   const byDate={};st.logs.forEach(l=>(byDate[l.log_date]??=[]).push(l));
   const dates=Object.keys(byDate).sort().reverse();
   return `<h2>${coaching()?`${esc(st.sel.name)} 회원 히스토리`:'내 운동 히스토리'}</h2>${coaching()?memberSelect():''}
-  ${dates.length?dates.map(dt=>`<div class="date">${fmtDate(dt)}</div>${byDate[dt].map(l=>`<div class="card"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(l.part)}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div><button class="x del" onclick="delLog('${l.id}')">삭제</button></div>
+  ${dates.length?dates.map(dt=>`<div class="date">${fmtDate(dt)}</div>${byDate[dt].map(l=>`<div class="card"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(partLabel(l.part))}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div><button class="x del" onclick="delLog('${l.id}')">삭제</button></div>
   <div class="small muted" style="margin-top:6px">${l.sets.map(s=>`${s.w}kg×${s.r}`).join(' · ')}</div>${l.feedback?`<div class="fb">💬 ${esc(l.feedback)}</div>`:''}</div>`).join('')}`).join(''):'<div class="card center muted">아직 기록이 없어요</div>'}`;
 }
 function delLog(id){if(!confirm('이 기록을 삭제할까요?'))return;run(async()=>{ok(await sb.from('workout_logs').delete().eq('id',id));await loadData();render()})}
