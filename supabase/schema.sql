@@ -19,7 +19,7 @@ create table if not exists public.workout_logs (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
   log_date date not null default current_date,
-  part text not null check (part in ('가슴','등','하체','어깨','팔')),
+  part text not null,                    -- exercises.body_part 값 (제한 없음; 종목 목록은 supabase/exercises.sql)
   exercise text not null,
   sets jsonb not null default '[]',      -- [{"w": 60, "r": 10}, ...] (w: kg, r: reps)
   feedback text not null default '',
