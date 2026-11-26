@@ -54,6 +54,7 @@ nav button i{display:block;font-style:normal;font-size:21px;margin-bottom:2px}na
 .cfg{background:#2a1515;color:var(--bad);border:1px solid var(--bad);border-radius:12px;padding:12px;font-size:13px;margin-top:16px}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#fff;color:#111;padding:12px 18px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;max-width:90%;z-index:9}#toast.show{opacity:1;transform:translateX(-50%)}
 .pill{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:5px 9px;font-size:13px;margin:6px 6px 0 0}.pill b{color:var(--p);margin-right:4px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl th{color:var(--m);font-weight:600;text-align:left;padding:6px 4px}.tbl td{padding:8px 4px;border-top:1px solid var(--line);vertical-align:top}.tbl .fbr td{border-top:none;padding:0 4px 8px;font-size:12px;color:var(--m);white-space:pre-wrap}.tbl .pt{color:var(--p);font-weight:700}.tbl .d{white-space:nowrap}
 .stats{display:flex;gap:8px}.stats div{flex:1;text-align:center}.stats b{display:block;font-size:20px}.stats span{font-size:12px;color:var(--m)}
 .ok{color:var(--ok)}.bad{color:var(--bad)}
 </style>
@@ -293,15 +294,29 @@ function logCard(l){return `<div class="card"><div class="row between"><div><b>$
   <div>${setsHtml(l)}</div>${l.feedback?`<div class="fb">💬 ${esc(l.feedback)}</div>`:''}</div>`}
 function filteredLogs(){const {q,part,ex}=st.hf,qq=q.trim().toLowerCase();
   return st.logs.filter(l=>(!part||l.part===part)&&(!ex||l.exercise===ex)&&(!qq||l.exercise.toLowerCase().includes(qq)||(l.feedback||'').toLowerCase().includes(qq)))}
+const fmtShort=d=>d.slice(2).replace(/-/g,'.')+'('+'일월화수목금토'[new Date(d+'T00:00').getDay()]+')';
+function minMax(list){const out=[];
+  for(let i=0;i<5;i++){const ws=list.filter(l=>l.sets[i]).map(l=>+l.sets[i].w);if(!ws.length)continue;
+    const pos=ws.filter(w=>w>0);out.push({n:i+1,min:pos.length?Math.min(...pos):0,max:pos.length?Math.max(...pos):0,cnt:ws.length})}
+  return out}
+const kg=w=>w?w+'kg':'맨몸';
+function exDetail(list,limit){
+  let best=null;list.forEach(l=>l.sets.forEach(x=>{if(!best||+x.w>+best.w||(+x.w===+best.w&&+x.r>+best.r))best={w:x.w,r:x.r}}));
+  const mm=minMax(list),ex=list[0].exercise;
+  return `<div class="card hl"><h3>${esc(ex)}</h3><div class="stats"><div><b>${list.length}회</b><span>수행</span></div><div><b>${kg(+best.w)}</b><span>최고 (${best.r}회)</span></div><div><b>${list[0].log_date.slice(2)}</b><span>마지막</span></div></div>
+  <label class="lbl" style="margin-top:16px">세트별 최소 / 최대 무게</label>
+  <table class="tbl"><thead><tr><th>세트</th><th>최소</th><th>최대</th><th>횟수</th></tr></thead><tbody>${mm.map(m=>`<tr><td>${m.n}set</td><td>${kg(m.min)}</td><td>${kg(m.max)}</td><td>${m.cnt}번</td></tr>`).join('')}</tbody></table></div>
+  <div class="card" style="padding:8px 12px"><table class="tbl"><thead><tr><th>날짜</th><th>무게(kg)</th><th>횟수</th><th></th><th></th></tr></thead><tbody>${list.slice(0,limit).map(l=>
+    `<tr><td class="d">${fmtShort(l.log_date)}</td><td>${l.sets.map(x=>+x.w||'맨몸').join(' · ')}</td><td>${l.sets.map(x=>x.r).join(' · ')}</td><td class="pt">${l.is_pt?'PT':''}</td><td><button class="x del" style="padding:0 4px" onclick="delLog('${l.id}')">✕</button></td></tr>`
+    +(l.feedback?`<tr class="fbr"><td colspan="5">💬 ${esc(l.feedback)}</td></tr>`:'')).join('')}</tbody></table></div>`;
+}
 function histResults(){
   const list=filteredLogs(),{ex,limit}=st.hf;
   if(!list.length)return '<div class="card center muted">조건에 맞는 기록이 없어요</div>';
-  let sum='';
-  if(ex){let best=null;list.forEach(l=>l.sets.forEach(x=>{if(!best||+x.w>+best.w||(+x.w===+best.w&&+x.r>+best.r))best={w:x.w,r:x.r}}));
-    sum=`<div class="card hl"><h3>${esc(ex)}</h3><div class="stats"><div><b>${list.length}회</b><span>수행</span></div><div><b>${+best.w?best.w+'kg':'맨몸'}</b><span>최고 (${best.r}회)</span></div><div><b>${list[0].log_date.slice(2)}</b><span>마지막</span></div></div></div>`}
-  const shown=list.slice(0,limit),by={};shown.forEach(l=>(by[l.log_date]??=[]).push(l));
-  return `${sum}<div class="small muted" style="margin:8px 4px 0">총 ${list.length}건</div>`+Object.keys(by).sort().reverse().map(d=>`<div class="date">${fmtDate(d)}</div>${by[d].map(logCard).join('')}`).join('')
-    +(list.length>limit?`<button class="btn" onclick="moreHist()">더 보기 (${list.length-limit}건 남음)</button>`:'');
+  const more=list.length>limit?`<button class="btn" onclick="moreHist()">더 보기 (${list.length-limit}건 남음)</button>`:'';
+  if(ex&&list.every(l=>l.exercise===ex))return exDetail(list,limit)+more;
+  const by={};list.slice(0,limit).forEach(l=>(by[l.log_date]??=[]).push(l));
+  return `<div class="small muted" style="margin:8px 4px 0">총 ${list.length}건</div>`+Object.keys(by).sort().reverse().map(d=>`<div class="date">${fmtDate(d)}</div>${by[d].map(logCard).join('')}`).join('')+more;
 }
 function historyView(){
   if(coaching()&&!st.sel)return `<h2>히스토리</h2>${noMember()}`;
