@@ -4,348 +4,336 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#4f46e5">
+<meta name="theme-color" content="#0b0d12">
 <title>MasilMuscle</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--p:#4f46e5;--pl:#eef2ff;--bg:#f5f6fa;--t:#111827;--m:#6b7280;--b:#e5e7eb}
+:root{--bg:#0b0d12;--card:#151922;--card2:#1c2230;--line:#262d3d;--t:#eef0f6;--m:#8b93a7;--p:#8b7bff;--pd:#6a59e6;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171}
 body{font-family:-apple-system,BlinkMacSystemFont,'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--t);max-width:480px;margin:0 auto;min-height:100vh}
-.screen{padding:16px 16px 100px}
-h2{font-size:21px}.title{margin:8px 0 14px}h3{font-size:16px;margin-bottom:8px}.sec{margin:20px 4px 10px}
-.card{background:#fff;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.card.slim{padding:12px 14px;cursor:pointer}.card.alert{background:var(--p);color:#fff;font-weight:600;cursor:pointer}
-.card.new{border-left:4px solid var(--p)}
-.muted{color:var(--m)}.small{font-size:13px}.center{text-align:center;padding:20px}
-.row{display:flex;align-items:center}.between{justify-content:space-between}.gap{gap:8px;flex-wrap:wrap}
-.card .row+.row{margin-top:12px}
+main{padding:12px 16px 110px}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px}
+h2{font-size:22px;margin:6px 0 14px}h3{font-size:16px;margin-bottom:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card.hl{border-color:var(--p);background:linear-gradient(160deg,#1d1a3a,var(--card))}
+.card.warn{border-color:var(--warn);background:#2a2412;color:var(--warn)}
+.muted{color:var(--m)}.small{font-size:13px}.center{text-align:center;padding:24px 0}
+.row{display:flex;align-items:center;gap:8px}.between{justify-content:space-between}
+.tag{display:inline-block;background:var(--card2);color:var(--m);font-size:12px;padding:3px 9px;border-radius:999px;margin-left:4px}
+.tag.pt{background:#2b2554;color:var(--p)}
 .lbl{display:block;font-size:13px;font-weight:600;color:var(--m);margin:16px 0 6px}.lbl:first-child{margin-top:0}
-.input{width:100%;padding:12px;border:1px solid var(--b);border-radius:10px;font-size:16px;background:#fff;font-family:inherit}
-.input:focus{outline:2px solid var(--p);border-color:transparent}.w-auto{width:auto}
+.input,select.input,textarea.input{width:100%;min-height:50px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:16px;background:var(--card2);color:var(--t);font-family:inherit}
+textarea.input{min-height:96px;resize:vertical}
+.input:focus{outline:2px solid var(--p);border-color:transparent}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{padding:10px 14px;border-radius:999px;border:1px solid var(--b);background:#fff;font-size:15px;cursor:pointer;font-family:inherit;color:var(--t)}
-.chip.on{background:var(--p);color:#fff;border-color:var(--p)}.chip.add{border-style:dashed;color:var(--m)}
-.chip.sm{padding:6px 11px;font-size:13px}
-.btn{display:block;width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:600;margin-top:12px;cursor:pointer;background:#f3f4f6;font-family:inherit;color:var(--t)}
-.btn.primary{background:var(--p);color:#fff}.btn.ghost{background:var(--pl);color:var(--p)}
-.btn.sm{width:auto;display:inline-block;padding:9px 13px;font-size:14px;margin-top:8px}
-.btn.danger{color:#dc2626}.btn.google{background:#fff;border:1px solid var(--b)}
-.setrow{display:flex;align-items:center;gap:6px;margin-bottom:8px}
-.sn{width:24px;height:24px;border-radius:50%;background:var(--pl);color:var(--p);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.num{text-align:center;padding:10px 4px}
-.x{border:none;background:none;color:var(--m);font-size:14px;padding:6px;cursor:pointer}
-.hint{background:#fffbeb;color:#92400e;padding:10px 12px;border-radius:10px;font-size:14px;margin-bottom:10px}
-.tag{display:inline-block;background:var(--pl);color:var(--p);font-size:12px;padding:3px 8px;border-radius:6px;font-weight:600;margin-right:4px}
-.tags{margin:8px 0}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
-.stats div{background:#fff;border-radius:12px;padding:12px;text-align:center}
-.stats b{display:block;font-size:20px}.stats span{font-size:12px;color:var(--m)}
-.reclist{list-style:none}
-.reclist li{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid var(--b);cursor:pointer}
-.go{color:var(--p);font-weight:600;font-size:14px;white-space:nowrap}
-.mini{border:1px solid var(--b);border-radius:8px;padding:5px;font-size:13px;background:#fff}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--b);display:flex;padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;border:none;background:none;padding:10px 0 8px;font-size:11px;color:var(--m);display:flex;flex-direction:column;align-items:center;gap:2px;position:relative;font-family:inherit;cursor:pointer}
-nav button i{font-style:normal;font-size:20px}nav button.on{color:var(--p);font-weight:700}
-.badge{position:absolute;top:4px;right:calc(50% - 20px);background:#ef4444;color:#fff;font-size:10px;border-radius:999px;padding:1px 5px}
-#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:9;max-width:90%;text-align:center}
-#toast.show{opacity:1}
-.login{padding:60px 24px;text-align:center}.logo{font-size:56px}.login h1{margin:8px 0}.login .input{margin-top:12px}
-.divider{margin:28px 0 4px;color:var(--m);font-size:13px}
-.seg{display:flex;gap:8px;margin-top:10px}.seg label{flex:1;padding:12px;border:1px solid var(--b);border-radius:10px;background:#fff}
-.fb{margin:10px 0;line-height:1.6}.hw{background:var(--bg);padding:10px;border-radius:8px;font-size:14px}
-details{margin-top:10px;font-size:14px}summary{color:var(--p);cursor:pointer;margin-bottom:6px}
-.spark{width:100%;height:60px;margin-top:4px}.metric{margin-bottom:16px}
-.toggle{width:22px;height:22px;accent-color:var(--p)}
-.up{color:#dc2626}.down{color:#2563eb}
+.chip{min-height:46px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--card2);color:var(--t);font-size:15px;font-family:inherit;cursor:pointer}
+.chip.on{background:var(--p);border-color:var(--p);color:#fff;font-weight:700}
+.btn{display:block;width:100%;min-height:52px;padding:0 16px;border:none;border-radius:14px;font-size:16px;font-weight:700;margin-top:12px;cursor:pointer;background:var(--card2);color:var(--t);font-family:inherit}
+.btn.primary{background:var(--p);color:#fff}.btn.primary:active{background:var(--pd)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--p)}
+.btn.sm{width:auto;min-height:40px;padding:0 14px;font-size:14px;margin-top:0}
+.btn:disabled{opacity:.5}
+.x{border:none;background:none;color:var(--m);font-size:14px;padding:10px;cursor:pointer;font-family:inherit}.x.del{color:var(--bad)}
+.set{display:grid;grid-template-columns:26px 1fr 1fr 28px;gap:8px;align-items:center;margin-bottom:10px}
+.sn{width:26px;height:26px;border-radius:50%;background:var(--card2);color:var(--p);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.stp{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;background:var(--card2);border-radius:12px;border:1px solid var(--line);overflow:hidden}
+.stp button{height:52px;border:none;background:#262d3d;color:var(--t);font-size:22px;font-weight:700;cursor:pointer}
+.stp button:active{background:var(--p)}
+.stp input{width:100%;height:52px;border:none;background:transparent;color:var(--t);text-align:center;font-size:18px;font-weight:700;font-family:inherit;min-width:0}
+.stp input:focus{outline:none}
+.unit{font-size:11px;color:var(--m);text-align:center;margin-top:-2px}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line)}.item:first-of-type{border-top:none}
+.date{font-size:13px;font-weight:700;color:var(--m);margin:18px 4px 8px}
+.fb{margin-top:8px;padding:8px 10px;background:var(--card2);border-radius:10px;font-size:14px;white-space:pre-wrap}
+.pre{white-space:pre-wrap;line-height:1.5}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;min-height:62px;border:none;background:none;color:var(--m);font-size:12px;font-family:inherit;cursor:pointer}
+nav button i{display:block;font-style:normal;font-size:21px;margin-bottom:2px}nav button.on{color:var(--p);font-weight:700}
+.login{padding:56px 20px 40px}.login h1{font-size:30px;margin-bottom:4px}
+.seg{display:flex;background:var(--card2);border-radius:12px;padding:4px;margin:20px 0 4px}
+.seg button{flex:1;min-height:42px;border:none;border-radius:9px;background:none;color:var(--m);font-size:15px;font-family:inherit;cursor:pointer}.seg button.on{background:var(--p);color:#fff;font-weight:700}
+.cfg{background:#2a1515;color:var(--bad);border:1px solid var(--bad);border-radius:12px;padding:12px;font-size:13px;margin-top:16px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#fff;color:#111;padding:12px 18px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;max-width:90%;z-index:9}#toast.show{opacity:1;transform:translateX(-50%)}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
+/* ===== 설정 =====
+   SUPABASE_URL은 반드시 프로젝트 고유 주소(https://<project-ref>.supabase.co)여야 합니다.
+   (anon/publishable 키는 공개 키이며, 데이터 보호는 supabase/schema.sql의 RLS 정책이 담당합니다) */
+const SUPABASE_URL='https://htizcjneaagxffqumvdm.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_QSMXmg5fLDukFoU6Lo3J-w_0Sb3a33q';
+const CONFIG_OK=new URL(SUPABASE_URL).hostname.split('.').length>=3;
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+
 /* ===== 기본 데이터 ===== */
-const PARTS=['가슴','등','하체','어깨','팔','복근'];
+const PARTS=['가슴','등','하체','어깨','팔'];
 const DEFAULT_EX={
   가슴:['벤치프레스','인클라인 덤벨프레스','체스트 프레스 머신','펙덱 플라이','딥스'],
   등:['랫풀다운','바벨로우','시티드 케이블로우','풀업','데드리프트'],
   하체:['스쿼트','레그프레스','레그 익스텐션','레그컬','루마니안 데드리프트'],
   어깨:['오버헤드프레스','사이드 레터럴 레이즈','리어델트 플라이','페이스풀'],
-  팔:['바벨컬','케이블 푸시다운','해머컬','오버헤드 익스텐션'],
-  복근:['크런치','행잉 레그레이즈','플랭크']
+  팔:['바벨컬','케이블 푸시다운','해머컬','오버헤드 익스텐션']
 };
-const SPLIT_LIST=[['auto','자동 추천'],['2','2분할'],['3','3분할'],['4','4분할'],['full','무분할']];
-const SPLIT_NAME=Object.fromEntries(SPLIT_LIST);
-const SPLITS={
-  '2':{desc:'상체 / 하체 번갈아',days:[{label:'상체',parts:['가슴','등','어깨','팔']},{label:'하체',parts:['하체','복근']}]},
-  '3':{desc:'가슴+삼두 / 등+이두 / 하체+어깨',days:[{label:'가슴+삼두',parts:['가슴','팔']},{label:'등+이두',parts:['등','팔']},{label:'하체+어깨',parts:['하체','어깨']}]},
-  '4':{desc:'가슴 / 등 / 하체 / 어깨+팔',days:[{label:'가슴',parts:['가슴']},{label:'등',parts:['등']},{label:'하체',parts:['하체','복근']},{label:'어깨+팔',parts:['어깨','팔']}]},
-  'full':{desc:'매번 전신을 골고루',days:[{label:'전신',parts:['하체','가슴','등','어깨']}]}
+const LEVELS=['초급','중급','고급'];
+const TARGET_REPS={초급:12,중급:10,고급:8};
+const PLANS={
+  초급:[{label:'상체',parts:['가슴','등','어깨','팔']},{label:'하체',parts:['하체']}],
+  중급:[{label:'밀기',parts:['가슴','어깨']},{label:'당기기',parts:['등','팔']},{label:'하체',parts:['하체']}],
+  고급:[{label:'가슴',parts:['가슴']},{label:'등',parts:['등']},{label:'하체',parts:['하체']},{label:'어깨+팔',parts:['어깨','팔']}]
 };
-const SPLIT_DESC={auto:'기록을 분석해서 가장 오래 쉰 부위를 추천해요',...Object.fromEntries(Object.entries(SPLITS).map(([k,v])=>[k,v.desc]))};
+const PT_STATUS={scheduled:'예정',completed:'완료',canceled:'취소'};
 
-/* ===== 상태 ===== */
-const KEY='fitlog-v1';
+/* ===== 상태 / 유틸 ===== */
 const $=s=>document.querySelector(s);
-const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const localDate=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10)};
-const todayStr=()=>localDate(new Date());
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const byDate=(a,b)=>a.date.localeCompare(b.date);
-let S=JSON.parse(localStorage.getItem(KEY)||'null')||{user:null,settings:{split:'auto',notify:false,notifyTime:'19:00',notifyDays:[1,3,5],ptNotify:true,scriptUrl:'',token:''},workouts:[],pt:[],inbody:[],customEx:{}};
-const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
-let tab='home';
-let draft={date:todayStr(),part:null,exercise:null,sets:[]};
+const localDate=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,10)};
+const today=()=>localDate(new Date());
+const daysSince=d=>Math.round((new Date(today()+'T00:00')-new Date(d+'T00:00'))/864e5);
+const fmtDate=d=>{const [,m,dd]=d.split('-');return `${+m}월 ${+dd}일 (${'일월화수목금토'[new Date(d+'T00:00').getDay()]})`};
+const fmtRest=d=>d>=999?'기록 없음':d===0?'오늘 함':`${d}일 쉼`;
+const ok=r=>{if(r.error)throw r.error;return r.data};
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600)}
+async function run(fn){try{await fn()}catch(e){toast(e.message||String(e))}}
 
-/* ===== 유틸 ===== */
-function fmtDate(d){const [,m,dd]=d.split('-');return `${+m}월 ${+dd}일 (${'일월화수목금토'[new Date(d+'T00:00').getDay()]})`}
-function daysSince(d){return Math.round((new Date(todayStr()+'T00:00')-new Date(d+'T00:00'))/864e5)}
-function exercisesOf(p){return [...DEFAULT_EX[p],...(S.customEx[p]||[])]}
-function lastTrained(p){const ds=S.workouts.filter(w=>w.part===p).map(w=>w.date).sort();return ds.at(-1)||null}
-function restDays(p){const l=lastTrained(p);return l?daysSince(l):999}
-function fmtRest(d){return d>=999?'기록 없음':d===0?'오늘 함':`${d}일 쉼`}
-function lastRec(ex){return S.workouts.filter(w=>w.exercise===ex).sort(byDate).at(-1)}
-let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2400)}
-const unreadPT=()=>S.user?.role==='member'?S.pt.filter(p=>!p.read).length:0;
+const st={me:null,tab:'home',mode:'trainer',authMode:'login',members:[],sel:null,logs:[],pts:[],myTrainer:null,found:undefined,draft:null};
+const isTrainer=()=>st.me?.role==='trainer';
+const coaching=()=>isTrainer()&&st.mode==='trainer';
+const targetId=()=>coaching()?st.sel?.id:st.me.id;
+const targetProfile=()=>coaching()?st.sel:st.me;
+const newDraft=()=>({date:today(),part:'가슴',exercise:'',custom:false,customName:'',sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}],feedback:''});
+st.draft=newDraft();
+
+/* ===== 인증 ===== */
+async function boot(){
+  if(CONFIG_OK){
+    const {data:{session}}=await sb.auth.getSession();
+    if(session)await run(()=>afterLogin(session.user));
+  }
+  render();
+}
+async function afterLogin(user){
+  let p=ok(await sb.from('profiles').select('*').eq('id',user.id).maybeSingle());
+  if(!p){const m=user.user_metadata||{};
+    p=ok(await sb.from('profiles').insert({id:user.id,email:(user.email||'').toLowerCase(),name:m.name||'',role:m.role==='trainer'?'trainer':'member',level:LEVELS.includes(m.level)?m.level:'초급'}).select().single())}
+  st.me=p;st.mode=isTrainer()?'trainer':'personal';st.tab=coaching()?'members':'home';st.draft=newDraft();
+  await loadData();
+}
+async function doLogin(){await run(async()=>{
+  const email=$('#a-email').value.trim(),password=$('#a-pw').value;
+  if(!email||!password)return toast('이메일과 비밀번호를 입력해주세요');
+  const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;
+  await afterLogin(data.user);render();
+})}
+async function doSignup(){await run(async()=>{
+  const email=$('#a-email').value.trim(),password=$('#a-pw').value,name=$('#a-name').value.trim();
+  const role=$('#a-role').value,level=$('#a-level').value;
+  if(!email||!password||!name)return toast('이름, 이메일, 비밀번호를 모두 입력해주세요');
+  if(password.length<6)return toast('비밀번호는 6자 이상이어야 해요');
+  const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,role,level}}});if(error)throw error;
+  if(data.session){await afterLogin(data.user);render()}
+  else{st.authMode='login';render();toast('가입 완료! 이메일 인증 후 로그인해주세요')}
+})}
+async function logout(){await sb.auth.signOut();Object.assign(st,{me:null,members:[],sel:null,logs:[],pts:[],myTrainer:null,found:undefined,authMode:'login'});st.draft=newDraft();render()}
+function setAuth(m){st.authMode=m;render()}
+
+/* ===== 데이터 로드 ===== */
+async function loadData(){
+  const me=st.me;
+  if(coaching()){
+    st.members=ok(await sb.from('profiles').select('*').eq('trainer_id',me.id).order('name'));
+    st.sel=st.members.find(m=>m.id===st.sel?.id)||st.members[0]||null;
+  }else if(me.role==='member'){
+    st.me=ok(await sb.from('profiles').select('*').eq('id',me.id).single());
+  }
+  const tid=targetId();
+  st.logs=tid?ok(await sb.from('workout_logs').select('*').eq('user_id',tid).order('log_date',{ascending:false}).order('created_at',{ascending:false})):[];
+  st.pts=[];st.myTrainer=null;
+  if(coaching()&&tid)st.pts=ok(await sb.from('pt_schedules').select('*').eq('member_id',tid).order('pt_date').order('pt_time'));
+  else if(!isTrainer()){
+    st.pts=ok(await sb.from('pt_schedules').select('*').eq('member_id',me.id).order('pt_date').order('pt_time'));
+    if(st.me.trainer_id)st.myTrainer=ok(await sb.from('profiles').select('id,name').eq('id',st.me.trainer_id).maybeSingle());
+  }
+}
+const reload=()=>run(async()=>{await loadData();render()});
+function go(t){st.tab=t;render();window.scrollTo(0,0)}
+function toggleMode(){st.mode=coaching()?'personal':'trainer';st.tab=coaching()?'members':'home';st.draft=newDraft();reload()}
+function selectMember(id){st.sel=st.members.find(m=>m.id===id)||null;st.draft=newDraft();reload()}
 
 /* ===== 추천 로직 ===== */
-function suggest(ex){
-  const last=lastRec(ex);
-  if(!last)return{text:'첫 기록이에요! 가벼운 무게로 자세부터 잡아요',w:'',r:10};
-  const top=last.sets.reduce((a,s)=>+s.w>+a.w?s:a,last.sets[0]);
-  let w=+top.w,msg;
-  if(last.sets.every(s=>+s.r>=12)){w=Math.round((w+(w>=40?2.5:w>0?1:0))*10)/10;msg=`모든 세트 12회 이상 → ${w}kg 증량 도전!`}
-  else if(last.sets.some(s=>+s.r<6))msg='횟수가 낮았어요 → 무게 유지';
-  else msg='같은 무게로 횟수 늘리기';
-  return{text:`지난번 ${top.w}kg×${top.r}회 · ${msg}`,w,r:top.r};
-}
+const exercisesOf=p=>[...new Set([...DEFAULT_EX[p],...st.logs.filter(l=>l.part===p).map(l=>l.exercise)])];
+const lastRec=ex=>st.logs.find(l=>l.exercise===ex);
+const restDays=p=>{const l=st.logs.find(x=>x.part===p);return l?daysSince(l.log_date):999};
 function topExercises(p,n){
-  const cnt={};S.workouts.filter(w=>w.part===p).forEach(w=>cnt[w.exercise]=(cnt[w.exercise]||0)+1);
-  return [...new Set([...Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]),...exercisesOf(p)])].slice(0,n);
+  const cnt={};st.logs.filter(l=>l.part===p).forEach(l=>cnt[l.exercise]=(cnt[l.exercise]||0)+1);
+  return [...new Set([...Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]),...DEFAULT_EX[p]])].slice(0,n);
+}
+function suggest(ex){
+  const level=targetProfile()?.level||'초급',tr=TARGET_REPS[level],last=lastRec(ex);
+  if(!last)return{text:'첫 기록이에요! 가벼운 무게로 자세부터 잡아요',w:'',r:tr};
+  const sets=last.sets,top=sets.reduce((a,s)=>+s.w>+a.w?s:a,sets[0]);
+  let w=+top.w,r=+top.r,msg;
+  if(sets.every(s=>+s.r>=tr)){
+    if(w>0){w=Math.round((w+(w>=40?2.5:1))*10)/10;r=tr;msg=`전 세트 ${tr}회 달성 → ${w}kg 증량 도전!`}
+    else{r=r+1;msg=`전 세트 ${tr}회 달성 → ${r}회로 늘리기`}
+  }else{r=r+1;msg=`목표 ${tr}회 미달 → 같은 무게로 ${r}회 도전`}
+  return{text:`지난번 ${top.w}kg×${top.r}회 · ${msg}`,w,r};
 }
 function recommend(){
-  const mode=S.settings.split;let label,parts,reason;
-  if(mode==='auto'){
-    const main=['가슴','등','하체','어깨'].map(p=>({p,d:restDays(p)})).sort((a,b)=>b.d-a.d);
-    parts=main.slice(0,2).map(x=>x.p);label='오늘의 자동 추천';
-    reason=main.slice(0,2).map(x=>`${x.p} ${fmtRest(x.d)}`).join(' · ')+' → 가장 오래 쉰 부위예요';
-  }else{
-    const pick=SPLITS[mode].days.map(d=>({...d,rest:restDays(d.parts[0])})).reduce((a,b)=>b.rest>a.rest?b:a);
-    parts=pick.parts;label=`${SPLIT_NAME[mode]} · ${pick.label} 데이`;
-    reason=mode==='full'?(pick.rest<1?'오늘 이미 전신 운동을 했어요. 충분히 쉬어주세요!':`마지막 전신 운동 후 ${fmtRest(pick.rest)}`):`${pick.label} ${fmtRest(pick.rest)} → 오늘 차례예요`;
-  }
-  const per=Math.min(3,Math.max(1,Math.round(5/parts.length)));
-  return{label,parts,reason,items:parts.flatMap(p=>topExercises(p,per).map(ex=>({part:p,ex,...suggest(ex)})))};
+  const level=targetProfile()?.level||'초급';
+  let plan=PLANS[level];
+  if(level==='초급'&&!st.logs.length)plan=[{label:'전신',parts:['하체','가슴','등']}];
+  const pick=plan.map(g=>({...g,rest:Math.min(...g.parts.map(restDays))})).reduce((a,b)=>b.rest>a.rest?b:a);
+  const per=pick.parts.length>=3?1:2;
+  const items=pick.parts.flatMap(p=>topExercises(p,per).map(ex=>({part:p,ex,...suggest(ex)}))).slice(0,5);
+  const warns=pick.parts.map(p=>st.logs.find(l=>l.part===p)).filter(l=>l&&/통증|부상/.test(l.feedback||''));
+  return{pick,items,warns,level};
 }
 
-/* ===== 화면: 로그인 ===== */
-function loginView(){return `<div class="login">
-  <div class="logo">🏋️</div><h1>ㅁ+ㅅ</h1><p class="muted">3번 탭하면 기록 끝.<br>구글 시트에 쌓이는 내 운동일지</p>
-  <button class="btn google" onclick="toast('실서비스에서는 Google 로그인이 연결됩니다')">🔵 Google 계정으로 계속하기</button>
-  <div class="divider">— 프로토타입 체험 —</div>
-  <input id="lg-name" class="input" placeholder="이름 (예: 김민수)">
-  <div class="seg"><label><input type="radio" name="role" value="member" checked> 회원</label><label><input type="radio" name="role" value="trainer"> 트레이너</label></div>
-  <button class="btn primary" onclick="login()">시작하기</button></div>`}
-function login(){
-  const name=$('#lg-name').value.trim();if(!name)return toast('이름을 입력해주세요');
-  S.user={name,role:document.querySelector('input[name=role]:checked').value};
-  if(!S.workouts.length)seed();save();tab='home';render();
+/* ===== 화면 ===== */
+function authView(){
+  const su=st.authMode==='signup';
+  return `<div class="login"><h1>💪 MasilMuscle</h1><p class="muted">회원 · 트레이너 운동 관리</p>
+  ${CONFIG_OK?'':'<div class="cfg">⚠️ SUPABASE_URL이 프로젝트 주소가 아닙니다. index.html 상단의 SUPABASE_URL을 <b>https://&lt;project-ref&gt;.supabase.co</b> 형태로 바꿔주세요.</div>'}
+  <div class="seg"><button class="${su?'':'on'}" onclick="setAuth('login')">로그인</button><button class="${su?'on':''}" onclick="setAuth('signup')">회원가입</button></div>
+  ${su?`<label class="lbl">이름</label><input id="a-name" class="input" autocomplete="name">`:''}
+  <label class="lbl">이메일</label><input id="a-email" class="input" type="email" autocomplete="email">
+  <label class="lbl">비밀번호</label><input id="a-pw" class="input" type="password" autocomplete="${su?'new-password':'current-password'}">
+  ${su?`<label class="lbl">역할</label><select id="a-role" class="input"><option value="member">일반 회원</option><option value="trainer">트레이너</option></select>
+  <label class="lbl">운동 숙련도</label><select id="a-level" class="input">${LEVELS.map(l=>`<option>${l}</option>`).join('')}</select>`:''}
+  <button class="btn primary" onclick="${su?'doSignup()':'doLogin()'}">${su?'가입하기':'로그인'}</button></div>`;
 }
+function headerView(){
+  const m=st.me;
+  return `<header><div><b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원'} · ${esc(m.level)}</span></div><button class="x" onclick="logout()">로그아웃</button></header>
+  ${isTrainer()?`<div style="padding:4px 16px 0"><button class="btn ghost" style="margin-top:8px" onclick="toggleMode()">${coaching()?'🏋️ 내 개인 운동 모드로 전환':'👥 회원 관리 모드로 돌아가기'}</button></div>`:''}`;
+}
+const tabList=()=>coaching()?[['members','👥','회원'],['record','✏️','기록'],['history','📅','히스토리'],['pt','🗓️','PT']]:[['home','🏠','홈'],['record','✏️','기록'],['history','📅','히스토리']];
+const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${st.tab===k?'on':''}" onclick="go('${k}')"><i>${i}</i>${l}</button>`).join('')}</nav>`;
+const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${esc(m.name)} (${esc(m.level)})</option>`).join('')}</select>`:'';
+const noMember=()=>`<div class="card center muted">담당 회원이 없어요.<br>회원 탭에서 이메일로 회원을 등록해주세요.</div>`;
 
-/* ===== 화면: 홈 ===== */
+function nextPT(){return st.pts.filter(p=>p.status==='scheduled'&&p.pt_date>=today())}
 function homeView(){
-  const rec=recommend(),t=todayStr();
-  const week=new Set(S.workouts.filter(w=>daysSince(w.date)<7).map(w=>w.date)).size;
-  const month=new Set(S.workouts.filter(w=>w.date.slice(0,7)===t.slice(0,7)).map(w=>w.date)).size;
-  const ib=S.inbody.slice().sort(byDate).at(-1);const done=S.workouts.some(w=>w.date===t);const u=unreadPT();
-  return `<div class="muted small">${fmtDate(t)}</div><h2>${esc(S.user.name)}님, ${done?'오늘도 해냈어요 🔥':'오늘 운동해볼까요?'}</h2>
-  <div class="stats"><div><b>${week}</b><span>최근 7일</span></div><div><b>${month}</b><span>이번 달</span></div><div><b>${ib?ib.weight+'kg':'-'}</b><span>최근 체중</span></div></div>
-  ${u?`<div class="card alert" onclick="go('pt')">📝 트레이너 피드백 ${u}건이 도착했어요 →</div>`:''}
-  <div class="card"><div class="row between"><h3>🎯 ${esc(rec.label)}</h3>
-    <select class="mini" onchange="setSplit(this.value)">${SPLIT_LIST.map(([k,v])=>`<option value="${k}" ${S.settings.split===k?'selected':''}>${v}</option>`).join('')}</select></div>
-    <p class="muted small">${esc(rec.reason)}</p>
-    <div class="tags">${rec.parts.map(p=>`<span class="tag">${p}</span>`).join('')}</div>
-    <ul class="reclist">${rec.items.map(it=>`<li data-p="${esc(it.part)}" data-e="${esc(it.ex)}" onclick="startEx(this.dataset.p,this.dataset.e)"><div><b>${esc(it.ex)}</b><div class="muted small">${esc(it.text)}</div></div><span class="go">기록 ›</span></li>`).join('')}</ul></div>
-  <h3 class="sec">최근 기록</h3>${recentView()}`;
+  const me=st.me,r=recommend(),ups=nextPT().slice(0,3);
+  const card=me.role==='member'?`<div class="card hl"><h3>👨‍🏫 트레이너 노트 & PT 일정</h3>
+    ${st.myTrainer?`<div class="small muted">담당 트레이너 · ${esc(st.myTrainer.name)}</div>
+    <label class="lbl">내 특징</label><div class="pre">${esc(me.notes)||'<span class="muted">아직 작성된 내용이 없어요</span>'}</div>
+    <label class="lbl">운동 방향 / 커리큘럼</label><div class="pre">${esc(me.curriculum)||'<span class="muted">아직 작성된 내용이 없어요</span>'}</div>
+    <label class="lbl">다가오는 PT</label>${ups.length?ups.map(p=>`<div class="item"><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b><span class="small muted">${esc(p.goal)}</span></div>`).join(''):'<div class="muted small">예정된 PT가 없어요</div>'}`
+    :'<div class="muted small">아직 담당 트레이너가 없어요. 트레이너가 이메일로 회원님을 등록하면 여기에 노트와 PT 일정이 표시돼요.</div>'}</div>`:'';
+  return `<h2>오늘의 운동</h2>${card}
+  ${r.warns.map(l=>`<div class="card warn">⚠️ 직전 피드백에 통증/부상 언급이 있어요 (${esc(l.exercise)}): “${esc(l.feedback)}”<br>무리하지 말고 무게를 낮추거나 해당 부위를 쉬어가세요.</div>`).join('')}
+  <div class="card"><div class="row between"><h3 style="margin:0">오늘의 추천 · ${esc(r.pick.label)}</h3><span class="tag">${esc(r.level)}</span></div>
+  <div class="small muted" style="margin:6px 0 4px">${r.pick.parts.map(p=>`${p} ${fmtRest(restDays(p))}`).join(' · ')} → 가장 오래 쉰 분할이에요</div>
+  ${r.items.map(i=>`<div class="item"><div><b>${esc(i.ex)}</b> <span class="tag">${i.part}</span><div class="small muted">${esc(i.text)}</div></div><button class="btn sm primary" onclick="startEx('${i.part}','${esc(i.ex).replace(/'/g,"\\'")}')">기록</button></div>`).join('')}</div>`;
 }
-function recentView(){
-  const dates=[...new Set(S.workouts.map(w=>w.date))].sort().reverse().slice(0,5);
-  if(!dates.length)return '<p class="muted center">첫 운동을 기록해보세요!</p>';
-  return dates.map(d=>{const ws=S.workouts.filter(w=>w.date===d);
-    return `<div class="card slim" onclick="openDate('${d}')"><div class="row between"><b>${fmtDate(d)}</b><div>${[...new Set(ws.map(w=>w.part))].map(p=>`<span class="tag">${p}</span>`).join('')}</div></div>
-    <div class="muted small" style="margin-top:6px">${ws.map(w=>`${esc(w.exercise)} · ${w.sets.length}세트 · 최고 ${Math.max(...w.sets.map(s=>s.w))}kg`).join('<br>')}</div></div>`}).join('');
-}
-function openDate(d){draft={date:d,part:null,exercise:null,sets:[]};go('record')}
-function startEx(p,e){const sg=suggest(e);draft={date:todayStr(),part:p,exercise:e,sets:[0,1,2].map(()=>({w:sg.w,r:sg.r}))};go('record')}
-function setSplit(v){S.settings.split=v;save();render()}
+function startEx(p,e){st.draft=newDraft();st.draft.part=p;pickEx(e);st.tab='record';render();window.scrollTo(0,0)}
 
-/* ===== 화면: 기록 ===== */
 function recordView(){
-  const d=draft,sug=d.exercise?suggest(d.exercise):null,recs=S.workouts.filter(w=>w.date===d.date);
-  return `<h2 class="title">운동 기록</h2><div class="card">
-  <label class="lbl">① 날짜</label><input type="date" class="input" value="${d.date}" max="${todayStr()}" onchange="draft.date=this.value;render()">
-  <label class="lbl">② 부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" data-v="${p}" onclick="pickPart(this.dataset.v)">${p}</button>`).join('')}</div>
-  ${d.part?`<label class="lbl">③ 운동</label><div class="chips">${topExercises(d.part,99).map(e=>`<button class="chip ${d.exercise===e?'on':''}" data-v="${esc(e)}" onclick="pickEx(this.dataset.v)">${esc(e)}</button>`).join('')}<button class="chip add" onclick="addEx()">+ 직접 추가</button></div>`:''}
-  ${d.exercise?`<label class="lbl">④ 무게 · 횟수</label><div class="hint">💡 ${esc(sug.text)}</div>
-    ${d.sets.map((s,i)=>`<div class="setrow"><span class="sn">${i+1}</span>
-      <input type="number" inputmode="decimal" class="input num" value="${s.w}" placeholder="맨몸" oninput="draft.sets[${i}].w=this.value"><span>kg</span>
-      <input type="number" inputmode="numeric" class="input num" value="${s.r}" placeholder="0" oninput="draft.sets[${i}].r=this.value"><span>회</span>
-      <button class="x" onclick="delSet(${i})">✕</button></div>`).join('')}
-    <button class="btn ghost" onclick="addSet()">+ 세트 추가 (이전 세트 복사)</button>
-    <button class="btn primary" onclick="saveWorkout()">저장하기</button>`:''}</div>
-  <h3 class="sec">${fmtDate(d.date)} 기록 ${recs.length?`(${recs.length}종목)`:''}</h3>
-  ${recs.length?recs.map(w=>`<div class="card slim"><div class="row between"><b>${esc(w.exercise)} <span class="tag">${w.part}</span></b><button class="x" onclick="delWorkout('${w.id}')">삭제</button></div>
-    <div class="muted small">${w.sets.map(s=>`${s.w}kg×${s.r}`).join(' · ')}</div></div>`).join(''):'<p class="muted center">아직 기록이 없어요</p>'}`;
+  if(coaching()&&!st.sel)return `<h2>회원 운동 기록</h2>${noMember()}`;
+  const d=st.draft,exs=exercisesOf(d.part);
+  const cur=d.custom?'__custom':d.exercise;
+  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 대신 기록`:'운동 기록'}</h2>${coaching()?memberSelect():''}
+  <div class="card"><label class="lbl">날짜</label><input type="date" class="input" value="${d.date}" onchange="st.draft.date=this.value">
+  <label class="lbl">부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" onclick="pickPart('${p}')">${p}</button>`).join('')}</div>
+  <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)"><option value="">종목을 선택하세요</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>✏️ 직접 입력</option></select>
+  ${d.custom?`<input class="input" style="margin-top:8px" placeholder="종목 이름" value="${esc(d.customName)}" oninput="st.draft.customName=this.value">`:''}
+  <label class="lbl">세트 (무게 kg · 횟수)</label>
+  ${d.sets.map((s,i)=>`<div class="set"><span class="sn">${i+1}</span>
+    <div class="stp"><button onclick="adj(${i},'w',-2.5)">−</button><input type="number" inputmode="decimal" value="${s.w}" placeholder="kg" oninput="st.draft.sets[${i}].w=this.value"><button onclick="adj(${i},'w',2.5)">+</button></div>
+    <div class="stp"><button onclick="adj(${i},'r',-1)">−</button><input type="number" inputmode="numeric" value="${s.r}" placeholder="회" oninput="st.draft.sets[${i}].r=this.value"><button onclick="adj(${i},'r',1)">+</button></div>
+    <button class="x" onclick="delSet(${i})">✕</button></div>`).join('')}
+  ${d.sets.length<5?'<button class="btn ghost sm" onclick="addSet()">+ 세트 추가</button>':'<div class="small muted">최대 5세트까지 입력할 수 있어요</div>'}
+  <label class="lbl">피드백 ${coaching()?'(회원 컨디션 · 자세 · 통증 여부)':'(컨디션 · 통증 여부 등)'}</label><textarea class="input" placeholder="통증이나 부상이 있다면 꼭 적어주세요" oninput="st.draft.feedback=this.value">${esc(d.feedback)}</textarea>
+  <button class="btn primary" onclick="saveLog()">저장하기</button></div>`;
 }
-function pickPart(p){draft.part=p;draft.exercise=null;draft.sets=[];render()}
-function pickEx(e){draft.exercise=e;const l=lastRec(e);draft.sets=l?l.sets.map(s=>({...s})):[{w:'',r:''}];render()}
-function addEx(){const n=prompt(`${draft.part} 운동 이름을 입력하세요`)?.trim();if(!n)return;if(!exercisesOf(draft.part).includes(n)){(S.customEx[draft.part]??=[]).push(n);save()}pickEx(n)}
-function addSet(){draft.sets.push({...(draft.sets.at(-1)||{w:'',r:''})});render()}
-function delSet(i){draft.sets.splice(i,1);if(!draft.sets.length)draft.sets.push({w:'',r:''});render()}
-function saveWorkout(){
-  if(draft.date>todayStr())return toast('미래 날짜는 기록할 수 없어요');
-  const sets=draft.sets.filter(s=>+s.r>0).map(s=>({w:+s.w||0,r:+s.r}));
-  if(!sets.length)return toast('횟수를 입력해주세요');
-  const ex=S.workouts.find(w=>w.date===draft.date&&w.exercise===draft.exercise);
-  const start=ex?ex.sets.length:0;
-  if(ex)ex.sets.push(...sets);else S.workouts.push({id:uid(),date:draft.date,part:draft.part,exercise:draft.exercise,sets});
-  save();pushSheet('운동기록',sets.map((s,i)=>[draft.date,draft.part,draft.exercise,start+i+1,s.w,s.r,S.user.name]));
-  toast('저장됐어요 💪');draft.exercise=null;draft.sets=[];render();
+function pickPart(p){st.draft.part=p;st.draft.custom=false;st.draft.customName='';pickEx(exercisesOf(p)[0])}
+function pickEx(e){
+  const d=st.draft;
+  if(e==='__custom'){d.custom=true;d.exercise='';d.customName=''}
+  else if(!e){d.custom=false;d.exercise=''}
+  else{d.custom=false;d.exercise=e;const s=suggest(e),n=Math.max(3,lastRec(e)?.sets.length||3);d.sets=Array.from({length:Math.min(5,n)},()=>({w:s.w,r:s.r}))}
+  render();
 }
-function delWorkout(id){if(!confirm('이 기록을 삭제할까요?'))return;S.workouts=S.workouts.filter(w=>w.id!==id);save();render()}
+function adj(i,k,dv){const s=st.draft.sets[i];s[k]=Math.max(0,Math.round(((+s[k]||0)+dv)*10)/10);render()}
+function addSet(){const d=st.draft;if(d.sets.length<5){d.sets.push({...d.sets.at(-1)});render()}}
+function delSet(i){const d=st.draft;d.sets.splice(i,1);if(!d.sets.length)d.sets.push({w:'',r:''});render()}
+function saveLog(){return run(async()=>{
+  const d=st.draft,tid=targetId(),exercise=(d.custom?d.customName:d.exercise).trim();
+  if(!tid)return toast('회원을 먼저 선택해주세요');
+  if(!exercise)return toast('종목을 선택하거나 입력해주세요');
+  const sets=d.sets.filter(s=>+s.r>0).map(s=>({w:+s.w||0,r:+s.r}));
+  if(!sets.length)return toast('횟수를 1회 이상 입력해주세요');
+  ok(await sb.from('workout_logs').insert({user_id:tid,log_date:d.date,part:d.part,exercise,sets,feedback:d.feedback.trim(),is_pt:coaching()}));
+  st.draft=newDraft();st.draft.date=d.date;await loadData();render();toast('저장했어요 💪');
+})}
 
-/* ===== 화면: PT ===== */
+function historyView(){
+  if(coaching()&&!st.sel)return `<h2>히스토리</h2>${noMember()}`;
+  const byDate={};st.logs.forEach(l=>(byDate[l.log_date]??=[]).push(l));
+  const dates=Object.keys(byDate).sort().reverse();
+  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 히스토리`:'내 운동 히스토리'}</h2>${coaching()?memberSelect():''}
+  ${dates.length?dates.map(dt=>`<div class="date">${fmtDate(dt)}</div>${byDate[dt].map(l=>`<div class="card"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(l.part)}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div><button class="x del" onclick="delLog('${l.id}')">삭제</button></div>
+  <div class="small muted" style="margin-top:6px">${l.sets.map(s=>`${s.w}kg×${s.r}`).join(' · ')}</div>${l.feedback?`<div class="fb">💬 ${esc(l.feedback)}</div>`:''}</div>`).join('')}`).join(''):'<div class="card center muted">아직 기록이 없어요</div>'}`;
+}
+function delLog(id){if(!confirm('이 기록을 삭제할까요?'))return;run(async()=>{ok(await sb.from('workout_logs').delete().eq('id',id));await loadData();render()})}
+
+function membersView(){
+  const f=st.found,s=st.sel;
+  return `<h2>담당 회원 관리</h2>
+  <div class="card"><h3>이메일로 회원 등록</h3><div class="row"><input id="m-q" class="input" type="email" placeholder="회원 이메일"><button class="btn sm primary" style="min-height:50px" onclick="searchMember()">검색</button></div>
+  ${f===null?'<div class="small muted" style="margin-top:10px">해당 이메일의 회원을 찾지 못했어요</div>':''}
+  ${f?`<div class="item" style="margin-top:8px"><div><b>${esc(f.name)}</b><span class="tag">${esc(f.level)}</span><div class="small muted">${esc(f.email)}</div></div>
+  ${f.trainer_id===st.me.id?'<span class="ok small">내 회원</span>':f.trainer_id?'<span class="muted small">다른 트레이너 담당</span>':`<button class="btn sm primary" onclick="addMember('${f.id}')">내 회원으로 등록</button>`}</div>`:''}</div>
+  ${st.members.length?`<div class="card"><h3>회원 선택</h3>${memberSelect()}
+  ${s?`<div class="small muted">${esc(s.email)} · 숙련도 ${esc(s.level)}</div>
+  <label class="lbl">회원 특징 (notes)</label><textarea id="m-notes" class="input" placeholder="체형, 부상 이력, 성향 등">${esc(s.notes)}</textarea>
+  <label class="lbl">운동 방향 / 커리큘럼 (curriculum)</label><textarea id="m-cur" class="input" placeholder="목표와 주차별 운동 방향">${esc(s.curriculum)}</textarea>
+  <button class="btn primary" onclick="saveNotes()">저장하기</button>`:''}</div>`:noMember()}`;
+}
+function searchMember(){return run(async()=>{
+  const q=$('#m-q').value.trim().toLowerCase();if(!q)return toast('이메일을 입력해주세요');
+  st.found=ok(await sb.from('profiles').select('id,name,email,level,trainer_id').eq('role','member').eq('email',q).maybeSingle());render();
+})}
+function addMember(id){return run(async()=>{
+  ok(await sb.from('profiles').update({trainer_id:st.me.id}).eq('id',id).select());
+  st.found=undefined;st.sel={id};await loadData();render();toast('담당 회원으로 등록했어요');
+})}
+function saveNotes(){return run(async()=>{
+  ok(await sb.from('profiles').update({notes:$('#m-notes').value,curriculum:$('#m-cur').value}).eq('id',st.sel.id).select());
+  await loadData();render();toast('저장했어요');
+})}
+
 function ptView(){
-  const isT=S.user.role==='trainer',list=S.pt.slice().sort((a,b)=>b.date.localeCompare(a.date));
-  return `<h2 class="title">PT ${isT?'· 피드백 작성':'· 트레이너 피드백'}</h2>
-  ${isT?`<div class="card"><label class="lbl">수업 날짜</label><input id="pt-date" type="date" class="input" value="${todayStr()}">
-    <label class="lbl">회원</label><input id="pt-member" class="input" placeholder="회원 이름">
-    <label class="lbl">오늘 수업 내용</label><input id="pt-content" class="input" placeholder="예: 스쿼트 자세 교정, 하체 루틴">
-    <label class="lbl">피드백 *</label><textarea id="pt-fb" class="input" rows="3" placeholder="잘한 점 / 고칠 점"></textarea>
-    <label class="lbl">다음 수업까지 숙제</label><input id="pt-hw" class="input" placeholder="예: 고블릿 스쿼트 3x12">
-    <button class="btn primary" onclick="savePT()">피드백 보내기</button></div><h3 class="sec">작성한 피드백</h3>`:''}
-  ${list.length?list.map(ptCard).join(''):'<p class="muted center">아직 PT 기록이 없어요</p>'}`;
+  if(!st.sel)return `<h2>PT 일정</h2>${noMember()}`;
+  return `<h2>${esc(st.sel.name)} 회원 PT 일정</h2>${memberSelect()}
+  <div class="card"><h3>PT 일정 등록</h3><div class="row"><input id="p-date" type="date" class="input" value="${today()}"><input id="p-time" type="time" class="input" value="19:00"></div>
+  <label class="lbl">수업 목표</label><input id="p-goal" class="input" placeholder="예) 하체 자세 교정, 스쿼트 중량 올리기">
+  <button class="btn primary" onclick="addPT()">일정 등록</button></div>
+  ${st.pts.length?st.pts.map(p=>`<div class="card"><div class="row between"><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b>
+  <select class="input" style="width:auto;min-height:40px;padding:6px 10px" onchange="setPT('${p.id}',this.value)">${Object.entries(PT_STATUS).map(([k,v])=>`<option value="${k}" ${p.status===k?'selected':''}>${v}</option>`).join('')}</select></div>
+  <div class="small muted" style="margin-top:6px">${esc(p.goal)||'목표 미입력'}</div></div>`).join(''):'<div class="card center muted">등록된 PT 일정이 없어요</div>'}`;
 }
-function ptCard(p){const day=S.workouts.filter(w=>w.date===p.date);
-  return `<div class="card ${p.read?'':'new'}"><div class="row between"><b>${fmtDate(p.date)}</b><span class="muted small">${esc(p.trainer)} 트레이너 → ${esc(p.member)}</span></div>
-  ${p.content?`<p style="margin-top:8px"><span class="tag">수업</span>${esc(p.content)}</p>`:''}
-  <p class="fb">${esc(p.feedback).replace(/\n/g,'<br>')}</p>${p.homework?`<p class="hw">📌 숙제: ${esc(p.homework)}</p>`:''}
-  ${day.length?`<details><summary>이날 운동 기록 ${day.length}종목</summary>${day.map(w=>`<div class="small muted">${esc(w.exercise)}: ${w.sets.map(s=>`${s.w}×${s.r}`).join(', ')}</div>`).join('')}</details>`:''}</div>`}
-function savePT(){
-  const v=id=>$(id).value.trim(),fb=v('#pt-fb');
-  if(!v('#pt-member'))return toast('회원 이름을 입력해주세요');if(!fb)return toast('피드백을 입력해주세요');
-  const p={id:uid(),date:v('#pt-date'),member:v('#pt-member'),trainer:S.user.name,content:v('#pt-content'),feedback:fb,homework:v('#pt-hw'),read:false};
-  S.pt.push(p);save();pushSheet('PT',[[p.date,p.member,p.trainer,p.content,p.feedback,p.homework]]);
-  if(S.settings.ptNotify)notify('📝 새 PT 피드백',`${p.member}님에게 피드백이 전송됐어요`);else toast('피드백을 보냈어요');render();
-}
-
-/* ===== 화면: 인바디 ===== */
-const METRICS=[['weight','체중','kg','#4f46e5'],['muscle','골격근량','kg','#059669'],['fat','체지방률','%','#f59e0b']];
-function spark(vals,c){
-  if(vals.length<2)return '<div class="muted small">2회 이상 측정하면 그래프가 보여요</div>';
-  const W=300,H=60,mn=Math.min(...vals),r=(Math.max(...vals)-mn)||1;
-  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="spark"><polyline points="${vals.map((v,i)=>`${i/(vals.length-1)*W},${H-6-(v-mn)/r*(H-12)}`).join(' ')}" fill="none" stroke="${c}" stroke-width="2.5"/></svg>`}
-function inbodyView(){
-  const list=S.inbody.slice().sort(byDate);
-  return `<h2 class="title">인바디</h2><div class="card"><label class="lbl">측정일</label><input id="ib-date" type="date" class="input" value="${todayStr()}" max="${todayStr()}">
-  <div class="grid3">${METRICS.map(([k,l,u])=>`<div><label class="lbl">${l}(${u})</label><input id="ib-${k}" type="number" inputmode="decimal" class="input num" placeholder="0"></div>`).join('')}</div>
-  <button class="btn primary" onclick="saveInbody()">등록</button></div>
-  ${list.length?`<div class="card">${METRICS.map(([k,l,u,c])=>{const d=(list.at(-1)[k]-list[0][k]).toFixed(1);
-    return `<div class="metric"><div class="row between"><b>${l}</b><span>${list.at(-1)[k]}${u} <span class="small ${d>0?'up':'down'}">${d>0?'+':''}${d} (처음 대비)</span></span></div>${spark(list.map(x=>x[k]),c)}</div>`}).join('')}</div>`:''}
-  <h3 class="sec">측정 기록</h3>
-  ${list.length?list.slice().reverse().map(x=>`<div class="card"><div class="row between"><div><b>${fmtDate(x.date)}</b><div class="muted small">체중 ${x.weight}kg · 골격근 ${x.muscle}kg · 체지방 ${x.fat}%</div></div><button class="x" onclick="delInbody('${x.id}')">삭제</button></div></div>`).join(''):'<p class="muted center">첫 인바디를 등록해보세요</p>'}`;
-}
-function saveInbody(){
-  const date=$('#ib-date').value,o={};for(const [k,l] of METRICS){o[k]=+$('#ib-'+k).value;if(!o[k])return toast(`${l}을(를) 입력해주세요`)}
-  S.inbody=S.inbody.filter(x=>x.date!==date);S.inbody.push({id:uid(),date,...o});save();
-  pushSheet('인바디',[[date,S.user.name,o.weight,o.muscle,o.fat]]);toast('인바디가 등록됐어요');render();
-}
-function delInbody(id){if(!confirm('삭제할까요?'))return;S.inbody=S.inbody.filter(x=>x.id!==id);save();render()}
-
-/* ===== 화면: 설정 ===== */
-function settingsView(){
-  const s=S.settings;
-  return `<h2 class="title">설정</h2>
-  <div class="card"><div class="row between"><div><b>${esc(S.user.name)}</b><div class="muted small">${S.user.role==='trainer'?'트레이너':'회원'} 계정</div></div><button class="btn sm" onclick="switchRole()">역할 전환(데모)</button></div></div>
-  <div class="card"><h3>🏋️ 루틴 방식</h3><div class="chips">${SPLIT_LIST.map(([k,v])=>`<button class="chip ${s.split===k?'on':''}" onclick="setSplit('${k}')">${v}</button>`).join('')}</div><p class="muted small" style="margin-top:10px">${SPLIT_DESC[s.split]}</p></div>
-  <div class="card"><h3>🔔 알림</h3>
-    <div class="row between"><span>운동 알림</span><input type="checkbox" class="toggle" ${s.notify?'checked':''} onchange="toggleNotify(this.checked)"></div>
-    <div class="row between"><span>알림 시간</span><input type="time" class="input w-auto" value="${s.notifyTime}" onchange="S.settings.notifyTime=this.value;save()"></div>
-    <div class="row"><div class="chips">${'일월화수목금토'.split('').map((d,i)=>`<button class="chip sm ${s.notifyDays.includes(i)?'on':''}" onclick="toggleDay(${i})">${d}</button>`).join('')}</div></div>
-    <div class="row between"><span>PT 피드백 도착 알림</span><input type="checkbox" class="toggle" ${s.ptNotify?'checked':''} onchange="S.settings.ptNotify=this.checked;save()"></div>
-    <button class="btn ghost" onclick="testNotify()">알림 테스트</button></div>
-  <div class="card"><h3>📊 구글 시트 연결</h3>
-    <label class="lbl">Apps Script 웹앱 URL</label><input class="input" id="st-url" value="${esc(s.scriptUrl)}" placeholder="https://script.google.com/macros/s/.../exec">
-    <label class="lbl">보안 토큰</label><input class="input" id="st-token" value="${esc(s.token)}" placeholder="Apps Script의 TOKEN 값">
-    <div class="row gap"><button class="btn sm" onclick="saveSheet()">저장</button><button class="btn sm" onclick="pullSheet()">시트에서 불러오기</button></div>
-    <p class="muted small" style="margin-top:8px">${s.scriptUrl?'✅ 연결됨 · 기록할 때마다 시트에 자동 저장':'연결하지 않으면 이 기기에만 저장돼요'}</p></div>
-  <div class="card"><h3>💾 데이터</h3><div class="row gap"><button class="btn sm" onclick="exportCSV()">CSV 내보내기</button><button class="btn sm" onclick="seed();save();render();toast('샘플 데이터를 추가했어요')">샘플 데이터</button><button class="btn sm danger" onclick="resetAll()">초기화</button></div></div>
-  <button class="btn" onclick="logout()">로그아웃</button>`;
-}
-function switchRole(){S.user.role=S.user.role==='trainer'?'member':'trainer';save();render();toast(`${S.user.role==='trainer'?'트레이너':'회원'} 모드로 전환했어요`)}
-function toggleNotify(on){if(on&&'Notification' in window&&Notification.permission==='default')Notification.requestPermission();S.settings.notify=on;save();toast(on?`${S.settings.notifyTime}에 알려드릴게요`:'알림을 껐어요')}
-function toggleDay(i){const a=S.settings.notifyDays;S.settings.notifyDays=a.includes(i)?a.filter(x=>x!==i):[...a,i];save();render()}
-function notify(t,b){if('Notification' in window&&Notification.permission==='granted'){try{new Notification(t,{body:b});return}catch(e){}}toast(`${t} — ${b}`)}
-function testNotify(){const r=recommend();notify('💪 운동할 시간이에요!',`${r.label}: ${r.parts.join(', ')}`)}
-function checkNotify(){
-  const s=S.settings;if(!s.notify||!S.user)return;const n=new Date(),hm=n.toTimeString().slice(0,5),h=n.getHours();
-  if(h>=22||h<8||!s.notifyDays.includes(n.getDay())||hm!==s.notifyTime||s.lastNotified===todayStr())return;
-  s.lastNotified=todayStr();save();testNotify();
-}
-function logout(){S.user=null;save();render()}
-function resetAll(){if(confirm('이 기기의 모든 데이터를 삭제할까요? (시트 데이터는 유지)')){localStorage.removeItem(KEY);location.reload()}}
-function exportCSV(){
-  const rows=[['날짜','부위','운동','세트','무게','횟수']];
-  S.workouts.slice().sort(byDate).forEach(w=>w.sets.forEach((s,i)=>rows.push([w.date,w.part,w.exercise,i+1,s.w,s.r])));
-  const csv='\uFEFF'+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='운동기록.csv';a.click();
-}
-
-/* ===== 구글 시트 연동 ===== */
-function saveSheet(){S.settings.scriptUrl=$('#st-url').value.trim();S.settings.token=$('#st-token').value.trim();save();render();toast('저장했어요')}
-async function pushSheet(type,rows){
-  const {scriptUrl,token}=S.settings;if(!scriptUrl)return;
-  try{await fetch(scriptUrl,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token,type,rows})})}
-  catch(e){toast('시트 저장 실패 (기기에는 저장됨)')}
-}
-async function pullSheet(){
-  const {scriptUrl,token}=S.settings;if(!scriptUrl)return toast('URL을 먼저 저장해주세요');
-  try{toast('불러오는 중...');
-    const rows=await (await fetch(`${scriptUrl}?type=${encodeURIComponent('운동기록')}&token=${encodeURIComponent(token)}`)).json();
-    if(rows.error)return toast(rows.error);
-    const map={};
-    rows.forEach(r=>{const date=String(r['날짜']).slice(0,10),part=r['부위'],ex=r['운동'];if(!date||!ex)return;
-      const k=date+'|'+ex;map[k]??={id:uid(),date,part,exercise:ex,sets:[]};map[k].sets.push({w:+r['무게']||0,r:+r['횟수']||0});
-      if(PARTS.includes(part)&&!exercisesOf(part).includes(ex))(S.customEx[part]??=[]).push(ex)});
-    if(!confirm(`시트에서 ${Object.keys(map).length}개 기록을 찾았어요. 이 기기의 기록을 시트 기준으로 바꿀까요?`))return;
-    S.workouts=Object.values(map);save();render();toast('동기화 완료!');
-  }catch(e){toast('불러오기 실패: URL과 배포 권한을 확인해주세요')}
-}
-
-/* ===== 샘플 데이터 ===== */
-function seed(){
-  const plan=[['가슴','팔'],['등','팔'],['하체','복근'],['어깨']];
-  const W={벤치프레스:50,'인클라인 덤벨프레스':16,랫풀다운:45,바벨로우:40,스쿼트:60,레그프레스:120,오버헤드프레스:30,'사이드 레터럴 레이즈':8,바벨컬:20,'케이블 푸시다운':20,크런치:0,'행잉 레그레이즈':0};
-  [13,11,9,8,6,4,2].forEach((off,i)=>{const d=new Date();d.setDate(d.getDate()-off);const ds=localDate(d),late=i>=4;
-    plan[i%4].forEach(p=>DEFAULT_EX[p].slice(0,2).forEach(ex=>{const w=(W[ex]??20)+(late&&W[ex]?2.5:0);
-      S.workouts.push({id:uid(),date:ds,part:p,exercise:ex,sets:[{w,r:late?12:10},{w,r:late?12:10},{w,r:late?12:8}]})}))});
-  const dd=n=>{const d=new Date();d.setDate(d.getDate()-n);return localDate(d)};
-  S.inbody.push({id:uid(),date:dd(30),weight:74.2,muscle:32.1,fat:21.5},{id:uid(),date:dd(16),weight:73.6,muscle:32.3,fat:20.6},{id:uid(),date:dd(2),weight:73.1,muscle:32.6,fat:19.8});
-  S.pt.push({id:uid(),date:dd(4),member:S.user?.name||'회원',trainer:'박코치',content:'등 운동 자세 교정 (랫풀다운, 바벨로우)',feedback:'랫풀다운 할 때 어깨가 으쓱 올라가는 습관이 있어요. 견갑을 먼저 내리고 당기세요!\n바벨로우는 허리 각도가 아주 좋았습니다 👍',homework:'개인 운동 때 랫풀다운 가볍게 4x12, 견갑 하강 의식하기',read:false});
-}
+function addPT(){return run(async()=>{
+  const date=$('#p-date').value,time=$('#p-time').value,goal=$('#p-goal').value.trim();
+  if(!date||!time)return toast('날짜와 시간을 입력해주세요');
+  ok(await sb.from('pt_schedules').insert({member_id:st.sel.id,trainer_id:st.me.id,pt_date:date,pt_time:time,goal,status:'scheduled'}));
+  await loadData();render();toast('PT 일정을 등록했어요');
+})}
+function setPT(id,status){return run(async()=>{ok(await sb.from('pt_schedules').update({status}).eq('id',id));await loadData();render()})}
 
 /* ===== 렌더링 ===== */
-function navView(){const u=unreadPT();
-  return `<nav>${[['home','🏠','홈'],['record','✏️','기록'],['pt','💬','PT'],['inbody','📈','인바디'],['settings','⚙️','설정']].map(([k,i,l])=>`<button class="${tab===k?'on':''}" onclick="go('${k}')"><i>${i}</i>${l}${k==='pt'&&u?`<span class="badge">${u}</span>`:''}</button>`).join('')}</nav>`}
-function go(t){tab=t;render();window.scrollTo(0,0)}
 function render(){
-  if(!S.user){$('#app').innerHTML=loginView();return}
-  const V={home:homeView,record:recordView,pt:ptView,inbody:inbodyView,settings:settingsView};
-  $('#app').innerHTML=`<main class="screen">${V[tab]()}</main>${navView()}`;
-  if(tab==='pt'&&S.user.role==='member'&&S.pt.some(p=>!p.read)){S.pt.forEach(p=>p.read=true);save()}
+  const app=$('#app');
+  if(!st.me){app.innerHTML=authView();return}
+  const V={home:homeView,record:recordView,history:historyView,members:membersView,pt:ptView};
+  app.innerHTML=headerView()+`<main>${V[st.tab]()}</main>`+navView();
 }
-setInterval(checkNotify,30000);
-render();
+boot();
 </script>
 </body>
 </html>
