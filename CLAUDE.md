@@ -6,11 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 MasilMuscle is a Korean-language, mobile-first (dark UI) workout management web app for regular members and trainers, backed by Supabase (Auth + Postgres). The whole frontend is a single static file, `index.html` (inline `<style>` + one inline `<script>`; `@supabase/supabase-js` is loaded from the jsdelivr CDN). There is no build system, package manager, linter, or test suite.
 
-Other files: `supabase/schema.sql` (tables, auth trigger, RLS policies — run once in the Supabase SQL editor) and `.github/workflows/keep-supabase-alive.yml` (daily 09:00 KST GET to the REST API; needs `SUPABASE_URL` and `SUPABASE_ANON_KEY` repo secrets).
+Other files: `supabase/schema.sql` (tables, auth trigger, RLS policies — run once in the Supabase SQL editor), `supabase/auth_trigger.sql` (the signup-profile trigger alone, idempotent) and `.github/workflows/keep-supabase-alive.yml` (daily 09:00 KST GET to the REST API; needs `SUPABASE_URL` and `SUPABASE_ANON_KEY` repo secrets).
 
 ## Running
 
-No build step. Serve statically (e.g. `python3 -m http.server`) and view at mobile width (`max-width:480px`). Set `SUPABASE_URL` at the top of the script to the real `https://<project-ref>.supabase.co` (the auth screen shows a warning while it is the bare `supabase.co`). The anon/publishable key is public by design; security comes from RLS. There are no tests; to check UI changes, load the page with Playwright and stub the CDN script or point it at a real project.
+No build step. Serve statically (e.g. `python3 -m http.server`) and view at mobile width (`max-width:480px`). `SUPABASE_URL` at the top of the script is the project base URL (`https://<project-ref>.supabase.co`, no `/rest/v1/` suffix; the auth screen warns if it is the bare `supabase.co`). The anon/publishable key is public by design; security comes from RLS. There are no tests; to check UI changes, load the page with Playwright and stub the CDN script or point it at a real project.
 
 ## Architecture
 
