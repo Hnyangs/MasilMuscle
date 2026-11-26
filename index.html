@@ -30,7 +30,7 @@ textarea.input{min-height:96px;resize:vertical}
 .btn{display:block;width:100%;min-height:52px;padding:0 16px;border:none;border-radius:14px;font-size:16px;font-weight:700;margin-top:12px;cursor:pointer;background:var(--card2);color:var(--t);font-family:inherit}
 .btn.primary{background:var(--p);color:#fff}.btn.primary:active{background:var(--pd)}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--p)}
-.btn.danger{background:#3a1a1a;color:var(--bad)}.btn.sm{width:auto;min-height:40px;padding:0 14px;font-size:14px;margin-top:0}
+.btn.danger{background:#3a1a1a;color:var(--bad)}.btn.sm{white-space:nowrap;flex-shrink:0;width:auto;min-height:40px;padding:0 14px;font-size:14px;margin-top:0}
 .btn:disabled{opacity:.5}
 .x{border:none;background:none;color:var(--m);font-size:14px;padding:10px;cursor:pointer;font-family:inherit}.x.del{color:var(--bad)}
 .set{display:grid;grid-template-columns:26px 1fr 1fr 28px;gap:8px;align-items:center;margin-bottom:10px}
@@ -46,7 +46,7 @@ textarea.input{min-height:96px;resize:vertical}
 .fb{margin-top:8px;padding:8px 10px;background:var(--card2);border-radius:10px;font-size:14px;white-space:pre-wrap}
 .pre{white-space:pre-wrap;line-height:1.5}
 nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;min-height:62px;border:none;background:none;color:var(--m);font-size:12px;font-family:inherit;cursor:pointer}
+nav button{flex:1;min-height:62px;border:none;background:none;color:var(--m);font-size:11px;padding:0;font-family:inherit;cursor:pointer}
 nav button i{display:block;font-style:normal;font-size:21px;margin-bottom:2px}nav button.on{color:var(--p);font-weight:700}
 .login{padding:56px 20px 40px}.login h1{font-size:30px;margin-bottom:4px}
 .seg{display:flex;background:var(--card2);border-radius:12px;padding:4px;margin:20px 0 4px}
@@ -56,6 +56,15 @@ nav button i{display:block;font-style:normal;font-size:21px;margin-bottom:2px}na
 .pill{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:5px 9px;font-size:13px;margin:6px 6px 0 0}.pill b{color:var(--p);margin-right:4px}
 .tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl th{color:var(--m);font-weight:600;text-align:left;padding:6px 4px}.tbl td{padding:8px 4px;border-top:1px solid var(--line);vertical-align:top}.tbl .fbr td{border-top:none;padding:0 4px 8px;font-size:12px;color:var(--m);white-space:pre-wrap}.tbl .pt{color:var(--p);font-weight:700}.tbl .d{white-space:nowrap}
 .fbtn{display:block;padding:8px 0 0;color:var(--m);font-size:13px}.fb[hidden],tr[hidden]{display:none}.pr{display:inline-block;margin:0 8px 4px 0;white-space:nowrap}.pr b{font-weight:700}.pr i{font-style:normal;color:var(--m)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.grid2 .lbl:first-child,.grid3 .lbl:first-child{margin-top:16px}
+.avatar{width:56px;height:56px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin-right:14px;color:var(--p);flex-shrink:0}
+.code{font-size:40px;font-weight:800;letter-spacing:12px;color:var(--p);margin:6px 0}.code-in{font-size:28px;text-align:center;letter-spacing:16px;font-weight:700}
+.sec{margin:22px 4px 10px;font-size:14px;color:var(--m)}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px}.wk button{border:none;background:none;color:var(--t);font-family:inherit;padding:4px 0;border-radius:12px;cursor:pointer}
+.wk button span{display:block;font-size:12px;color:var(--m)}.wk button b{display:block;font-size:16px;width:34px;height:34px;line-height:34px;margin:4px auto;border-radius:50%}.wk button.today b{background:var(--p);color:#fff}
+.wk i{display:flex;justify-content:center;gap:3px;height:6px}em.dw,em.dp,em.db{display:inline-block;width:6px;height:6px;border-radius:50%}em.dw{background:var(--ok)}em.dp{background:var(--p)}em.db{background:var(--warn)}
+.legend{display:flex;gap:4px;align-items:center;justify-content:center;font-size:12px;color:var(--m);margin-top:10px}.legend em{margin-left:8px}
+.metric{display:flex;justify-content:space-between;align-items:flex-end}.metric b{font-size:24px}.metric .small{text-align:right}
 .stats{display:flex;gap:8px}.stats div{flex:1;text-align:center}.stats b{display:block;font-size:20px}.stats span{font-size:12px;color:var(--m)}
 .ok{color:var(--ok)}.bad{color:var(--bad)}
 </style>
@@ -84,7 +93,9 @@ const PLANS={
   중급:[{label:'밀기',parts:['가슴','어깨','삼두']},{label:'당기기',parts:['등','이두']},{label:'하체',parts:['하체']}],
   고급:[{label:'가슴',parts:['가슴']},{label:'등',parts:['등']},{label:'하체',parts:['하체']},{label:'어깨+팔',parts:['어깨','이두','삼두']}]
 };
-const PT_STATUS={scheduled:'예정',completed:'완료',canceled:'취소'};
+const PT_STATUS={requested:'신청',scheduled:'예정',completed:'완료',canceled:'취소'};
+const GOALS=['근력·체력','다이어트','체형 교정','재활·통증 관리','건강 유지'];
+const IB=[['weight','체중','kg','#8b7bff'],['muscle','골격근량','kg','#4ade80'],['fat_pct','체지방률','%','#fbbf24']];
 
 /* ===== 상태 / 유틸 ===== */
 const $=s=>document.querySelector(s);
@@ -98,16 +109,17 @@ const ok=r=>{if(r.error)throw r.error;return r.data};
 let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2600)}
 async function run(fn){try{await fn()}catch(e){toast(e.message||String(e))}}
 
-const st={hf:{q:'',part:'',ex:'',limit:60,sort:'desc',edit:false},exercises:{},me:null,tab:'home',mode:'trainer',authMode:'login',members:[],sel:null,logs:[],pts:[],myTrainer:null,found:undefined,draft:null};
+const st={hf:{q:'',part:'',ex:'',date:'',limit:60,sort:'desc',edit:false},inbody:[],reqs:[],week:0,myCode:null,codeBusy:false,needMig:false,classLimit:10,exercises:{},me:null,tab:'home',mode:'trainer',authMode:'login',members:[],sel:null,logs:[],pts:[],myTrainer:null,found:undefined,draft:null};
 const isTrainer=()=>st.me?.role==='trainer';
 const coaching=()=>isTrainer()&&st.mode==='trainer';
 const targetId=()=>coaching()?st.sel?.id:st.me.id;
 const targetProfile=()=>coaching()?st.sel:st.me;
-const newDraft=()=>({date:today(),part:'가슴',exercise:'',custom:false,customName:'',sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}],feedback:''});
+const newDraft=()=>({date:today(),part:'가슴',exercise:'',custom:false,customName:'',sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}],feedback:'',note:''});
 st.draft=newDraft();
 
 /* ===== 인증 ===== */
 async function boot(){
+  applyFont();
   if(CONFIG_OK){
     const {data:{session}}=await sb.auth.getSession();
     if(session)await run(()=>afterLogin(session.user));
@@ -136,7 +148,7 @@ async function doSignup(){await run(async()=>{
   if(data.session){await afterLogin(data.user);render()}
   else{st.authMode='login';render();toast('가입 완료! 이메일 인증 후 로그인해주세요')}
 })}
-async function logout(){await sb.auth.signOut();Object.assign(st,{me:null,members:[],sel:null,logs:[],pts:[],myTrainer:null,found:undefined,authMode:'login'});st.draft=newDraft();render()}
+async function logout(){await sb.auth.signOut();Object.assign(st,{me:null,members:[],sel:null,logs:[],pts:[],reqs:[],inbody:[],myTrainer:null,myCode:null,codeBusy:false,week:0,found:undefined,authMode:'login'});st.draft=newDraft();render()}
 function setAuth(m){st.authMode=m;render()}
 
 /* ===== 데이터 로드 ===== */
@@ -156,7 +168,10 @@ async function loadData(){
   }
   const tid=targetId();
   st.logs=tid?await fetchAll(()=>sb.from('workout_logs').select('*').eq('user_id',tid).order('log_date',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];
-  st.pts=[];st.myTrainer=null;
+  try{st.inbody=tid?await fetchAll(()=>sb.from('inbody_records').select('*').eq('user_id',tid).order('measured_on',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];st.needMig=!('goal' in st.me)}
+  catch(e){st.inbody=[];st.needMig=true}   /* migration_002 미실행 */
+  st.pts=[];st.reqs=[];st.myTrainer=null;
+  if(coaching())st.reqs=ok(await sb.from('pt_schedules').select('*').eq('trainer_id',me.id).eq('status','requested').order('pt_date').order('pt_time'));
   if(coaching()&&tid)st.pts=ok(await sb.from('pt_schedules').select('*').eq('member_id',tid).order('pt_date').order('pt_time'));
   else if(!isTrainer()){
     st.pts=ok(await sb.from('pt_schedules').select('*').eq('member_id',me.id).order('pt_date').order('pt_time'));
@@ -214,13 +229,15 @@ function authView(){
 }
 function headerView(){
   const m=st.me;
-  return `<header><div><b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원'} · ${esc(m.level)}</span></div><button class="x" onclick="logout()">로그아웃</button></header>
+  return `<header><div><b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원'} · ${esc(m.level)}</span></div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
   ${isTrainer()?`<div style="padding:4px 16px 0"><button class="btn ghost" style="margin-top:8px" onclick="toggleMode()">${coaching()?'🏋️ 내 개인 운동 모드로 전환':'👥 회원 관리 모드로 돌아가기'}</button></div>`:''}`;
 }
-const tabList=()=>coaching()?[['members','👥','회원'],['record','✏️','기록'],['history','📅','히스토리'],['pt','🗓️','PT']]:[['home','🏠','홈'],['record','✏️','기록'],['history','📅','히스토리']];
+const tabList=()=>coaching()?[['members','👥','회원'],['record','✏️','기록'],['history','📅','히스토리'],['inbody','📈','인바디'],['pt','🗓️','PT'],['my','👤','마이']]
+  :[['home','🏠','홈'],['record','✏️','기록'],['history','📅','히스토리'],['inbody','📈','인바디'],...(isTrainer()?[]:[['class','🗓️','수업']]),['my','👤','마이']];
 const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${st.tab===k?'on':''}" onclick="go('${k}')"><i>${i}</i>${l}</button>`).join('')}</nav>`;
 const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${esc(m.name)} (${esc(m.level)})</option>`).join('')}</select>`:'';
-const noMember=()=>`<div class="card center muted">담당 회원이 없어요.<br>회원 탭에서 이메일로 회원을 등록해주세요.</div>`;
+const noMember=()=>`<div class="card center muted">담당 회원이 없어요.<br>회원 탭에서 이메일로 등록하거나,<br>마이 탭의 강사 코드를 회원에게 알려주세요.</div>`;
+const migHint=()=>`<div class="card warn">⚠️ DB 업데이트가 필요해요. Supabase SQL Editor에서 <b>supabase/migration_002_mypage_inbody.sql</b>을 실행해 주세요. (인바디 · 내 정보 · 강사 코드 · PT 신청 · 노트 기능)</div>`;
 
 function nextPT(){return st.pts.filter(p=>p.status==='scheduled'&&p.pt_date>=today())}
 function homeView(){
@@ -230,13 +247,24 @@ function homeView(){
     <label class="lbl">내 특징</label><div class="pre">${esc(me.notes)||'<span class="muted">아직 작성된 내용이 없어요</span>'}</div>
     <label class="lbl">운동 방향 / 커리큘럼</label><div class="pre">${esc(me.curriculum)||'<span class="muted">아직 작성된 내용이 없어요</span>'}</div>
     <label class="lbl">다가오는 PT</label>${ups.length?ups.map(p=>`<div class="item"><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b><span class="small muted">${esc(p.goal)}</span></div>`).join(''):'<div class="muted small">예정된 PT가 없어요</div>'}`
-    :'<div class="muted small">아직 담당 트레이너가 없어요. 트레이너가 이메일로 회원님을 등록하면 여기에 노트와 PT 일정이 표시돼요.</div>'}</div>`:'';
-  return `<h2>오늘의 운동</h2>${card}
+    :`<div class="muted small">아직 담당 트레이너가 없어요. 트레이너에게 받은 4자리 강사 코드를 입력하면 노트와 PT 일정이 여기에 표시돼요.</div><button class="btn ghost" onclick="go('my')">+ 강사 연결하기</button>`}</div>`:'';
+  return `<h2>오늘의 운동</h2>${weekStrip()}${card}
   ${r.warns.map(l=>`<div class="card warn">⚠️ 직전 피드백에 통증/부상 언급이 있어요 (${esc(l.exercise)}): “${esc(l.feedback)}”<br>무리하지 말고 무게를 낮추거나 해당 부위를 쉬어가세요.</div>`).join('')}
   <div class="card"><div class="row between"><h3 style="margin:0">오늘의 추천 · ${esc(r.pick.label)}</h3><span class="tag">${esc(r.level)}</span></div>
   <div class="small muted" style="margin:6px 0 4px">${r.pick.parts.map(p=>`${partLabel(p)} ${fmtRest(restDays(p))}`).join(' · ')} → 가장 오래 쉰 분할이에요</div>
   ${r.items.map(i=>`<div class="item"><div><b>${esc(i.ex)}</b> <span class="tag">${esc(partLabel(i.part))}</span><div class="small muted">${esc(i.text)}</div></div><button class="btn sm primary" onclick="startEx('${i.part}','${esc(i.ex).replace(/'/g,"\\'")}')">기록</button></div>`).join('')}</div>`;
 }
+function weekStrip(){
+  const base=new Date(today()+'T00:00');base.setDate(base.getDate()-(base.getDay()+6)%7+st.week*7);
+  const days=[...Array(7)].map((_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);return localDate(d)});
+  const dot=d=>(st.logs.some(l=>l.log_date===d&&!l.is_pt)?'<em class="dw"></em>':'')+(st.logs.some(l=>l.log_date===d&&l.is_pt)||st.pts.some(p=>p.pt_date===d&&p.status==='scheduled')?'<em class="dp"></em>':'')+(st.inbody.some(x=>x.measured_on===d)?'<em class="db"></em>':'');
+  return `<div class="card"><div class="row between"><b>${+days[3].slice(5,7)}월 ${st.week===0?'· 이번 주':''}</b><div><button class="x" style="font-size:20px" onclick="wk(-1)">‹</button><button class="x" style="font-size:20px" onclick="wk(1)">›</button></div></div>
+  <div class="wk">${days.map((d,i)=>`<button class="${d===today()?'today':''}" onclick="openDay('${d}')"><span>${'월화수목금토일'[i]}</span><b>${+d.slice(8)}</b><i>${dot(d)}</i></button>`).join('')}</div>
+  <div class="legend"><em class="dw"></em>운동<em class="dp"></em>PT<em class="db"></em>인바디</div></div>`;
+}
+function wk(n){st.week+=n;render()}
+function openDay(d){resetHF();st.hf.date=d;go('history')}
+function recordOn(d){st.draft=newDraft();st.draft.date=d;go('record')}
 function startEx(p,e){st.draft=newDraft();st.draft.part=p;pickEx(e);st.tab='record';render();window.scrollTo(0,0)}
 
 function recordView(){
@@ -255,7 +283,8 @@ function recordView(){
     <div class="stp"><button onclick="adj(${i},'r',-1)">−</button><input type="number" inputmode="numeric" value="${s.r}" placeholder="회" oninput="st.draft.sets[${i}].r=this.value"><button onclick="adj(${i},'r',1)">+</button></div>
     <button class="x" onclick="delSet(${i})">✕</button></div>`).join('')}
   ${d.sets.length<5?'<button class="btn ghost sm" onclick="addSet()">+ 세트 추가</button>':'<div class="small muted">최대 5세트까지 입력할 수 있어요</div>'}
-  <label class="lbl">피드백 ${coaching()?'(회원 컨디션 · 자세 · 통증 여부)':'(컨디션 · 통증 여부 등)'}</label><textarea class="input" placeholder="통증이나 부상이 있다면 꼭 적어주세요" oninput="st.draft.feedback=this.value">${esc(d.feedback)}</textarea>
+  <label class="lbl">피드백 ${coaching()?'(회원에게 전달 · 자세 · 통증 여부)':'(컨디션 · 통증 여부 등)'}</label><textarea class="input" placeholder="통증이나 부상이 있다면 꼭 적어주세요" oninput="st.draft.feedback=this.value">${esc(d.feedback)}</textarea>
+  <label class="lbl">노트 ${coaching()?'(수업 메모 · 숙제 · 다음 수업 계획)':'(메모)'}</label><textarea class="input" style="min-height:70px" placeholder="${coaching()?'회원에게 보이는 노트예요':'자유 메모'}" oninput="st.draft.note=this.value">${esc(d.note)}</textarea>
   <button class="btn primary" onclick="saveLog()">저장하기</button></div>`;
 }
 function recentCard(name){
@@ -281,7 +310,7 @@ function saveLog(){return run(async()=>{
   if(exercise.length>60)return toast('종목 이름은 60자 이내로 입력해주세요');
   const sets=d.sets.filter(s=>+s.r>0).map(s=>({w:+s.w||0,r:+s.r}));
   if(!sets.length)return toast('횟수를 1회 이상 입력해주세요');
-  ok(await sb.from('workout_logs').insert({user_id:tid,log_date:d.date,part:d.part,exercise,sets,feedback:d.feedback.trim(),is_pt:coaching()}));
+  ok(await sb.from('workout_logs').insert({user_id:tid,log_date:d.date,part:d.part,exercise,sets,feedback:d.feedback.trim(),is_pt:coaching(),...(d.note.trim()?{note:d.note.trim()}:{})}));
   if(!(st.exercises[d.part]||[]).includes(exercise)){   /* 새 종목이면 exercises 테이블에도 자동 저장 */
     try{ok(await sb.from('exercises').upsert({body_part:d.part,name:exercise},{onConflict:'body_part,name',ignoreDuplicates:true}));(st.exercises[d.part]??=[]).push(exercise)}
     catch(e){console.warn('exercise save failed',e)}
@@ -289,14 +318,16 @@ function saveLog(){return run(async()=>{
   st.draft=newDraft();st.draft.date=d.date;await loadData();render();toast('저장했어요 💪');
 })}
 
-const resetHF=()=>{st.hf={q:'',part:'',ex:'',limit:60,sort:'desc',edit:false}};
+const resetHF=()=>{st.hf={q:'',part:'',ex:'',date:'',limit:60,sort:'desc',edit:false}};
 const setsHtml=l=>l.sets.map((x,i)=>`<span class="pill"><b>${i+1}세트</b> ${+x.w?x.w+'kg':'맨몸'} × ${x.r}회</span>`).join('');
+const hasFb=l=>!!(l.feedback||l.note);
+const fbBody=l=>(l.feedback?esc(l.feedback):'')+(l.feedback&&l.note?'\n':'')+(l.note?'📝 '+esc(l.note):'');
 function tgFb(b){const e=b.nextElementSibling;e.hidden=!e.hidden;b.textContent=e.hidden?'💬 피드백 ▸':'💬 피드백 ▾'}
 function tgFbRow(b){const r=b.closest('tr').nextElementSibling;r.hidden=!r.hidden}
-function logCard(l){return `<div class="card" style="padding:14px"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(partLabel(l.part))}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div>${st.hf.edit?`<button class="btn sm danger" onclick="delLog('${l.id}')">삭제</button>`:''}</div>
-  <div>${setsHtml(l)}</div>${l.feedback?`<button class="x fbtn" onclick="tgFb(this)">💬 피드백 ▸</button><div class="fb" hidden>${esc(l.feedback)}</div>`:''}</div>`}
-function filteredLogs(){const {q,part,ex}=st.hf,qq=q.trim().toLowerCase();
-  return st.logs.filter(l=>(!part||l.part===part)&&(!ex||l.exercise===ex)&&(!qq||l.exercise.toLowerCase().includes(qq)||(l.feedback||'').toLowerCase().includes(qq)))}
+function logCard(l,open){return `<div class="card" style="padding:14px"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(partLabel(l.part))}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div>${st.hf.edit?`<button class="btn sm danger" onclick="delLog('${l.id}')">삭제</button>`:''}</div>
+  <div>${setsHtml(l)}</div>${hasFb(l)?`<button class="x fbtn" onclick="tgFb(this)">💬 피드백 ${open?'▾':'▸'}</button><div class="fb" ${open?'':'hidden'}>${fbBody(l)}</div>`:''}</div>`}
+function filteredLogs(){const {q,part,ex,date}=st.hf,qq=q.trim().toLowerCase();
+  return st.logs.filter(l=>(!date||l.log_date===date)&&(!part||l.part===part)&&(!ex||l.exercise===ex)&&(!qq||l.exercise.toLowerCase().includes(qq)||(l.feedback||'').toLowerCase().includes(qq)||(l.note||'').toLowerCase().includes(qq)))}
 const fmtShort=d=>d.slice(2).replace(/-/g,'.')+'('+'일월화수목금토'[new Date(d+'T00:00').getDay()]+')';
 function minMax(list){const out=[];
   for(let i=0;i<5;i++){const ws=list.filter(l=>l.sets[i]).map(l=>+l.sets[i].w);if(!ws.length)continue;
@@ -311,18 +342,18 @@ function exDetail(list,limit){
   <table class="tbl"><thead><tr><th>세트</th><th>최소</th><th>최대</th><th>횟수</th></tr></thead><tbody>${mm.map(m=>`<tr><td>${m.n}set</td><td>${kg(m.min)}</td><td>${kg(m.max)}</td><td>${m.cnt}번</td></tr>`).join('')}</tbody></table></div>
   <div class="card" style="padding:8px 12px"><table class="tbl"><thead><tr><th>날짜</th><th>세트 (kg × 횟수)</th><th></th></tr></thead><tbody>${list.slice(0,limit).map(l=>
     `<tr><td class="d">${fmtShort(l.log_date)}${l.is_pt?'<div class="pt">PT</div>':''}</td><td>${l.sets.map(x=>`<span class="pr"><b>${+x.w?x.w:'맨몸'}</b><i>×</i>${x.r}</span>`).join('')}</td>
-    <td style="white-space:nowrap;text-align:right">${l.feedback?'<button class="x" style="padding:0 6px" onclick="tgFbRow(this)">💬</button>':''}${st.hf.edit?`<button class="btn sm danger" style="margin-left:6px" onclick="delLog('${l.id}')">삭제</button>`:''}</td></tr>`
-    +(l.feedback?`<tr class="fbr" hidden><td colspan="3">${esc(l.feedback)}</td></tr>`:'')).join('')}</tbody></table></div>`;
+    <td style="white-space:nowrap;text-align:right">${hasFb(l)?'<button class="x" style="padding:0 6px" onclick="tgFbRow(this)">💬</button>':''}${st.hf.edit?`<button class="btn sm danger" style="margin-left:6px" onclick="delLog('${l.id}')">삭제</button>`:''}</td></tr>`
+    +(hasFb(l)?`<tr class="fbr" hidden><td colspan="3">${fbBody(l)}</td></tr>`:'')).join('')}</tbody></table></div>`;
 }
 function histResults(){
   let list=filteredLogs();const {ex,limit,sort}=st.hf;
-  if(!list.length)return '<div class="card center muted">조건에 맞는 기록이 없어요</div>';
+  if(!list.length)return st.hf.date?`<div class="card center muted">선택한 날짜에 운동 기록이 없어요<button class="btn primary" onclick="recordOn('${st.hf.date}')">이 날짜로 운동 기록하기</button></div>`:'<div class="card center muted">조건에 맞는 기록이 없어요</div>';
   if(sort==='asc')list=[...list].reverse();   /* st.logs는 최신순으로 로드됨 */
   const more=list.length>limit?`<button class="btn" onclick="moreHist()">더 보기 (${list.length-limit}건 남음)</button>`:'';
   if(ex&&list.every(l=>l.exercise===ex))return exDetail(list,limit)+more;
   const by={};list.slice(0,limit).forEach(l=>(by[l.log_date]??=[]).push(l));
   const keys=Object.keys(by).sort();if(sort!=='asc')keys.reverse();
-  return `<div class="small muted" style="margin:8px 4px 0">총 ${list.length}건</div>`+keys.map(d=>`<div class="date">${fmtDate(d)}</div>${by[d].map(logCard).join('')}`).join('')+more;
+  return `<div class="small muted" style="margin:8px 4px 0">총 ${list.length}건</div>`+keys.map(d=>`<div class="date">${fmtDate(d)}</div>${by[d].map(l=>logCard(l)).join('')}`).join('')+more;
 }
 function historyView(){
   if(coaching()&&!st.sel)return `<h2>히스토리</h2>${noMember()}`;
@@ -330,12 +361,14 @@ function historyView(){
   const cnt={};st.logs.filter(l=>!hf.part||l.part===hf.part).forEach(l=>cnt[l.exercise]=(cnt[l.exercise]||0)+1);
   const exs=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b,'ko'));
   return `<h2>${coaching()?`${esc(st.sel.name)} 회원 히스토리`:'내 운동 히스토리'}</h2>${coaching()?memberSelect():''}
-  <div class="card"><input class="input" type="search" placeholder="🔍 종목 · 피드백 검색" value="${esc(hf.q)}" oninput="hfQ(this.value)">
+  <div class="card"><input class="input" type="search" placeholder="🔍 종목 · 피드백 · 노트 검색" value="${esc(hf.q)}" oninput="hfQ(this.value)">
+  ${hf.date?`<button class="chip on" style="margin-top:12px" onclick="hfDate()">📅 ${fmtDate(hf.date)} ✕</button>`:''}
   <div class="chips" style="margin-top:12px"><button class="chip ${hf.part?'':'on'}" onclick="hfPart('')">전체</button>${parts.map(p=>`<button class="chip ${hf.part===p?'on':''}" onclick="hfPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
   <div class="row between" style="margin-top:12px"><button class="chip on" style="min-height:40px" onclick="hfSort()">${hf.sort==='asc'?'날짜 ↑ 오래된순':'날짜 ↓ 최신순'}</button><button class="chip ${hf.edit?'on':''}" style="min-height:40px" onclick="hfEdit()">🗑 삭제 모드 ${hf.edit?'ON':'OFF'}</button></div>
   <select class="input" style="margin-top:12px" onchange="hfEx(this.value)"><option value="">전체 종목 (${exs.length})</option>${exs.map(e=>`<option value="${esc(e)}" ${hf.ex===e?'selected':''}>${esc(e)} · ${cnt[e]}회</option>`).join('')}</select></div>
   <div id="hres">${histResults()}</div>`;
 }
+function hfDate(){st.hf.date='';render()}
 function hfEdit(){st.hf.edit=!st.hf.edit;render()}
 function hfSort(){st.hf.sort=st.hf.sort==='asc'?'desc':'asc';render()}
 function hfPart(p){st.hf.part=p;st.hf.ex='';st.hf.limit=60;render()}
@@ -346,7 +379,9 @@ function delLog(id){const l=st.logs.find(x=>x.id===id);if(!confirm(`${l?fmtDate(
 
 function membersView(){
   const f=st.found,s=st.sel;
+  const nameOf=id=>st.members.find(m=>m.id===id)?.name||'회원';
   return `<h2>담당 회원 관리</h2>
+  ${st.reqs.length?`<div class="card hl"><h3>📥 PT 신청 ${st.reqs.length}건</h3>${st.reqs.map(p=>`<div class="item"><div><b>${esc(nameOf(p.member_id))}</b> <span class="small muted">${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</span><div class="small muted">${esc(p.goal)}</div></div><div class="row"><button class="btn sm primary" onclick="setPT('${p.id}','scheduled')">승인</button><button class="btn sm" onclick="setPT('${p.id}','canceled')">거절</button></div></div>`).join('')}</div>`:''}
   <div class="card"><h3>이메일로 회원 등록</h3><div class="row"><input id="m-q" class="input" type="email" placeholder="회원 이메일"><button class="btn sm primary" style="min-height:50px" onclick="searchMember()">검색</button></div>
   ${f===null?'<div class="small muted" style="margin-top:10px">해당 이메일의 회원을 찾지 못했어요</div>':''}
   ${f?`<div class="item" style="margin-top:8px"><div><b>${esc(f.name)}</b><span class="tag">${esc(f.level)}</span><div class="small muted">${esc(f.email)}</div></div>
@@ -378,7 +413,9 @@ function ptView(){
   <button class="btn primary" onclick="addPT()">일정 등록</button></div>
   ${st.pts.length?st.pts.map(p=>`<div class="card"><div class="row between"><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b>
   <select class="input" style="width:auto;min-height:40px;padding:6px 10px" onchange="setPT('${p.id}',this.value)">${Object.entries(PT_STATUS).map(([k,v])=>`<option value="${k}" ${p.status===k?'selected':''}>${v}</option>`).join('')}</select></div>
-  <div class="small muted" style="margin-top:6px">${esc(p.goal)||'목표 미입력'}</div></div>`).join(''):'<div class="card center muted">등록된 PT 일정이 없어요</div>'}`;
+  <div class="small muted" style="margin-top:6px">${esc(p.goal)||'목표 미입력'}</div>
+  ${p.status==='requested'?`<div class="row" style="margin-top:10px"><button class="btn sm primary" onclick="setPT('${p.id}','scheduled')">승인</button><button class="btn sm" onclick="setPT('${p.id}','canceled')">거절</button></div>`:''}
+  ${p.status==='scheduled'&&p.pt_date<=today()?`<button class="btn ghost sm" style="margin-top:10px" onclick="recordOn('${p.pt_date}')">✏️ 이 수업 운동 기록하기</button>`:''}</div>`).join(''):'<div class="card center muted">등록된 PT 일정이 없어요</div>'}`;
 }
 function addPT(){return run(async()=>{
   const date=$('#p-date').value,time=$('#p-time').value,goal=$('#p-goal').value.trim();
@@ -388,11 +425,108 @@ function addPT(){return run(async()=>{
 })}
 function setPT(id,status){return run(async()=>{ok(await sb.from('pt_schedules').update({status}).eq('id',id));await loadData();render()})}
 
+/* ===== 인바디 ===== */
+function spark(vals,color){
+  const v=vals.filter(x=>x!=null&&!isNaN(x));if(v.length<2)return '<div class="small muted" style="padding:10px 0">기록이 2개 이상이면 그래프가 보여요</div>';
+  const mn=Math.min(...v),mx=Math.max(...v),W=300,H=64,p=6,sx=(W-2*p)/(v.length-1),sy=y=>H-p-(mx===mn?.5:(y-mn)/(mx-mn))*(H-2*p);
+  const pts=v.map((y,i)=>[(p+i*sx).toFixed(1),sy(y).toFixed(1)]);
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:64px;margin-top:6px"><polyline fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" points="${pts.map(x=>x.join(',')).join(' ')}"/><circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="4" fill="${color}"/></svg>`;
+}
+const dlt=(a,b)=>{if(a==null||b==null)return '-';const d=Math.round((a-b)*10)/10;return d>0?`+${d}`:`${d}`};
+function inbodyView(){
+  if(coaching()&&!st.sel)return `<h2>인바디</h2>${noMember()}`;
+  const rec=st.inbody,asc=[...rec].reverse(),num=x=>x==null?null:+x;
+  const lastOf=k=>rec.find(r=>r[k]!=null),firstOf=k=>asc.find(r=>r[k]!=null),prevOf=k=>rec.filter(r=>r[k]!=null)[1];
+  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 인바디`:'인바디'}</h2>${coaching()?memberSelect():''}${st.needMig?migHint():''}
+  <div class="card"><h3>인바디 기록하기</h3><label class="lbl">측정일</label><input id="ib-date" type="date" class="input" value="${today()}">
+  <div class="grid3">${IB.map(([k,l,u])=>`<div><label class="lbl">${l} (${u})</label><input id="ib-${k}" type="number" inputmode="decimal" step="0.1" class="input"></div>`).join('')}</div>
+  <button class="btn primary" onclick="saveInbody()">저장하기</button></div>
+  ${rec.length?IB.map(([k,l,u,c])=>{const L=lastOf(k);if(!L)return '';const P=prevOf(k),F=firstOf(k);
+    return `<div class="card"><div class="metric"><div><div class="small muted">${l}</div><b>${num(L[k])}<span class="small muted"> ${u}</span></b></div><div class="small muted">지난번 대비 ${dlt(num(L[k]),P?num(P[k]):null)}<br>처음 대비 ${dlt(num(L[k]),num(F[k]))}</div></div>${spark(asc.map(r=>num(r[k])),c)}</div>`}).join('')
+  +`<div class="card" style="padding:8px 12px"><div class="row between" style="padding:6px 4px"><b>측정 기록 ${rec.length}건</b><button class="chip ${st.hf.edit?'on':''}" style="min-height:36px" onclick="hfEdit()">🗑 삭제 모드 ${st.hf.edit?'ON':'OFF'}</button></div>
+  <table class="tbl"><thead><tr><th>날짜</th><th>체중</th><th>골격근</th><th>체지방률</th><th></th></tr></thead><tbody>${rec.map(r=>`<tr><td class="d">${fmtShort(r.measured_on)}</td><td>${r.weight??'-'}</td><td>${r.muscle??'-'}</td><td>${r.fat_pct!=null?r.fat_pct+'%':'-'}</td><td>${st.hf.edit?`<button class="btn sm danger" onclick="delInbody('${r.id}')">삭제</button>`:''}</td></tr>`).join('')}</tbody></table></div>`
+  :'<div class="card center muted">아직 인바디 기록이 없어요</div>'}`;
+}
+function saveInbody(){return run(async()=>{
+  const tid=targetId();if(!tid)return toast('회원을 먼저 선택해주세요');
+  const v=k=>{const x=$('#ib-'+k).value;return x===''?null:+x};
+  const row={user_id:tid,measured_on:$('#ib-date').value||today(),weight:v('weight'),muscle:v('muscle'),fat_pct:v('fat_pct')};
+  if(row.weight==null&&row.muscle==null&&row.fat_pct==null)return toast('값을 하나 이상 입력해주세요');
+  ok(await sb.from('inbody_records').insert(row));await loadData();render();toast('인바디를 저장했어요');
+})}
+function delInbody(id){const r=st.inbody.find(x=>x.id===id);if(!confirm(`${r?fmtDate(r.measured_on)+' ':''}인바디 기록을 삭제할까요? 되돌릴 수 없어요.`))return;run(async()=>{ok(await sb.from('inbody_records').delete().eq('id',id));await loadData();render()})}
+
+/* ===== 수업 (회원) ===== */
+function classView(){
+  const t=st.myTrainer,ups=nextPT(),req=st.pts.filter(p=>p.status==='requested');
+  const by={};st.logs.filter(l=>l.is_pt).forEach(l=>(by[l.log_date]??=[]).push(l));
+  const all=Object.keys(by).sort().reverse(),dates=all.slice(0,st.classLimit);
+  const goalOf=d=>st.pts.find(p=>p.pt_date===d&&p.status!=='canceled')?.goal;
+  const tm=p=>`${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}`;
+  return `<h2>수업</h2>
+  <div class="card hl"><div class="row between"><div><div class="small muted">1:1 PT</div><b style="font-size:18px">${t?esc(t.name)+' 트레이너':'연결된 강사가 없어요'}</b></div>${t?'':`<button class="btn sm primary" onclick="go('my')">강사 연결</button>`}</div>
+  <div class="stats" style="margin-top:14px"><div><b>${all.length}</b><span>누적 수업</span></div><div><b>${ups.length}</b><span>예정</span></div><div><b>${req.length}</b><span>신청 중</span></div></div></div>
+  ${t?`<div class="card"><h3>PT 신청</h3><div class="row"><input id="r-date" type="date" class="input" value="${today()}"><input id="r-time" type="time" class="input" value="19:00"></div>
+  <label class="lbl">요청사항</label><input id="r-goal" class="input" placeholder="예) 하체 위주로 하고 싶어요"><button class="btn primary" onclick="requestPT()">신청하기</button></div>`:''}
+  ${ups.length?`<div class="card"><h3>다가오는 수업</h3>${ups.map(p=>`<div class="item"><b>${tm(p)}</b><span class="small muted">${esc(p.goal)}</span></div>`).join('')}</div>`:''}
+  ${req.length?`<div class="card"><h3>신청 내역</h3>${req.map(p=>`<div class="item"><div><b>${tm(p)}</b><div class="small muted">${esc(p.goal)}</div></div><button class="btn sm" onclick="cancelReq('${p.id}')">신청 취소</button></div>`).join('')}</div>`:''}
+  <h3 class="sec">수업 기록 · 트레이너 피드백</h3>
+  ${dates.length?dates.map(d=>`<div class="date">${fmtDate(d)}${goalOf(d)?` · ${esc(goalOf(d))}`:''}</div>${by[d].map(l=>logCard(l,true)).join('')}`).join(''):'<div class="card center muted">아직 PT 수업 기록이 없어요</div>'}
+  ${all.length>dates.length?`<button class="btn" onclick="st.classLimit+=10;render()">더 보기 (${all.length-dates.length}회 남음)</button>`:''}`;
+}
+function requestPT(){return run(async()=>{
+  const date=$('#r-date').value,time=$('#r-time').value,goal=$('#r-goal').value.trim();
+  if(!date||!time)return toast('날짜와 시간을 입력해주세요');
+  ok(await sb.from('pt_schedules').insert({member_id:st.me.id,trainer_id:st.me.trainer_id,pt_date:date,pt_time:time,goal,status:'requested'}));
+  await loadData();render();toast('PT를 신청했어요. 트레이너가 승인하면 예정 수업에 표시돼요');
+})}
+function cancelReq(id){if(!confirm('PT 신청을 취소할까요?'))return;run(async()=>{ok(await sb.from('pt_schedules').update({status:'canceled'}).eq('id',id));await loadData();render()})}
+
+/* ===== 마이페이지 ===== */
+function getFont(){try{return +localStorage.getItem('mm-font')||100}catch(e){return 100}}
+function applyFont(){document.body.style.zoom=getFont()/100}
+function setFont(v){try{localStorage.setItem('mm-font',v)}catch(e){}applyFont();render()}
+function ensureCode(){if(st.myCode!==null||st.codeBusy)return;st.codeBusy=true;
+  sb.rpc('my_trainer_code').then(({data,error})=>{st.myCode=error?'':(data||'');if(error)st.needMig=true;if(st.tab==='my')render()})}
+function myView(){
+  const m=st.me,tr=isTrainer(),fs=getFont();if(tr)ensureCode();
+  const sel=(id,opts,val,blank)=>`<select id="${id}" class="input">${blank!=null?`<option value="">${blank}</option>`:''}${opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select>`;
+  return `<h2>마이</h2>${st.needMig?migHint():''}
+  <div class="card hl"><div class="row"><div class="avatar">${esc((m.name||'?').slice(0,1))}</div><div><b style="font-size:20px">${esc(m.name)} ${tr?'트레이너님':'회원님'}</b>
+  <div style="margin-top:6px">${tr?`<span class="tag pt">강사 코드 ${esc(st.myCode||'…')}</span>`:st.myTrainer?`<span class="tag pt">👨‍🏫 ${esc(st.myTrainer.name)} 트레이너</span>`:'<span class="tag">강사 미연결</span>'}</div></div></div></div>
+  <h3 class="sec">내 정보</h3>
+  <div class="card"><label class="lbl">이름</label><input id="p-name" class="input" value="${esc(m.name)}">
+  <div class="grid2"><div><label class="lbl">숙련도</label>${sel('p-level',LEVELS,m.level)}</div><div><label class="lbl">목표</label>${sel('p-goal',GOALS,m.goal,'선택 안 함')}</div></div>
+  <div class="grid2"><div><label class="lbl">키 (cm)</label><input id="p-height" type="number" inputmode="decimal" class="input" value="${m.height_cm??''}"></div><div><label class="lbl">시작 체중 (kg)</label><input id="p-sw" type="number" inputmode="decimal" class="input" value="${m.start_weight??''}"></div></div>
+  <div class="grid2"><div><label class="lbl">생년월일</label><input id="p-birth" type="date" class="input" value="${m.birth_date||''}"></div><div><label class="lbl">성별</label>${sel('p-gender',['여성','남성'],m.gender,'선택 안 함')}</div></div>
+  <div class="small muted" style="margin-top:12px">${esc(m.email)}</div><button class="btn primary" onclick="saveMe()">저장하기</button></div>
+  <h3 class="sec">강사 관리</h3>
+  ${tr?`<div class="card"><div class="small muted">내 강사 코드</div><div class="code">${st.myCode===null?'…':esc(st.myCode)||'----'}</div><div class="small muted">회원에게 이 4자리 코드를 알려주면 회원이 마이 탭에서 입력해 직접 연결돼요.</div>${st.myCode?'<button class="btn ghost" onclick="copyCode()">코드 복사</button>':''}</div>`
+   :st.myTrainer?`<div class="card"><div class="row between"><div><div class="small muted">연결된 강사</div><b>${esc(st.myTrainer.name)} 트레이너</b></div><button class="btn sm" onclick="unlinkTrainer()">연결 해제</button></div></div>`
+   :`<div class="card"><h3>강사님께 받은 코드를 입력해주세요</h3><input id="tcode" class="input code-in" inputmode="numeric" maxlength="4" placeholder="0000"><div class="small muted" style="margin-top:8px">공유받은 강사의 코드번호를 입력하면 자동으로 연결돼요.</div><button class="btn primary" onclick="linkTrainer()">연결하기</button></div>`}
+  <h3 class="sec">화면</h3>
+  <div class="card"><label class="lbl">글자 크기</label><div class="chips">${[[100,'기본'],[110,'크게'],[120,'아주 크게']].map(([v,l])=>`<button class="chip ${fs===v?'on':''}" onclick="setFont(${v})">${l}</button>`).join('')}</div></div>
+  <button class="btn" onclick="logout()">로그아웃</button>`;
+}
+function saveMe(){return run(async()=>{
+  const num=id=>{const v=$(id).value;return v===''?null:+v},name=$('#p-name').value.trim();
+  if(!name)return toast('이름을 입력해주세요');
+  const upd={name,level:$('#p-level').value,goal:$('#p-goal').value,height_cm:num('#p-height'),start_weight:num('#p-sw'),birth_date:$('#p-birth').value||null,gender:$('#p-gender').value};
+  st.me=ok(await sb.from('profiles').update(upd).eq('id',st.me.id).select().single());render();toast('저장했어요');
+})}
+function linkTrainer(){return run(async()=>{
+  const code=$('#tcode').value.trim();if(!/^\d{4}$/.test(code))return toast('4자리 숫자 코드를 입력해주세요');
+  const name=ok(await sb.rpc('link_trainer',{code}));await loadData();render();toast(`${name} 트레이너와 연결됐어요`);
+})}
+function unlinkTrainer(){if(!confirm('강사 연결을 해제할까요? 트레이너가 더 이상 내 기록을 볼 수 없어요.'))return;run(async()=>{ok(await sb.rpc('unlink_trainer'));await loadData();render();toast('연결을 해제했어요')})}
+function copyCode(){navigator.clipboard?.writeText(st.myCode).then(()=>toast('코드를 복사했어요'),()=>toast(st.myCode))}
+
 /* ===== 렌더링 ===== */
 function render(){
   const app=$('#app');
   if(!st.me){app.innerHTML=authView();return}
-  const V={home:homeView,record:recordView,history:historyView,members:membersView,pt:ptView};
+  const V={home:homeView,record:recordView,history:historyView,members:membersView,pt:ptView,inbody:inbodyView,class:classView,my:myView};
+  if(!tabList().some(([k])=>k===st.tab))st.tab=tabList()[0][0];
   app.innerHTML=headerView()+`<main>${V[st.tab]()}</main>`+navView();
 }
 boot();
