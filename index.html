@@ -20,7 +20,7 @@
   --iron:#171717;--graphite:#333333;--chalk:#F2F0E9;--green:#B5C49C;--accent:#4FB3A0;--concrete:#77736D;
   --bg:var(--iron);--card:#222222;--card2:#2C2C2B;--line:var(--graphite);--t:var(--chalk);--m:#9A958D;
   --p:var(--accent);--pd:#3E9A88;--ok:var(--green);--warn:#D9A05B;--bad:#F2A99E;--badbg:#3A1E1A;
-  --r:6px;--r-sm:4px;--gut:20px;
+  --plan:#E8915A;--r:6px;--r-sm:4px;--gut:20px;
   --sans:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
   color-scheme:dark}
@@ -87,9 +87,14 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .sec{font-family:var(--mono);margin:28px 2px 10px;font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--m)}
 .wk{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px}.wk button{border:none;background:none;color:var(--t);font-family:inherit;padding:4px 0;cursor:pointer}
 .wk button span{display:block;font-size:12px;color:var(--m)}.wk button b{display:block;font-size:16px;font-weight:700;width:36px;height:36px;line-height:36px;margin:4px auto;border-radius:var(--r)}.wk button.today b{background:var(--accent);color:var(--iron)}
-.wk i{display:flex;justify-content:center;gap:3px;height:6px}em.dw,em.dp,em.db{display:inline-block;width:6px;height:6px;border-radius:1px}em.dw{background:var(--green)}em.dp{background:var(--accent)}em.db{background:var(--chalk)}
+.wk i{display:flex;justify-content:center;gap:3px;height:6px}em.dw,em.dp,em.db{display:inline-block;width:6px;height:6px;border-radius:1px}em.dw{background:var(--chalk)}em.dpd{display:inline-block;width:6px;height:6px;border-radius:1px;background:var(--green)}em.dpp{display:inline-block;width:6px;height:6px;border-radius:1px;background:var(--plan)}em.db{background:var(--accent)}
 .legend{display:flex;gap:4px;align-items:center;justify-content:center;font-size:12px;color:var(--m);margin-top:12px}.legend em{margin-left:10px}
 .metric{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}.metric b{font-size:36px;font-weight:800;letter-spacing:-.03em;line-height:1.1}.metric .small{text-align:right}
+.st-tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:var(--r-sm);border:1px solid currentColor;white-space:nowrap}
+.st-scheduled{color:var(--plan)}.st-completed{color:var(--green)}.st-requested{color:var(--accent)}.st-canceled{color:var(--m)}
+.card.hl .st-scheduled{color:#A85A2A}.card.hl .st-completed{color:#4E6B3A}.card.hl .st-requested{color:#2C7A6B}
+.routine{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--accent);border-radius:var(--r);padding:12px 14px;margin-bottom:12px}
+.routine b{color:var(--accent)}
 .stats{display:flex;gap:8px}.stats div{flex:1;text-align:center}.stats b{display:block;white-space:nowrap;font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15}.stats span{font-size:12px;color:var(--m)}
 .ok{color:var(--green)}.bad{color:var(--bad)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -186,7 +191,7 @@ async function oauth(provider){await run(async()=>{
   const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:appUrl()}});if(error)throw error;
 })}
 async function finishOnboarding(){await run(async()=>{
-  const name=$('#o-name').value.trim(),role=st.ob.role,level=st.ob.level;
+  const name=$('#o-name').value.trim(),role=st.ob.role,level=role==='trainer'?'고급':st.ob.level;
   if(!name)return toast('이름을 입력해주세요');
   ok(await sb.rpc('complete_onboarding',{p_name:name,p_role:role,p_level:level}));
   const {data:{user}}=await sb.auth.getUser();await afterLogin(user);render();toast('오늘도 좀 들어볼까?');
@@ -206,7 +211,7 @@ async function doLogin(){await run(async()=>{
 })}
 async function doSignup(){await run(async()=>{
   const email=$('#a-email').value.trim(),password=$('#a-pw').value,name=$('#a-name').value.trim();
-  const role=$('#a-role').value,level=$('#a-level').value;
+  const role=$('#a-role').value,level=role==='trainer'?'고급':$('#a-level').value;
   if(!email||!password||!name)return toast('이름, 이메일, 비밀번호를 모두 입력해주세요');
   if(password.length<6)return toast('비밀번호는 6자 이상이어야 해요');
   const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,role,level}}});if(error)throw error;
@@ -233,14 +238,19 @@ async function loadData(){
   }
   const tid=targetId();
   st.logs=tid?await fetchAll(()=>sb.from('workout_logs').select('*').eq('user_id',tid).order('log_date',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];
-  try{st.inbody=tid?await fetchAll(()=>sb.from('inbody_records').select('*').eq('user_id',tid).order('measured_on',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];st.needMig=!('goal' in st.me)||(st.inbody.length>0&&!('fat_mass' in st.inbody[0]))}
+  try{st.inbody=tid?await fetchAll(()=>sb.from('inbody_records').select('*').eq('user_id',tid).order('measured_on',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];st.needMig=!('goal' in st.me)||!('center_name' in st.me)||(st.inbody.length>0&&!('fat_mass' in st.inbody[0]))}
   catch(e){st.inbody=[];st.needMig=true}   /* migration_002 미실행 */
   st.pts=[];st.reqs=[];st.myTrainer=null;
   if(coaching())st.reqs=ok(await sb.from('pt_schedules').select('*').eq('trainer_id',me.id).eq('status','requested').order('pt_date').order('pt_time'));
   if(coaching()&&tid)st.pts=ok(await sb.from('pt_schedules').select('*').eq('member_id',tid).order('pt_date').order('pt_time'));
+  st.mnote=null;
+  if(coaching()&&tid){   /* 트레이너 노트: member_notes(회원 비공개), migration_005 전에는 profiles 컬럼 */
+    try{st.mnote=ok(await sb.from('member_notes').select('*').eq('member_id',tid).eq('trainer_id',me.id).maybeSingle())||{notes:'',curriculum:''};st.notesTable=true}
+    catch(e){st.notesTable=false;st.mnote={notes:st.sel.notes||'',curriculum:st.sel.curriculum||''}}
+  }
   else if(!isTrainer()){
     st.pts=ok(await sb.from('pt_schedules').select('*').eq('member_id',me.id).order('pt_date').order('pt_time'));
-    if(st.me.trainer_id)st.myTrainer=ok(await sb.from('profiles').select('id,name').eq('id',st.me.trainer_id).maybeSingle());
+    if(st.me.trainer_id)st.myTrainer=ok(await sb.from('profiles').select('*').eq('id',st.me.trainer_id).maybeSingle());
   }
 }
 const reload=()=>run(async()=>{await loadData();render()});
@@ -286,7 +296,7 @@ function onboardView(){
   <p class="muted" style="margin-top:6px">한 번만 입력하면 돼요. 나중에 마이 탭에서 바꿀 수 있어요(역할 제외).</p>
   <label class="lbl" style="margin-top:24px">이름</label><input id="o-name" class="input" value="${esc(st.me.name)}" autocomplete="name">
   <label class="lbl">역할</label><div class="chips">${[['member','일반 회원'],['trainer','트레이너']].map(([k,l])=>`<button class="chip ${o.role===k?'on':''}" onclick="st.ob.role='${k}';st.ob.keep=$('#o-name').value;render()">${l}</button>`).join('')}</div>
-  <label class="lbl">운동 숙련도</label><div class="chips">${LEVELS.map(l=>`<button class="chip ${o.level===l?'on':''}" onclick="st.ob.level='${l}';st.ob.keep=$('#o-name').value;render()">${l}</button>`).join('')}</div>
+  ${o.role==='trainer'?'':`<label class="lbl">운동 숙련도</label><div class="chips">${LEVELS.map(l=>`<button class="chip ${o.level===l?'on':''}" onclick="st.ob.level='${l}';st.ob.keep=$('#o-name').value;render()">${l}</button>`).join('')}</div>`}
   <button class="btn primary" onclick="finishOnboarding()">시작하기</button>
   <button class="btn ghost" onclick="logout()">다른 계정으로 로그인</button></div>`;
 }
@@ -304,67 +314,81 @@ function authView(){
   ${su?`<label class="lbl">이름</label><input id="a-name" class="input" autocomplete="name">`:''}
   <label class="lbl">이메일</label><input id="a-email" class="input" type="email" autocomplete="email">
   <label class="lbl">비밀번호</label><input id="a-pw" class="input" type="password" autocomplete="${su?'new-password':'current-password'}">
-  ${su?`<label class="lbl">역할</label><select id="a-role" class="input"><option value="member">일반 회원</option><option value="trainer">트레이너</option></select>
-  <label class="lbl">운동 숙련도</label><select id="a-level" class="input">${LEVELS.map(l=>`<option>${l}</option>`).join('')}</select>`:''}
+  ${su?`<label class="lbl">역할</label><select id="a-role" class="input" onchange="$('#a-level-w').hidden=this.value==='trainer'"><option value="member">일반 회원</option><option value="trainer">트레이너</option></select>
+  <div id="a-level-w"><label class="lbl">운동 숙련도</label><select id="a-level" class="input">${LEVELS.map(l=>`<option>${l}</option>`).join('')}</select></div>`:''}
   <button class="btn primary" onclick="${su?'doSignup()':'doLogin()'}">${su?'가입하기':'로그인'}</button></div>`;
 }
 function headerView(){
   const m=st.me;
-  return `<header><div class="brandrow">${logoSvg(28)}<b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원'} · ${esc(m.level)}</span></div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
+  return `<header><div class="brandrow">${logoSvg(28)}<b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원 · '+esc(m.level)}</span></div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
   ${isTrainer()?`<div style="padding:4px 16px 0"><button class="btn ghost" style="margin-top:8px" onclick="toggleMode()">${coaching()?'내 개인 운동 모드로 전환':'회원 관리 모드로 돌아가기'}</button></div>`:''}`;
 }
 const tabList=()=>coaching()?[['members','','회원'],['record','','기록'],['history','','히스토리'],['inbody','','인바디'],['pt','','PT'],['my','','마이']]
   :[['home','','홈'],['record','','기록'],['history','','히스토리'],['inbody','','인바디'],...(isTrainer()?[]:[['class','','수업']]),['my','','마이']];
 const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${st.tab===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
-const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${esc(m.name)} (${esc(m.level)})</option>`).join('')}</select>`:'';
-const noMember=()=>`<div class="card center muted">담당 회원이 없어요.<br>회원 탭에서 이메일로 등록하거나,<br>마이 탭의 강사 코드를 회원에게 알려주세요.</div>`;
-const migHint=()=>`<div class="card warn">DB 업데이트가 필요해요. Supabase SQL Editor에서 <b>supabase/migration_002_mypage_inbody.sql</b>과 <b>migration_003_inbody_fields.sql</b>을 순서대로 실행해 주세요. (인바디 · 내 정보 · 강사 코드 · PT 신청 · 노트 기능)</div>`;
+const mLabel=m=>`${esc(m.name)} · ${esc(m.member_code||m.level)}${m.is_managed?' · 앱 미사용':''}`;
+const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${mLabel(m)}</option>`).join('')}</select>`:'';
+const ptTag=p=>`<span class="st-tag st-${p.status}">${PT_STATUS[p.status]||p.status}</span>`;
+const noMember=()=>`<div class="card center muted">담당 회원이 없어요.<br>회원 탭에서 이름·이메일로 찾거나 직접 등록하고,<br>마이 탭의 강사 코드를 회원에게 알려주세요.</div>`;
+const migHint=()=>`<div class="card warn">DB 업데이트가 필요해요. Supabase SQL Editor에서 <b>supabase/</b> 폴더의 <b>migration_002 ~ 005</b>를 번호 순서대로 실행해 주세요. (인바디 · 내 정보 · 강사 코드 · 간편 로그인 · 회원 코드 · 트레이너 프로필)</div>`;
 
 function nextPT(){return st.pts.filter(p=>p.status==='scheduled'&&p.pt_date>=today())}
 function homeView(){
   const me=st.me,r=recommend(),ups=nextPT().slice(0,3);
-  const card=me.role==='member'?`<div class="card hl"><h3>트레이너 노트 & PT 일정</h3>
-    ${st.myTrainer?`<div class="small muted">담당 트레이너 · ${esc(st.myTrainer.name)}</div>
-    <label class="lbl">내 특징</label><div class="pre">${esc(me.notes)||'<span class="muted">아직 작성된 내용이 없어요</span>'}</div>
-    <label class="lbl">운동 방향 / 커리큘럼</label><div class="pre">${esc(me.curriculum)||'<span class="muted">아직 작성된 내용이 없어요</span>'}</div>
-    <label class="lbl">다가오는 PT</label>${ups.length?ups.map(p=>`<div class="item"><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b><span class="small muted">${esc(p.goal)}</span></div>`).join(''):'<div class="muted small">예정된 PT가 없어요</div>'}`
-    :`<div class="muted small">아직 담당 트레이너가 없어요. 트레이너에게 받은 4자리 강사 코드를 입력하면 노트와 PT 일정이 여기에 표시돼요.</div><button class="btn ghost" onclick="go('my')">+ 강사 연결하기</button>`}</div>`:'';
+  const card=me.role==='member'?`<div class="card hl"><h3>PT 일정</h3>
+    ${st.myTrainer?`<div class="small muted">담당 트레이너 · ${esc(st.myTrainer.name)}${st.myTrainer.center_name?' · '+esc(st.myTrainer.center_name):''}</div>
+    ${ups.length?ups.map(p=>`<div class="item"><div><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b>${p.goal?`<div class="small muted">${esc(p.goal)}</div>`:''}</div>${ptTag(p)}</div>`).join(''):'<div class="muted small" style="margin-top:12px">예정된 PT가 없어요</div>'}`
+    :`<div class="muted small">아직 담당 트레이너가 없어요. 트레이너에게 받은 4자리 강사 코드를 입력하면 PT 일정이 여기에 표시돼요.</div><button class="btn ghost" onclick="go('my')">+ 강사 연결하기</button>`}</div>`:'';
   const idle=st.logs.length?daysSince(st.logs[0].log_date):0;
   return `<h2>오늘도 좀 들어볼까?</h2>${weekStrip()}${idle>=7?`<div class="card warn"><b>쇠가 기다린다.</b><div class="small muted" style="margin-top:4px">마지막 운동이 ${idle}일 전이에요. 가볍게 한 세트부터.</div></div>`:''}${card}
   ${r.warns.map(l=>`<div class="card warn">직전 피드백에 통증/부상 언급이 있어요 (${esc(l.exercise)}): “${esc(l.feedback)}”<br>무리하지 말고 무게를 낮추거나 해당 부위를 쉬어가세요.</div>`).join('')}
   <div class="card"><div class="row between"><h3 style="margin:0">오늘의 추천 · ${esc(r.pick.label)}</h3><span class="tag">${esc(r.level)}</span></div>
   <div class="small muted" style="margin:6px 0 4px">${r.pick.parts.map(p=>`${partLabel(p)} ${fmtRest(restDays(p))}`).join(' · ')} → 가장 오래 쉰 분할이에요</div>
-  ${r.items.map(i=>`<div class="item"><div><b>${esc(i.ex)}</b> <span class="tag">${esc(partLabel(i.part))}</span><div class="small muted">${esc(i.text)}</div></div><button class="btn sm primary" onclick="startEx('${i.part}','${esc(i.ex).replace(/'/g,"\\'")}')">기록</button></div>`).join('')}</div>`;
+  ${r.items.map((i,k)=>`<div class="item"><div><b>${esc(i.ex)}</b> <span class="tag">${esc(partLabel(i.part))}</span><div class="small muted">${esc(i.text)}</div></div><button class="btn sm" onclick="startRoutine(${k})">기록</button></div>`).join('')}
+  ${r.items.length?'<button class="btn primary" onclick="startRoutine(0)">추천 운동으로 시작하기</button><div class="small muted" style="margin-top:8px;text-align:center">횟수는 채워 드려요. 무게는 직접 입력해 주세요.</div>':''}</div>`;
 }
 function weekStrip(){
   const base=new Date(today()+'T00:00');base.setDate(base.getDate()-(base.getDay()+6)%7+st.week*7);
   const days=[...Array(7)].map((_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);return localDate(d)});
-  const dot=d=>(st.logs.some(l=>l.log_date===d&&!l.is_pt)?'<em class="dw"></em>':'')+(st.logs.some(l=>l.log_date===d&&l.is_pt)||st.pts.some(p=>p.pt_date===d&&p.status==='scheduled')?'<em class="dp"></em>':'')+(st.inbody.some(x=>x.measured_on===d)?'<em class="db"></em>':'');
+  const dot=d=>{const done=st.logs.some(l=>l.log_date===d&&l.is_pt)||st.pts.some(p=>p.pt_date===d&&p.status==='completed'),plan=!done&&st.pts.some(p=>p.pt_date===d&&p.status==='scheduled');
+    return (st.logs.some(l=>l.log_date===d&&!l.is_pt)?'<em class="dw"></em>':'')+(done?'<em class="dpd"></em>':'')+(plan?'<em class="dpp"></em>':'')+(st.inbody.some(x=>x.measured_on===d)?'<em class="db"></em>':'')};
   return `<div class="card"><div class="row between"><b>${+days[3].slice(5,7)}월 ${st.week===0?'· 이번 주':''}</b><div><button class="x" style="font-size:20px" onclick="wk(-1)">‹</button><button class="x" style="font-size:20px" onclick="wk(1)">›</button></div></div>
   <div class="wk">${days.map((d,i)=>`<button class="${d===today()?'today':''}" onclick="openDay('${d}')"><span>${'월화수목금토일'[i]}</span><b>${+d.slice(8)}</b><i>${dot(d)}</i></button>`).join('')}</div>
-  <div class="legend"><em class="dw"></em>운동<em class="dp"></em>PT<em class="db"></em>인바디</div></div>`;
+  <div class="legend"><em class="dw"></em>운동<em class="dpd"></em>PT 완료<em class="dpp"></em>PT 예정<em class="db"></em>인바디</div></div>`;
 }
 function wk(n){st.week+=n;render()}
 function openDay(d){resetHF();st.hf.date=d;go('history')}
 function recordOn(d){st.draft=newDraft();st.draft.date=d;go('record')}
-function startEx(p,e){st.draft=newDraft();st.draft.part=p;pickEx(e);st.tab='record';render();window.scrollTo(0,0)}
+function startEx(p,e){st.routine=null;loadItem({part:p,ex:e,r:suggest(e).r,w:suggest(e).w,text:suggest(e).text})}
+function loadItem(it){
+  const d=st.draft=newDraft();d.part=it.part;d.exercise=it.ex;d.hint=it.text;
+  const n=Math.max(3,lastRec(it.ex)?.sets.length||3);d.sets=Array.from({length:n},()=>({w:'',r:it.r}));   /* 무게는 직접 입력 */
+  st.tab='record';render();window.scrollTo(0,0);
+}
+function startRoutine(k){const items=recommend().items;if(!items.length)return;st.routine={items,i:k};loadItem(items[k])}
+function routineNext(skip){const R=st.routine;if(!R)return;R.i++;
+  if(R.i>=R.items.length){st.routine=null;st.draft=newDraft();render();toast(skip?'루틴을 마쳤어요':'오늘도 한 건 했다.');return}
+  loadItem(R.items[R.i]);if(skip)toast('다음: '+R.items[R.i].ex)}
+function routineStop(){st.routine=null;render()}
+const routineBar=()=>{const R=st.routine;if(!R||coaching())return '';const it=R.items[R.i],nx=R.items[R.i+1];
+  return `<div class="routine"><div style="min-width:0"><b>추천 루틴 ${R.i+1}/${R.items.length}</b> · ${esc(it.ex)}<div class="small muted">${nx?'다음: '+esc(nx.ex):'마지막 운동이에요'}</div></div><div class="row" style="flex-shrink:0"><button class="btn sm" onclick="routineNext(true)">건너뛰기</button><button class="x" style="white-space:nowrap" onclick="routineStop()">종료</button></div></div>`};
 
 function recordView(){
   if(coaching()&&!st.sel)return `<h2>회원 운동 기록</h2>${noMember()}`;
   const d=st.draft,exs=exercisesOf(d.part);
   const cur=d.custom?'__custom':d.exercise;
-  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 대신 기록`:'운동 기록'}</h2><p class="sub">${coaching()?'오늘 수업 내용을 남겨주세요. 회원에게 그대로 보여요.':'자, 쇠질하러 가자.'}</p>${coaching()?memberSelect():''}
+  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 대신 기록`:'운동 기록'}</h2><p class="sub">${coaching()?'오늘 수업 내용을 남겨주세요. 회원에게 그대로 보여요.':'자, 쇠질하러 가자.'}</p>${coaching()?memberSelect():routineBar()}
   <div class="card"><label class="lbl">날짜</label><input type="date" class="input" value="${d.date}" onchange="st.draft.date=this.value">
   <label class="lbl">부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" onclick="pickPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
   <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)"><option value="">종목을 선택하세요</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>+ 직접 입력</option></select>
   ${d.custom?`<input class="input" style="margin-top:8px" placeholder="종목 이름" value="${esc(d.customName)}" oninput="st.draft.customName=this.value">`:''}
   ${recentCard(d.custom?d.customName.trim():d.exercise)}
-  <label class="lbl">세트 (무게 kg · 횟수)</label>
+  <label class="lbl">세트 (무게 kg · 횟수) · ${d.sets.length}세트</label>
   ${d.sets.map((s,i)=>`<div class="set"><span class="sn">${i+1}</span>
     <div class="stp"><button onclick="adj(${i},'w',-2.5)">−</button><input type="number" inputmode="decimal" value="${s.w}" placeholder="kg" oninput="st.draft.sets[${i}].w=this.value"><button onclick="adj(${i},'w',2.5)">+</button></div>
     <div class="stp"><button onclick="adj(${i},'r',-1)">−</button><input type="number" inputmode="numeric" value="${s.r}" placeholder="회" oninput="st.draft.sets[${i}].r=this.value"><button onclick="adj(${i},'r',1)">+</button></div>
     <button class="x" onclick="delSet(${i})">✕</button></div>`).join('')}
-  ${d.sets.length<5?'<button class="btn ghost sm" onclick="addSet()">+ 세트 추가</button>':'<div class="small muted">최대 5세트까지 입력할 수 있어요</div>'}
+  <button class="btn ghost sm" onclick="addSet()">+ 세트 추가</button>
   <label class="lbl">피드백 ${coaching()?'(회원에게 전달 · 자세 · 통증 여부)':'(컨디션 · 통증 여부 등)'}</label><textarea class="input" placeholder="통증이나 부상이 있다면 꼭 적어주세요" oninput="st.draft.feedback=this.value">${esc(d.feedback)}</textarea>
   <label class="lbl">노트 ${coaching()?'(수업 메모 · 숙제 · 다음 수업 계획)':'(메모)'}</label><textarea class="input" style="min-height:70px" placeholder="${coaching()?'회원에게 보이는 노트예요':'자유 메모'}" oninput="st.draft.note=this.value">${esc(d.note)}</textarea>
   <button class="btn primary" onclick="saveLog()">저장하기</button></div>`;
@@ -379,11 +403,11 @@ function pickEx(e){
   const d=st.draft;
   if(e==='__custom'){d.custom=true;d.exercise='';d.customName=''}
   else if(!e){d.custom=false;d.exercise=''}
-  else{d.custom=false;d.exercise=e;const s=suggest(e),n=Math.max(3,lastRec(e)?.sets.length||3);d.sets=Array.from({length:Math.min(5,n)},()=>({w:s.w,r:s.r}))}
+  else{d.custom=false;d.exercise=e;const s=suggest(e),n=Math.max(3,lastRec(e)?.sets.length||3);d.sets=Array.from({length:n},()=>({w:s.w,r:s.r}))}
   render();
 }
 function adj(i,k,dv){const s=st.draft.sets[i];s[k]=Math.max(0,Math.round(((+s[k]||0)+dv)*10)/10);render()}
-function addSet(){const d=st.draft;if(d.sets.length<5){d.sets.push({...d.sets.at(-1)});render()}}
+function addSet(){const d=st.draft;d.sets.push({...(d.sets.at(-1)||{w:'',r:''})});render()}
 function delSet(i){const d=st.draft;d.sets.splice(i,1);if(!d.sets.length)d.sets.push({w:'',r:''});render()}
 function saveLog(){return run(async()=>{
   const d=st.draft,tid=targetId(),exercise=(d.custom?d.customName:d.exercise).trim();
@@ -399,7 +423,10 @@ function saveLog(){return run(async()=>{
     try{ok(await sb.from('exercises').upsert({body_part:d.part,name:exercise},{onConflict:'body_part,name',ignoreDuplicates:true}));(st.exercises[d.part]??=[]).push(exercise)}
     catch(e){console.warn('exercise save failed',e)}
   }
-  st.draft=newDraft();st.draft.date=d.date;await loadData();render();toast(pr?`오, 이건 좀 믓지다. ${exercise} ${newBest}kg 신기록`:coaching()?'오늘의 쇠질 완료.':'오늘도 한 건 했다.');
+  const inRoutine=st.routine&&!coaching();
+  st.draft=newDraft();st.draft.date=d.date;await loadData();
+  if(inRoutine){const R=st.routine;if(R.i+1<R.items.length){R.i++;loadItem(R.items[R.i]);st.draft.date=d.date;render();return toast(pr?`오, 이건 좀 믓지다. ${newBest}kg 신기록 · 다음: ${R.items[R.i].ex}`:`좋아. 다음은 ${R.items[R.i].ex}`)}st.routine=null}
+  render();toast(pr?`오, 이건 좀 믓지다. ${exercise} ${newBest}kg 신기록`:coaching()?'오늘의 쇠질 완료.':'오늘도 한 건 했다.');
 })}
 
 const resetHF=()=>{st.hf={q:'',part:'',ex:'',date:'',limit:60,sort:'desc',edit:false}};
@@ -413,8 +440,8 @@ function logCard(l,open){return `<div class="card" style="padding:14px"><div cla
 function filteredLogs(){const {q,part,ex,date}=st.hf,qq=q.trim().toLowerCase();
   return st.logs.filter(l=>(!date||l.log_date===date)&&(!part||l.part===part)&&(!ex||l.exercise===ex)&&(!qq||l.exercise.toLowerCase().includes(qq)||(l.feedback||'').toLowerCase().includes(qq)||(l.note||'').toLowerCase().includes(qq)))}
 const fmtShort=d=>d.slice(2).replace(/-/g,'.')+'('+'일월화수목금토'[new Date(d+'T00:00').getDay()]+')';
-function minMax(list){const out=[];
-  for(let i=0;i<5;i++){const ws=list.filter(l=>l.sets[i]).map(l=>+l.sets[i].w);if(!ws.length)continue;
+function minMax(list){const out=[],max=Math.max(0,...list.map(l=>l.sets.length));
+  for(let i=0;i<max;i++){const ws=list.filter(l=>l.sets[i]).map(l=>+l.sets[i].w);if(!ws.length)continue;
     const pos=ws.filter(w=>w>0);out.push({n:i+1,min:pos.length?Math.min(...pos):0,max:pos.length?Math.max(...pos):0,cnt:ws.length})}
   return out}
 const kg=w=>w?w+'kg':'맨몸';
@@ -466,26 +493,40 @@ function membersView(){
   const nameOf=id=>st.members.find(m=>m.id===id)?.name||'회원';
   return `<h2>담당 회원 관리</h2>
   ${st.reqs.length?`<div class="card hl"><h3>PT 신청 ${st.reqs.length}건</h3>${st.reqs.map(p=>`<div class="item"><div><b>${esc(nameOf(p.member_id))}</b> <span class="small muted">${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</span><div class="small muted">${esc(p.goal)}</div></div><div class="row"><button class="btn sm primary" onclick="setPT('${p.id}','scheduled')">승인</button><button class="btn sm" onclick="setPT('${p.id}','canceled')">거절</button></div></div>`).join('')}</div>`:''}
-  <div class="card"><h3>이메일로 회원 등록</h3><div class="row"><input id="m-q" class="input" type="email" placeholder="회원 이메일"><button class="btn sm primary" style="min-height:50px" onclick="searchMember()">검색</button></div>
-  ${f===null?'<div class="small muted" style="margin-top:10px">해당 이메일의 회원을 찾지 못했어요</div>':''}
-  ${f?`<div class="item" style="margin-top:8px"><div><b>${esc(f.name)}</b><span class="tag">${esc(f.level)}</span><div class="small muted">${esc(f.email)}</div></div>
-  ${f.trainer_id===st.me.id?'<span class="ok small">내 회원</span>':f.trainer_id?'<span class="muted small">다른 트레이너 담당</span>':`<button class="btn sm primary" onclick="addMember('${f.id}')">내 회원으로 등록</button>`}</div>`:''}</div>
+  <div class="card"><h3>회원 찾기</h3><div class="row"><input id="m-q" class="input" placeholder="이름 · 회원코드 · 이메일" onkeydown="if(event.key==='Enter')searchMember()"><button class="btn sm primary" style="min-height:48px" onclick="searchMember()">검색</button></div>
+  ${Array.isArray(f)?(f.length?f.map(x=>`<div class="item"><div><b>${esc(x.name)}</b> <span class="tag">${esc(x.member_code||'')}</span><div class="small muted">${x.email_hint?esc(x.email_hint):x.is_managed?'앱 미사용 회원':'이메일 없음'} · ${esc(x.level)}</div></div>
+    ${x.trainer_state==='mine'?'<span class="ok small">내 회원</span>':x.trainer_state==='other'?'<span class="muted small">다른 트레이너</span>':`<button class="btn sm primary" onclick="addMember('${x.id}')">등록</button>`}</div>`).join(''):'<div class="small muted" style="margin-top:10px">찾는 회원이 없어요. 앱을 쓰지 않는 회원이면 아래에서 직접 등록하세요.</div>'):''}</div>
+  <div class="card"><h3>회원 직접 등록</h3><div class="small muted">이메일이 없거나 앱을 쓰지 않는 회원도 등록할 수 있어요. 고유 회원코드가 자동으로 붙어 동명이인도 구분돼요.</div>
+  <div class="grid2"><div><label class="lbl">이름</label><input id="mm-name" class="input"></div><div><label class="lbl">숙련도</label><select id="mm-level" class="input">${LEVELS.map(l=>`<option>${l}</option>`).join('')}</select></div></div>
+  <button class="btn ghost" onclick="addManaged()">등록하기</button></div>
   ${st.members.length?`<div class="card"><h3>회원 선택</h3>${memberSelect()}
-  ${s?`<div class="small muted">${esc(s.email)} · 숙련도 ${esc(s.level)}</div>
-  <label class="lbl">회원 특징 (notes)</label><textarea id="m-notes" class="input" placeholder="체형, 부상 이력, 성향 등">${esc(s.notes)}</textarea>
-  <label class="lbl">운동 방향 / 커리큘럼 (curriculum)</label><textarea id="m-cur" class="input" placeholder="목표와 주차별 운동 방향">${esc(s.curriculum)}</textarea>
+  ${s?`<div class="small muted">회원코드 ${esc(s.member_code||'-')} · ${s.is_managed?'앱 미사용 회원':esc(s.email||'이메일 없음')} · 숙련도 ${esc(s.level)}</div>
+  <label class="lbl">회원 특징 · 트레이너만 보는 메모</label><textarea id="m-notes" class="input" placeholder="체형, 부상 이력, 성향 등">${esc(st.mnote?.notes)}</textarea>
+  <label class="lbl">운동 방향 / 커리큘럼 · 트레이너만 보는 메모</label><textarea id="m-cur" class="input" placeholder="목표와 주차별 운동 방향">${esc(st.mnote?.curriculum)}</textarea>
   <button class="btn primary" onclick="saveNotes()">저장하기</button>`:''}</div>`:noMember()}`;
 }
 function searchMember(){return run(async()=>{
-  const q=$('#m-q').value.trim().toLowerCase();if(!q)return toast('이메일을 입력해주세요');
-  st.found=ok(await sb.from('profiles').select('id,name,email,level,trainer_id').eq('role','member').eq('email',q).maybeSingle());render();
+  const q=$('#m-q').value.trim();if(!q)return toast('이름, 회원코드 또는 이메일을 입력해주세요');
+  const r=await sb.rpc('search_members',{q});
+  if(r.error){   /* migration_005 전: 이메일 정확히 일치만 */
+    const one=ok(await sb.from('profiles').select('id,name,email,level,trainer_id').eq('role','member').eq('email',q.toLowerCase()).maybeSingle());
+    st.found=one?[{...one,email_hint:one.email,trainer_state:one.trainer_id===st.me.id?'mine':one.trainer_id?'other':'none'}]:[];
+  }else st.found=r.data;
+  render();$('#m-q').value=q;
+})}
+function addManaged(){return run(async()=>{
+  const name=$('#mm-name').value.trim(),level=$('#mm-level').value;if(!name)return toast('이름을 입력해주세요');
+  const m=ok(await sb.rpc('create_managed_member',{p_name:name,p_level:level}));
+  st.sel={id:m.id};st.found=undefined;await loadData();render();toast(`${m.name} 회원을 등록했어요 · 회원코드 ${m.member_code}`);
 })}
 function addMember(id){return run(async()=>{
   ok(await sb.from('profiles').update({trainer_id:st.me.id}).eq('id',id).select());
   st.found=undefined;st.sel={id};await loadData();render();toast('담당 회원으로 등록했어요');
 })}
 function saveNotes(){return run(async()=>{
-  ok(await sb.from('profiles').update({notes:$('#m-notes').value,curriculum:$('#m-cur').value}).eq('id',st.sel.id).select());
+  const notes=$('#m-notes').value,curriculum=$('#m-cur').value;
+  if(st.notesTable)ok(await sb.from('member_notes').upsert({member_id:st.sel.id,trainer_id:st.me.id,notes,curriculum,updated_at:new Date().toISOString()},{onConflict:'member_id,trainer_id'}));
+  else ok(await sb.from('profiles').update({notes,curriculum}).eq('id',st.sel.id).select());
   await loadData();render();toast('저장했어요');
 })}
 
@@ -495,7 +536,7 @@ function ptView(){
   <div class="card"><h3>PT 일정 등록</h3><div class="row"><input id="p-date" type="date" class="input" value="${today()}"><input id="p-time" type="time" class="input" value="19:00"></div>
   <label class="lbl">수업 목표</label><input id="p-goal" class="input" placeholder="예) 하체 자세 교정, 스쿼트 중량 올리기">
   <button class="btn primary" onclick="addPT()">일정 등록</button></div>
-  ${st.pts.length?st.pts.map(p=>`<div class="card"><div class="row between"><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b>
+  ${st.pts.length?st.pts.map(p=>`<div class="card"><div class="row between"><div class="row"><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b>${ptTag(p)}</div>
   <select class="input" style="width:auto;min-height:40px;padding:6px 10px" onchange="setPT('${p.id}',this.value)">${Object.entries(PT_STATUS).map(([k,v])=>`<option value="${k}" ${p.status===k?'selected':''}>${v}</option>`).join('')}</select></div>
   <div class="small muted" style="margin-top:6px">${esc(p.goal)||'목표 미입력'}</div>
   ${p.status==='requested'?`<div class="row" style="margin-top:10px"><button class="btn sm primary" onclick="setPT('${p.id}','scheduled')">승인</button><button class="btn sm" onclick="setPT('${p.id}','canceled')">거절</button></div>`:''}
@@ -555,11 +596,12 @@ function classView(){
   const goalOf=d=>st.pts.find(p=>p.pt_date===d&&p.status!=='canceled')?.goal;
   const tm=p=>`${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}`;
   return `<h2>수업</h2>
-  <div class="card hl"><div class="row between"><div><div class="small muted">1:1 PT</div><b style="font-size:18px">${t?esc(t.name)+' 트레이너':'연결된 강사가 없어요'}</b></div>${t?'':`<button class="btn sm primary" onclick="go('my')">강사 연결</button>`}</div>
+  <div class="card hl"><div class="row between"><div><div class="small muted">1:1 PT</div><b style="font-size:18px">${t?esc(t.name)+' 트레이너':'연결된 강사가 없어요'}</b>${t?.center_name?`<div class="small muted">${esc(t.center_name)}</div>`:''}</div>${t?'':`<button class="btn sm primary" onclick="go('my')">강사 연결</button>`}</div>
   <div class="stats" style="margin-top:14px"><div><b>${all.length}</b><span>누적 수업</span></div><div><b>${ups.length}</b><span>예정</span></div><div><b>${req.length}</b><span>신청 중</span></div></div></div>
   ${t?`<div class="card"><h3>PT 신청</h3><div class="row"><input id="r-date" type="date" class="input" value="${today()}"><input id="r-time" type="time" class="input" value="19:00"></div>
   <label class="lbl">요청사항</label><input id="r-goal" class="input" placeholder="예) 하체 위주로 하고 싶어요"><button class="btn primary" onclick="requestPT()">신청하기</button></div>`:''}
-  ${ups.length?`<div class="card"><h3>다가오는 수업</h3>${ups.map(p=>`<div class="item"><b>${tm(p)}</b><span class="small muted">${esc(p.goal)}</span></div>`).join('')}</div>`:''}
+  ${ups.length?`<div class="card"><h3>다가오는 수업</h3>${ups.map(p=>`<div class="item"><div><b>${tm(p)}</b>${p.goal?`<div class="small muted">${esc(p.goal)}</div>`:''}</div>${ptTag(p)}</div>`).join('')}</div>`:''}
+  ${(()=>{const done=st.pts.filter(p=>p.status==='completed').slice(-5).reverse();return done.length?`<div class="card"><h3>지난 수업</h3>${done.map(p=>`<div class="item"><div><b>${tm(p)}</b>${p.goal?`<div class="small muted">${esc(p.goal)}</div>`:''}</div>${ptTag(p)}</div>`).join('')}</div>`:''})()}
   ${req.length?`<div class="card"><h3>신청 내역</h3>${req.map(p=>`<div class="item"><div><b>${tm(p)}</b><div class="small muted">${esc(p.goal)}</div></div><button class="btn sm" onclick="cancelReq('${p.id}')">신청 취소</button></div>`).join('')}</div>`:''}
   <h3 class="sec">수업 기록 · 트레이너 피드백</h3>
   ${dates.length?dates.map(d=>`<div class="date">${fmtDate(d)}${goalOf(d)?` · ${esc(goalOf(d))}`:''}</div>${by[d].map(l=>logCard(l,true)).join('')}`).join(''):'<div class="card center muted">아직 PT 수업 기록이 없어요</div>'}
@@ -587,22 +629,35 @@ function myView(){
   <div style="margin-top:6px">${tr?`<span class="tag pt">강사 코드 ${esc(st.myCode||'…')}</span>`:st.myTrainer?`<span class="tag pt">${esc(st.myTrainer.name)} 트레이너</span>`:'<span class="tag">강사 미연결</span>'}</div></div></div></div>
   <h3 class="sec">내 정보</h3>
   <div class="card"><label class="lbl">이름</label><input id="p-name" class="input" value="${esc(m.name)}">
-  <div class="grid2"><div><label class="lbl">숙련도</label>${sel('p-level',LEVELS,m.level)}</div><div><label class="lbl">목표</label>${sel('p-goal',GOALS,m.goal,'선택 안 함')}</div></div>
+  <div class="grid2">${tr?'':`<div><label class="lbl">숙련도</label>${sel('p-level',LEVELS,m.level)}</div>`}<div><label class="lbl">목표</label>${sel('p-goal',GOALS,m.goal,'선택 안 함')}</div></div>
   <div class="grid2"><div><label class="lbl">키 (cm)</label><input id="p-height" type="number" inputmode="decimal" class="input" value="${m.height_cm??''}"></div><div><label class="lbl">시작 체중 (kg)</label><input id="p-sw" type="number" inputmode="decimal" class="input" value="${m.start_weight??''}"></div></div>
   <div class="grid2"><div><label class="lbl">생년월일</label><input id="p-birth" type="date" class="input" value="${m.birth_date||''}"></div><div><label class="lbl">성별</label>${sel('p-gender',['여성','남성'],m.gender,'선택 안 함')}</div></div>
-  <div class="small muted" style="margin-top:12px">${esc(m.email)}</div><button class="btn primary" onclick="saveMe()">저장하기</button></div>
+  <div class="small muted" style="margin-top:12px">${esc(m.email||'')}${m.member_code?' · 회원코드 '+esc(m.member_code):''}</div>
+  ${tr?`<h3 style="margin-top:28px">트레이너 프로필 <span class="small muted" style="font-weight:400">· 회원의 마이 > 강사 관리에 보여요</span></h3>
+  <label class="lbl">센터명</label><input id="p-center" class="input" value="${esc(m.center_name)}" placeholder="예) 믓 피트니스 강남점">
+  <label class="lbl">경력 (선택)</label><input id="p-career" class="input" value="${esc(m.career)}" placeholder="예) 트레이너 7년 · 생활체육지도사 2급">
+  <label class="lbl">전문 분야 (선택)</label><input id="p-spec" class="input" value="${esc(m.specialty)}" placeholder="예) 체형 교정, 재활, 다이어트">
+  <label class="lbl">소개 (선택)</label><textarea id="p-bio" class="input" placeholder="회원에게 보여줄 한마디">${esc(m.bio)}</textarea>`:''}
+  <button class="btn primary" onclick="saveMe()">저장하기</button></div>
   <h3 class="sec">강사 관리</h3>
   ${tr?`<div class="card"><div class="small muted">내 강사 코드</div><div class="code">${st.myCode===null?'…':esc(st.myCode)||'----'}</div><div class="small muted">회원에게 이 4자리 코드를 알려주면 회원이 마이 탭에서 입력해 직접 연결돼요.</div>${st.myCode?'<button class="btn ghost" onclick="copyCode()">코드 복사</button>':''}</div>`
-   :st.myTrainer?`<div class="card"><div class="row between"><div><div class="small muted">연결된 강사</div><b>${esc(st.myTrainer.name)} 트레이너</b></div><button class="btn sm" onclick="unlinkTrainer()">연결 해제</button></div></div>`
+   :st.myTrainer?trainerCard(st.myTrainer)
    :`<div class="card"><h3>강사님께 받은 코드를 입력해주세요</h3><input id="tcode" class="input code-in" inputmode="numeric" maxlength="4" placeholder="0000"><div class="small muted" style="margin-top:8px">공유받은 강사의 코드번호를 입력하면 자동으로 연결돼요.</div><button class="btn primary" onclick="linkTrainer()">연결하기</button></div>`}
   <h3 class="sec">화면</h3>
   <div class="card"><label class="lbl">글자 크기</label><div class="chips">${[[100,'기본'],[110,'크게'],[120,'아주 크게']].map(([v,l])=>`<button class="chip ${fs===v?'on':''}" onclick="setFont(${v})">${l}</button>`).join('')}</div></div>
   <button class="btn" onclick="logout()">로그아웃</button>`;
 }
+function trainerCard(t){
+  const row=(l,v)=>v?`<label class="lbl">${l}</label><div class="pre">${esc(v)}</div>`:'';
+  return `<div class="card"><div class="row"><div class="avatar">${esc((t.name||'?').slice(0,1))}</div><div><div class="small muted">담당 트레이너</div><b style="font-size:18px">${esc(t.name)}</b>${t.center_name?`<div class="small muted">${esc(t.center_name)}</div>`:''}</div></div>
+  ${row('경력',t.career)}${row('전문 분야',t.specialty)}${row('소개',t.bio)}
+  <button class="btn ghost" onclick="unlinkTrainer()">연결 해제</button></div>`;
+}
 function saveMe(){return run(async()=>{
   const num=id=>{const v=$(id).value;return v===''?null:+v},name=$('#p-name').value.trim();
   if(!name)return toast('이름을 입력해주세요');
-  const upd={name,level:$('#p-level').value,goal:$('#p-goal').value,height_cm:num('#p-height'),start_weight:num('#p-sw'),birth_date:$('#p-birth').value||null,gender:$('#p-gender').value};
+  const tr=isTrainer();
+  const upd={name,...(tr?{center_name:$('#p-center').value.trim(),career:$('#p-career').value.trim(),specialty:$('#p-spec').value.trim(),bio:$('#p-bio').value.trim()}:{level:$('#p-level').value}),goal:$('#p-goal').value,height_cm:num('#p-height'),start_weight:num('#p-sw'),birth_date:$('#p-birth').value||null,gender:$('#p-gender').value};
   st.me=ok(await sb.from('profiles').update(upd).eq('id',st.me.id).select().single());render();toast('저장했어요');
 })}
 function linkTrainer(){return run(async()=>{
