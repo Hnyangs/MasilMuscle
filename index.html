@@ -4,69 +4,92 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0b0d12">
-<title>MasilMuscle</title>
+<meta name="theme-color" content="#171717">
+<meta name="description" content="믓 — MOVE &amp; STRENGTH. 마실처럼 가볍게, 쇠질처럼 진심으로.">
+<title>믓</title>
+<link rel="icon" type="image/svg+xml" href="brand/meut-app-icon.svg">
+<link rel="apple-touch-icon" href="brand/meut-app-icon-180.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&display=swap">
 <style>
+/* 믓 MOVE & STRENGTH — 디자인 시스템 토큰 (brand/README.md)
+   비율: 아이언 블랙 55 · 초크 화이트 30 · 필드 그린 10 · 러스트 오렌지 5 */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#0b0d12;--card:#151922;--card2:#1c2230;--line:#262d3d;--t:#eef0f6;--m:#8b93a7;--p:#8b7bff;--pd:#6a59e6;--ok:#4ade80;--warn:#fbbf24;--bad:#f87171}
-body{font-family:-apple-system,BlinkMacSystemFont,'Pretendard','Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--t);max-width:480px;margin:0 auto;min-height:100vh}
-main{padding:12px 16px 110px}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 4px}
-h2{font-size:22px;margin:6px 0 14px}h3{font-size:16px;margin-bottom:10px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
-.card.hl{border-color:var(--p);background:linear-gradient(160deg,#1d1a3a,var(--card))}
-.card.warn{border-color:var(--warn);background:#2a2412;color:var(--warn)}
-.muted{color:var(--m)}.small{font-size:13px}.center{text-align:center;padding:24px 0}
+:root{
+  --iron:#171717;--graphite:#333333;--chalk:#F2F0E9;--green:#B5C49C;--rust:#E87543;--concrete:#77736D;
+  --bg:var(--iron);--card:#222222;--card2:#2C2C2B;--line:var(--graphite);--t:var(--chalk);--m:#9A958D;
+  --p:var(--rust);--pd:#CF6132;--ok:var(--green);--warn:var(--rust);--bad:#F2A99E;--badbg:#3A1E1A;
+  --r:6px;--r-sm:4px;--gut:20px;
+  --sans:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark}
+body{font-family:var(--sans);background:var(--bg);color:var(--t);max-width:480px;margin:0 auto;min-height:100vh;font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+main{padding:8px var(--gut) 112px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:16px var(--gut) 4px}
+.brandrow{display:flex;align-items:center;gap:10px;min-width:0}.brandrow svg{flex-shrink:0}
+.eyebrow{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.14em;color:var(--m);margin-top:16px}
+h2{font-size:28px;font-weight:800;letter-spacing:-.03em;line-height:1.2;margin:4px 0 16px;text-wrap:balance}h3{font-size:16px;font-weight:700;margin-bottom:12px}
+.sub{color:var(--m);font-size:14px;margin:-10px 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px 16px;margin-bottom:12px}
+.card.hl{--t:var(--iron);--m:#5F5B55;--card2:#E6E3DA;--line:#D6D2C8;background:var(--chalk);border-color:var(--chalk);color:var(--t)}
+.card.warn{border-color:var(--rust);color:var(--t)}.card.warn b{color:var(--rust)}
+.muted{color:var(--m)}.small{font-size:13px}.center{text-align:center;padding:24px 16px}
 .row{display:flex;align-items:center;gap:8px}.between{justify-content:space-between}
-.tag{display:inline-block;background:var(--card2);color:var(--m);font-size:12px;padding:3px 9px;border-radius:999px;margin-left:4px}
-.tag.pt{background:#2b2554;color:var(--p)}
-.lbl{display:block;font-size:13px;font-weight:600;color:var(--m);margin:16px 0 6px}.lbl:first-child{margin-top:0}
-.input,select.input,textarea.input{width:100%;min-height:50px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:16px;background:var(--card2);color:var(--t);font-family:inherit}
+.tag{display:inline-block;background:var(--card2);color:var(--m);font-size:12px;font-weight:600;padding:3px 8px;border-radius:var(--r-sm);margin-left:4px}
+.tag.pt{background:transparent;border:1px solid var(--rust);color:var(--rust);font-family:var(--mono);font-weight:700;letter-spacing:.06em}
+.card.hl .tag.pt{background:var(--iron);border-color:var(--iron);color:var(--chalk)}
+.lbl{display:block;font-size:13px;font-weight:600;color:var(--m);margin:16px 0 8px}.lbl:first-child{margin-top:0}
+.input,select.input,textarea.input{width:100%;min-height:48px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);font-size:16px;background:var(--card2);color:var(--t);font-family:inherit}
 textarea.input{min-height:96px;resize:vertical}
-.input:focus{outline:2px solid var(--p);border-color:transparent}
+.input:focus,.btn:focus-visible,.chip:focus-visible,nav button:focus-visible{outline:2px solid var(--rust);outline-offset:1px;border-color:transparent}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{min-height:46px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--card2);color:var(--t);font-size:15px;font-family:inherit;cursor:pointer}
-.chip.on{background:var(--p);border-color:var(--p);color:#fff;font-weight:700}
-.btn{display:block;width:100%;min-height:52px;padding:0 16px;border:none;border-radius:14px;font-size:16px;font-weight:700;margin-top:12px;cursor:pointer;background:var(--card2);color:var(--t);font-family:inherit}
-.btn.primary{background:var(--p);color:#fff}.btn.primary:active{background:var(--pd)}
-.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--p)}
-.btn.danger{background:#3a1a1a;color:var(--bad)}.btn.sm{white-space:nowrap;flex-shrink:0;width:auto;min-height:40px;padding:0 14px;font-size:14px;margin-top:0}
+.chip{min-height:44px;padding:0 14px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--card2);color:var(--t);font-size:15px;font-family:inherit;cursor:pointer}
+.chip.on{background:var(--chalk);border-color:var(--chalk);color:var(--iron);font-weight:700}
+.btn{display:block;width:100%;min-height:52px;padding:0 16px;border:none;border-radius:var(--r);font-size:16px;font-weight:700;margin-top:16px;cursor:pointer;background:var(--card2);color:var(--t);font-family:inherit;transition:background .12s}
+.btn.primary{background:var(--rust);color:var(--iron)}.btn.primary:active{background:var(--pd)}
+.card.hl .btn.primary{background:var(--iron);color:var(--chalk)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--t)}
+.btn.danger{background:var(--badbg);color:var(--bad)}.btn.sm{white-space:nowrap;flex-shrink:0;width:auto;min-height:40px;padding:0 14px;font-size:14px;margin-top:0}
 .btn:disabled{opacity:.5}
 .x{border:none;background:none;color:var(--m);font-size:14px;padding:10px;cursor:pointer;font-family:inherit}.x.del{color:var(--bad)}
-.set{display:grid;grid-template-columns:26px 1fr 1fr 28px;gap:8px;align-items:center;margin-bottom:10px}
-.sn{width:26px;height:26px;border-radius:50%;background:var(--card2);color:var(--p);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.stp{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;background:var(--card2);border-radius:12px;border:1px solid var(--line);overflow:hidden}
-.stp button{height:52px;border:none;background:#262d3d;color:var(--t);font-size:22px;font-weight:700;cursor:pointer}
-.stp button:active{background:var(--p)}
-.stp input{width:100%;height:52px;border:none;background:transparent;color:var(--t);text-align:center;font-size:18px;font-weight:700;font-family:inherit;min-width:0}
+.set{display:grid;grid-template-columns:26px 1fr 1fr 28px;gap:8px;align-items:center;margin-bottom:8px}
+.sn{width:26px;height:26px;border-radius:var(--r-sm);background:var(--card2);color:var(--green);font-family:var(--mono);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.stp{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;background:var(--card2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden}
+.stp button{height:52px;border:none;background:var(--graphite);color:var(--t);font-size:22px;font-weight:700;cursor:pointer}
+.stp button:active{background:var(--rust);color:var(--iron)}
+.stp input{width:100%;height:52px;border:none;background:transparent;color:var(--t);text-align:center;font-size:19px;font-weight:800;font-family:inherit;min-width:0}
 .stp input:focus{outline:none}
-.unit{font-size:11px;color:var(--m);text-align:center;margin-top:-2px}
-.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--line)}.item:first-of-type{border-top:none}
-.date{font-size:13px;font-weight:700;color:var(--m);margin:18px 4px 8px}
-.fb{margin-top:8px;padding:8px 10px;background:var(--card2);border-radius:10px;font-size:14px;white-space:pre-wrap}
-.pre{white-space:pre-wrap;line-height:1.5}
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
-nav button{flex:1;min-height:62px;border:none;background:none;color:var(--m);font-size:11px;padding:0;font-family:inherit;cursor:pointer}
-nav button i{display:block;font-style:normal;font-size:21px;margin-bottom:2px}nav button.on{color:var(--p);font-weight:700}
-.login{padding:56px 20px 40px}.login h1{font-size:30px;margin-bottom:4px}
-.seg{display:flex;background:var(--card2);border-radius:12px;padding:4px;margin:20px 0 4px}
-.seg button{flex:1;min-height:42px;border:none;border-radius:9px;background:none;color:var(--m);font-size:15px;font-family:inherit;cursor:pointer}.seg button.on{background:var(--p);color:#fff;font-weight:700}
-.cfg{background:#2a1515;color:var(--bad);border:1px solid var(--bad);border-radius:12px;padding:12px;font-size:13px;margin-top:16px}
-#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#fff;color:#111;padding:12px 18px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;max-width:90%;z-index:9}#toast.show{opacity:1;transform:translateX(-50%)}
-.pill{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:5px 9px;font-size:13px;margin:6px 6px 0 0}.pill b{color:var(--p);margin-right:4px}
-.tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl th{color:var(--m);font-weight:600;text-align:left;padding:6px 4px}.tbl td{padding:8px 4px;border-top:1px solid var(--line);vertical-align:top}.tbl .fbr td{border-top:none;padding:0 4px 8px;font-size:12px;color:var(--m);white-space:pre-wrap}.tbl .pt{color:var(--p);font-weight:700}.tbl .d{white-space:nowrap}
-.fbtn{display:block;padding:8px 0 0;color:var(--m);font-size:13px}.fb[hidden],tr[hidden]{display:none}.pr{display:inline-block;margin:0 8px 4px 0;white-space:nowrap}.pr b{font-weight:700}.pr i{font-style:normal;color:var(--m)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.grid2 .lbl:first-child,.grid3 .lbl:first-child{margin-top:16px}
-.avatar{width:56px;height:56px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin-right:14px;color:var(--p);flex-shrink:0}
-.code{font-size:40px;font-weight:800;letter-spacing:12px;color:var(--p);margin:6px 0}.code-in{font-size:28px;text-align:center;letter-spacing:16px;font-weight:700}
-.sec{margin:22px 4px 10px;font-size:14px;color:var(--m)}
-.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px}.wk button{border:none;background:none;color:var(--t);font-family:inherit;padding:4px 0;border-radius:12px;cursor:pointer}
-.wk button span{display:block;font-size:12px;color:var(--m)}.wk button b{display:block;font-size:16px;width:34px;height:34px;line-height:34px;margin:4px auto;border-radius:50%}.wk button.today b{background:var(--p);color:#fff}
-.wk i{display:flex;justify-content:center;gap:3px;height:6px}em.dw,em.dp,em.db{display:inline-block;width:6px;height:6px;border-radius:50%}em.dw{background:var(--ok)}em.dp{background:var(--p)}em.db{background:var(--warn)}
-.legend{display:flex;gap:4px;align-items:center;justify-content:center;font-size:12px;color:var(--m);margin-top:10px}.legend em{margin-left:8px}
-.metric{display:flex;justify-content:space-between;align-items:flex-end}.metric b{font-size:24px}.metric .small{text-align:right}
-.stats{display:flex;gap:8px}.stats div{flex:1;text-align:center}.stats b{display:block;font-size:20px}.stats span{font-size:12px;color:var(--m)}
-.ok{color:var(--ok)}.bad{color:var(--bad)}
+.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;border-top:1px solid var(--line)}.item:first-of-type{border-top:none}
+.date{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.04em;color:var(--m);margin:24px 2px 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+.fb{margin-top:8px;padding:10px 12px;background:var(--card2);border-radius:var(--r-sm);font-size:14px;white-space:pre-wrap}
+.pre{white-space:pre-wrap;line-height:1.55}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--iron);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;min-height:62px;border:none;background:none;color:var(--m);font-size:11px;font-weight:600;padding:0;font-family:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav button.on svg{color:var(--rust)}
+.login{padding:56px var(--gut) 40px}
+.login h1{line-height:0}.login .mark{display:block}
+.login .en{font-family:var(--mono);font-size:14px;font-weight:700;letter-spacing:.16em;margin-top:20px}
+.login .hello{font-size:20px;font-weight:700;margin-top:28px}
+.seg{display:flex;background:var(--card2);border-radius:var(--r);padding:4px;margin:20px 0 4px}
+.seg button{flex:1;min-height:44px;border:none;border-radius:var(--r-sm);background:none;color:var(--m);font-size:15px;font-family:inherit;cursor:pointer}.seg button.on{background:var(--chalk);color:var(--iron);font-weight:700}
+.cfg{background:var(--badbg);color:var(--bad);border:1px solid var(--bad);border-radius:var(--r);padding:12px;font-size:13px;margin-top:16px}
+#toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%) translateY(16px);background:var(--chalk);color:var(--iron);font-weight:700;padding:12px 18px;border-radius:var(--r);font-size:14px;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s cubic-bezier(.2,.8,.2,1);max-width:90%;z-index:9}#toast.show{opacity:1;transform:translateX(-50%)}
+.pill{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:var(--r-sm);padding:5px 9px;font-size:13px;margin:6px 6px 0 0}.pill b{font-family:var(--mono);color:var(--green);margin-right:4px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl th{font-family:var(--mono);color:var(--m);font-weight:500;font-size:11px;letter-spacing:.06em;text-align:left;padding:6px 4px}.tbl td{padding:10px 4px;border-top:1px solid var(--line);vertical-align:top}.tbl .fbr td{border-top:none;padding:0 4px 10px;font-size:12px;color:var(--m);white-space:pre-wrap}.tbl .pt{font-family:var(--mono);color:var(--rust);font-weight:700;font-size:11px}.tbl .d{white-space:nowrap;font-family:var(--mono);font-size:12px}
+.fbtn{display:block;padding:10px 0 0;color:var(--m);font-size:13px}.fb[hidden],tr[hidden]{display:none}.pr{display:inline-block;margin:0 10px 4px 0;white-space:nowrap}.pr b{font-weight:800}.pr i{font-style:normal;color:var(--m);margin:0 1px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.grid2 .lbl:first-child,.grid3 .lbl:first-child{margin-top:16px}
+.avatar{width:56px;height:56px;border-radius:var(--r);background:var(--iron);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;margin-right:14px;color:var(--chalk);flex-shrink:0}
+.code{font-family:var(--mono);font-size:44px;font-weight:700;letter-spacing:12px;color:var(--rust);margin:6px 0}.code-in{font-family:var(--mono);font-size:28px;text-align:center;letter-spacing:16px;font-weight:700}
+.sec{font-family:var(--mono);margin:28px 2px 10px;font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--m)}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px}.wk button{border:none;background:none;color:var(--t);font-family:inherit;padding:4px 0;cursor:pointer}
+.wk button span{display:block;font-size:12px;color:var(--m)}.wk button b{display:block;font-size:16px;font-weight:700;width:36px;height:36px;line-height:36px;margin:4px auto;border-radius:var(--r)}.wk button.today b{background:var(--rust);color:var(--iron)}
+.wk i{display:flex;justify-content:center;gap:3px;height:6px}em.dw,em.dp,em.db{display:inline-block;width:6px;height:6px;border-radius:1px}em.dw{background:var(--green)}em.dp{background:var(--rust)}em.db{background:var(--chalk)}
+.legend{display:flex;gap:4px;align-items:center;justify-content:center;font-size:12px;color:var(--m);margin-top:12px}.legend em{margin-left:10px}
+.metric{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}.metric b{font-size:36px;font-weight:800;letter-spacing:-.03em;line-height:1.1}.metric .small{text-align:right}
+.stats{display:flex;gap:8px}.stats div{flex:1;text-align:center}.stats b{display:block;white-space:nowrap;font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15}.stats span{font-size:12px;color:var(--m)}
+.ok{color:var(--green)}.bad{color:var(--bad)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
@@ -95,7 +118,16 @@ const PLANS={
 };
 const PT_STATUS={requested:'신청',scheduled:'예정',completed:'완료',canceled:'취소'};
 const GOALS=['근력·체력','다이어트','체형 교정','재활·통증 관리','건강 유지'];
-const IB=[['weight','체중','kg','#8b7bff'],['muscle','골격근량','kg','#4ade80'],['fat_mass','체지방량','kg','#f87171'],['fat_pct','체지방률','%','#fbbf24']];
+const IB=[['weight','체중','kg','var(--chalk)'],['muscle','골격근량','kg','var(--green)'],['fat_mass','체지방량','kg','var(--rust)'],['fat_pct','체지방률','%','var(--m)']];
+/* 2px 라인 아이콘 · 자체 심볼 */
+const ICON={home:'<path d="M4 11 12 4l8 7"/><path d="M6 10v10h12V10"/>',record:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',history:'<path d="M4 6h16M4 12h16M4 18h10"/>',
+  inbody:'<path d="M4 20h16"/><path d="m4 16 5-5 4 3 7-8"/>',class:'<path d="M4 5h16v15H4zM4 10h16M9 3v4M15 3v4"/>',pt:'<path d="M4 5h16v15H4zM4 10h16M9 3v4M15 3v4"/>',
+  my:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',members:'<circle cx="9" cy="8" r="3.5"/><path d="M2 20c.8-3.5 3.3-5 7-5s6.2 1.5 7 5M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2 .6 3.4 2.2 4 5"/>',
+  msg:'<path d="M4 5h16v11H9l-5 4z"/>'};
+const ico=(k,n=22)=>`<svg viewBox="0 0 24 24" width="${n}" height="${n}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true">${ICON[k]}</svg>`;
+/* 믓 심볼: 철봉(ㅁ 윗변) · 팔과 어깨(ㅁ) · 머리 · ㅡ · 다리(ㅅ) */
+const logoSvg=n=>`<svg class="mark" viewBox="0 0 64 64" width="${n}" height="${n}" role="img" aria-label="믓"><g fill="none" stroke="var(--chalk)" stroke-width="6" stroke-linecap="square"><path d="M6 10H58"/><path d="M18 10V30H46V10"/><path d="M10 41H54"/><path d="M32 47L20 59M32 47L44 59"/></g><circle cx="32" cy="20.5" r="4.5" fill="var(--rust)"/></svg>`;
+const EYEBROW={home:'TODAY',record:'LOG',history:'HISTORY',inbody:'INBODY',class:'CLASS',my:'MY',members:'MEMBERS',pt:'PT SCHEDULE'};
 
 /* ===== 상태 / 유틸 ===== */
 const $=s=>document.querySelector(s);
@@ -217,8 +249,8 @@ function recommend(){
 /* ===== 화면 ===== */
 function authView(){
   const su=st.authMode==='signup';
-  return `<div class="login"><h1>💪 MasilMuscle</h1><p class="muted">회원 · 트레이너 운동 관리</p>
-  ${CONFIG_OK?'':'<div class="cfg">⚠️ SUPABASE_URL이 프로젝트 주소가 아닙니다. index.html 상단의 SUPABASE_URL을 <b>https://&lt;project-ref&gt;.supabase.co</b> 형태로 바꿔주세요.</div>'}
+  return `<div class="login"><h1 aria-label="믓">${logoSvg(96)}</h1><div class="en">MOVE &amp; STRENGTH</div><p class="muted" style="margin-top:6px">마실처럼 가볍게, 쇠질처럼 진심으로.</p><div class="hello">오늘도 좀 들어볼까?</div>
+  ${CONFIG_OK?'':'<div class="cfg">SUPABASE_URL이 프로젝트 주소가 아닙니다. index.html 상단의 SUPABASE_URL을 <b>https://&lt;project-ref&gt;.supabase.co</b> 형태로 바꿔주세요.</div>'}
   <div class="seg"><button class="${su?'':'on'}" onclick="setAuth('login')">로그인</button><button class="${su?'on':''}" onclick="setAuth('signup')">회원가입</button></div>
   ${su?`<label class="lbl">이름</label><input id="a-name" class="input" autocomplete="name">`:''}
   <label class="lbl">이메일</label><input id="a-email" class="input" type="email" autocomplete="email">
@@ -229,27 +261,28 @@ function authView(){
 }
 function headerView(){
   const m=st.me;
-  return `<header><div><b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원'} · ${esc(m.level)}</span></div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
-  ${isTrainer()?`<div style="padding:4px 16px 0"><button class="btn ghost" style="margin-top:8px" onclick="toggleMode()">${coaching()?'🏋️ 내 개인 운동 모드로 전환':'👥 회원 관리 모드로 돌아가기'}</button></div>`:''}`;
+  return `<header><div class="brandrow">${logoSvg(28)}<b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원'} · ${esc(m.level)}</span></div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
+  ${isTrainer()?`<div style="padding:4px 16px 0"><button class="btn ghost" style="margin-top:8px" onclick="toggleMode()">${coaching()?'내 개인 운동 모드로 전환':'회원 관리 모드로 돌아가기'}</button></div>`:''}`;
 }
-const tabList=()=>coaching()?[['members','👥','회원'],['record','✏️','기록'],['history','📅','히스토리'],['inbody','📈','인바디'],['pt','🗓️','PT'],['my','👤','마이']]
-  :[['home','🏠','홈'],['record','✏️','기록'],['history','📅','히스토리'],['inbody','📈','인바디'],...(isTrainer()?[]:[['class','🗓️','수업']]),['my','👤','마이']];
-const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${st.tab===k?'on':''}" onclick="go('${k}')"><i>${i}</i>${l}</button>`).join('')}</nav>`;
+const tabList=()=>coaching()?[['members','','회원'],['record','','기록'],['history','','히스토리'],['inbody','','인바디'],['pt','','PT'],['my','','마이']]
+  :[['home','','홈'],['record','','기록'],['history','','히스토리'],['inbody','','인바디'],...(isTrainer()?[]:[['class','','수업']]),['my','','마이']];
+const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${st.tab===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
 const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${esc(m.name)} (${esc(m.level)})</option>`).join('')}</select>`:'';
 const noMember=()=>`<div class="card center muted">담당 회원이 없어요.<br>회원 탭에서 이메일로 등록하거나,<br>마이 탭의 강사 코드를 회원에게 알려주세요.</div>`;
-const migHint=()=>`<div class="card warn">⚠️ DB 업데이트가 필요해요. Supabase SQL Editor에서 <b>supabase/migration_002_mypage_inbody.sql</b>과 <b>migration_003_inbody_fields.sql</b>을 순서대로 실행해 주세요. (인바디 · 내 정보 · 강사 코드 · PT 신청 · 노트 기능)</div>`;
+const migHint=()=>`<div class="card warn">DB 업데이트가 필요해요. Supabase SQL Editor에서 <b>supabase/migration_002_mypage_inbody.sql</b>과 <b>migration_003_inbody_fields.sql</b>을 순서대로 실행해 주세요. (인바디 · 내 정보 · 강사 코드 · PT 신청 · 노트 기능)</div>`;
 
 function nextPT(){return st.pts.filter(p=>p.status==='scheduled'&&p.pt_date>=today())}
 function homeView(){
   const me=st.me,r=recommend(),ups=nextPT().slice(0,3);
-  const card=me.role==='member'?`<div class="card hl"><h3>👨‍🏫 트레이너 노트 & PT 일정</h3>
+  const card=me.role==='member'?`<div class="card hl"><h3>트레이너 노트 & PT 일정</h3>
     ${st.myTrainer?`<div class="small muted">담당 트레이너 · ${esc(st.myTrainer.name)}</div>
     <label class="lbl">내 특징</label><div class="pre">${esc(me.notes)||'<span class="muted">아직 작성된 내용이 없어요</span>'}</div>
     <label class="lbl">운동 방향 / 커리큘럼</label><div class="pre">${esc(me.curriculum)||'<span class="muted">아직 작성된 내용이 없어요</span>'}</div>
     <label class="lbl">다가오는 PT</label>${ups.length?ups.map(p=>`<div class="item"><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b><span class="small muted">${esc(p.goal)}</span></div>`).join(''):'<div class="muted small">예정된 PT가 없어요</div>'}`
     :`<div class="muted small">아직 담당 트레이너가 없어요. 트레이너에게 받은 4자리 강사 코드를 입력하면 노트와 PT 일정이 여기에 표시돼요.</div><button class="btn ghost" onclick="go('my')">+ 강사 연결하기</button>`}</div>`:'';
-  return `<h2>오늘의 운동</h2>${weekStrip()}${card}
-  ${r.warns.map(l=>`<div class="card warn">⚠️ 직전 피드백에 통증/부상 언급이 있어요 (${esc(l.exercise)}): “${esc(l.feedback)}”<br>무리하지 말고 무게를 낮추거나 해당 부위를 쉬어가세요.</div>`).join('')}
+  const idle=st.logs.length?daysSince(st.logs[0].log_date):0;
+  return `<h2>오늘도 좀 들어볼까?</h2>${weekStrip()}${idle>=7?`<div class="card warn"><b>쇠가 기다린다.</b><div class="small muted" style="margin-top:4px">마지막 운동이 ${idle}일 전이에요. 가볍게 한 세트부터.</div></div>`:''}${card}
+  ${r.warns.map(l=>`<div class="card warn">직전 피드백에 통증/부상 언급이 있어요 (${esc(l.exercise)}): “${esc(l.feedback)}”<br>무리하지 말고 무게를 낮추거나 해당 부위를 쉬어가세요.</div>`).join('')}
   <div class="card"><div class="row between"><h3 style="margin:0">오늘의 추천 · ${esc(r.pick.label)}</h3><span class="tag">${esc(r.level)}</span></div>
   <div class="small muted" style="margin:6px 0 4px">${r.pick.parts.map(p=>`${partLabel(p)} ${fmtRest(restDays(p))}`).join(' · ')} → 가장 오래 쉰 분할이에요</div>
   ${r.items.map(i=>`<div class="item"><div><b>${esc(i.ex)}</b> <span class="tag">${esc(partLabel(i.part))}</span><div class="small muted">${esc(i.text)}</div></div><button class="btn sm primary" onclick="startEx('${i.part}','${esc(i.ex).replace(/'/g,"\\'")}')">기록</button></div>`).join('')}</div>`;
@@ -271,10 +304,10 @@ function recordView(){
   if(coaching()&&!st.sel)return `<h2>회원 운동 기록</h2>${noMember()}`;
   const d=st.draft,exs=exercisesOf(d.part);
   const cur=d.custom?'__custom':d.exercise;
-  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 대신 기록`:'운동 기록'}</h2>${coaching()?memberSelect():''}
+  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 대신 기록`:'운동 기록'}</h2><p class="sub">${coaching()?'오늘 수업 내용을 남겨주세요. 회원에게 그대로 보여요.':'자, 쇠질하러 가자.'}</p>${coaching()?memberSelect():''}
   <div class="card"><label class="lbl">날짜</label><input type="date" class="input" value="${d.date}" onchange="st.draft.date=this.value">
   <label class="lbl">부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" onclick="pickPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
-  <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)"><option value="">종목을 선택하세요</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>✏️ 직접 입력</option></select>
+  <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)"><option value="">종목을 선택하세요</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>+ 직접 입력</option></select>
   ${d.custom?`<input class="input" style="margin-top:8px" placeholder="종목 이름" value="${esc(d.customName)}" oninput="st.draft.customName=this.value">`:''}
   ${recentCard(d.custom?d.customName.trim():d.exercise)}
   <label class="lbl">세트 (무게 kg · 횟수)</label>
@@ -310,22 +343,24 @@ function saveLog(){return run(async()=>{
   if(exercise.length>60)return toast('종목 이름은 60자 이내로 입력해주세요');
   const sets=d.sets.filter(s=>+s.r>0).map(s=>({w:+s.w||0,r:+s.r}));
   if(!sets.length)return toast('횟수를 1회 이상 입력해주세요');
+  const prev=st.logs.filter(l=>l.exercise===exercise),prevBest=Math.max(0,...prev.flatMap(l=>l.sets.map(x=>+x.w||0))),newBest=Math.max(...sets.map(x=>x.w));
+  const pr=prev.length>0&&newBest>prevBest;
   ok(await sb.from('workout_logs').insert({user_id:tid,log_date:d.date,part:d.part,exercise,sets,feedback:d.feedback.trim(),is_pt:coaching(),...(d.note.trim()?{note:d.note.trim()}:{})}));
   if(!(st.exercises[d.part]||[]).includes(exercise)){   /* 새 종목이면 exercises 테이블에도 자동 저장 */
     try{ok(await sb.from('exercises').upsert({body_part:d.part,name:exercise},{onConflict:'body_part,name',ignoreDuplicates:true}));(st.exercises[d.part]??=[]).push(exercise)}
     catch(e){console.warn('exercise save failed',e)}
   }
-  st.draft=newDraft();st.draft.date=d.date;await loadData();render();toast('저장했어요 💪');
+  st.draft=newDraft();st.draft.date=d.date;await loadData();render();toast(pr?`오, 이건 좀 믓지다. ${exercise} ${newBest}kg 신기록`:coaching()?'오늘의 쇠질 완료.':'오늘도 한 건 했다.');
 })}
 
 const resetHF=()=>{st.hf={q:'',part:'',ex:'',date:'',limit:60,sort:'desc',edit:false}};
 const setsHtml=l=>l.sets.map((x,i)=>`<span class="pill"><b>${i+1}세트</b> ${+x.w?x.w+'kg':'맨몸'} × ${x.r}회</span>`).join('');
 const hasFb=l=>!!(l.feedback||l.note);
-const fbBody=l=>(l.feedback?esc(l.feedback):'')+(l.feedback&&l.note?'\n':'')+(l.note?'📝 '+esc(l.note):'');
-function tgFb(b){const e=b.nextElementSibling;e.hidden=!e.hidden;b.textContent=e.hidden?'💬 피드백 ▸':'💬 피드백 ▾'}
+const fbBody=l=>(l.feedback?esc(l.feedback):'')+(l.feedback&&l.note?'\n':'')+(l.note?'노트 · '+esc(l.note):'');
+function tgFb(b){const e=b.nextElementSibling;e.hidden=!e.hidden;b.textContent=e.hidden?'피드백 보기 ▸':'피드백 접기 ▾'}
 function tgFbRow(b){const r=b.closest('tr').nextElementSibling;r.hidden=!r.hidden}
 function logCard(l,open){return `<div class="card" style="padding:14px"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(partLabel(l.part))}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div>${st.hf.edit?`<button class="btn sm danger" onclick="delLog('${l.id}')">삭제</button>`:''}</div>
-  <div>${setsHtml(l)}</div>${hasFb(l)?`<button class="x fbtn" onclick="tgFb(this)">💬 피드백 ${open?'▾':'▸'}</button><div class="fb" ${open?'':'hidden'}>${fbBody(l)}</div>`:''}</div>`}
+  <div>${setsHtml(l)}</div>${hasFb(l)?`<button class="x fbtn" onclick="tgFb(this)">피드백 ${open?'접기 ▾':'보기 ▸'}</button><div class="fb" ${open?'':'hidden'}>${fbBody(l)}</div>`:''}</div>`}
 function filteredLogs(){const {q,part,ex,date}=st.hf,qq=q.trim().toLowerCase();
   return st.logs.filter(l=>(!date||l.log_date===date)&&(!part||l.part===part)&&(!ex||l.exercise===ex)&&(!qq||l.exercise.toLowerCase().includes(qq)||(l.feedback||'').toLowerCase().includes(qq)||(l.note||'').toLowerCase().includes(qq)))}
 const fmtShort=d=>d.slice(2).replace(/-/g,'.')+'('+'일월화수목금토'[new Date(d+'T00:00').getDay()]+')';
@@ -337,12 +372,12 @@ const kg=w=>w?w+'kg':'맨몸';
 function exDetail(list,limit){
   let best=null;list.forEach(l=>l.sets.forEach(x=>{if(!best||+x.w>+best.w||(+x.w===+best.w&&+x.r>+best.r))best={w:x.w,r:x.r}}));
   const mm=minMax(list),ex=list[0].exercise,last=list.reduce((a,l)=>l.log_date>a?l.log_date:a,'');
-  return `<div class="card hl"><h3>${esc(ex)}</h3><div class="stats"><div><b>${list.length}회</b><span>수행</span></div><div><b>${kg(+best.w)}</b><span>최고 (${best.r}회)</span></div><div><b>${last.slice(2)}</b><span>마지막</span></div></div>
+  return `<div class="card hl"><h3>${esc(ex)}</h3><div class="stats"><div><b>${list.length}회</b><span>수행</span></div><div><b>${kg(+best.w)}</b><span>최고 (${best.r}회)</span></div><div><b>${last.slice(5).replace('-','.')}</b><span>마지막 · ${last.slice(0,4)}</span></div></div>
   <label class="lbl" style="margin-top:16px">세트별 최소 / 최대 무게</label>
   <table class="tbl"><thead><tr><th>세트</th><th>최소</th><th>최대</th><th>횟수</th></tr></thead><tbody>${mm.map(m=>`<tr><td>${m.n}set</td><td>${kg(m.min)}</td><td>${kg(m.max)}</td><td>${m.cnt}번</td></tr>`).join('')}</tbody></table></div>
   <div class="card" style="padding:8px 12px"><table class="tbl"><thead><tr><th>날짜</th><th>세트 (kg × 횟수)</th><th></th></tr></thead><tbody>${list.slice(0,limit).map(l=>
     `<tr><td class="d">${fmtShort(l.log_date)}${l.is_pt?'<div class="pt">PT</div>':''}</td><td>${l.sets.map(x=>`<span class="pr"><b>${+x.w?x.w:'맨몸'}</b><i>×</i>${x.r}</span>`).join('')}</td>
-    <td style="white-space:nowrap;text-align:right">${hasFb(l)?'<button class="x" style="padding:0 6px" onclick="tgFbRow(this)">💬</button>':''}${st.hf.edit?`<button class="btn sm danger" style="margin-left:6px" onclick="delLog('${l.id}')">삭제</button>`:''}</td></tr>`
+    <td style="white-space:nowrap;text-align:right">${hasFb(l)?`<button class="x" style="padding:0 6px" onclick="tgFbRow(this)" aria-label="피드백 보기">${ico('msg',18)}</button>`:''}${st.hf.edit?`<button class="btn sm danger" style="margin-left:6px" onclick="delLog('${l.id}')">삭제</button>`:''}</td></tr>`
     +(hasFb(l)?`<tr class="fbr" hidden><td colspan="3">${fbBody(l)}</td></tr>`:'')).join('')}</tbody></table></div>`;
 }
 function histResults(){
@@ -360,11 +395,11 @@ function historyView(){
   const hf=st.hf,have=new Set(st.logs.map(l=>l.part)),parts=[...PARTS,...have].filter((p,i,a)=>have.has(p)&&a.indexOf(p)===i);
   const cnt={};st.logs.filter(l=>!hf.part||l.part===hf.part).forEach(l=>cnt[l.exercise]=(cnt[l.exercise]||0)+1);
   const exs=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b,'ko'));
-  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 히스토리`:'내 운동 히스토리'}</h2>${coaching()?memberSelect():''}
-  <div class="card"><input class="input" type="search" placeholder="🔍 종목 · 피드백 · 노트 검색" value="${esc(hf.q)}" oninput="hfQ(this.value)">
-  ${hf.date?`<button class="chip on" style="margin-top:12px" onclick="hfDate()">📅 ${fmtDate(hf.date)} ✕</button>`:''}
+  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 히스토리`:'내 운동 히스토리'}</h2><p class="sub">남과 비교 말고 어제의 나와 비교.</p>${coaching()?memberSelect():''}
+  <div class="card"><input class="input" type="search" placeholder="종목 · 피드백 · 노트 검색" value="${esc(hf.q)}" oninput="hfQ(this.value)">
+  ${hf.date?`<button class="chip on" style="margin-top:12px" onclick="hfDate()">${fmtDate(hf.date)} ✕</button>`:''}
   <div class="chips" style="margin-top:12px"><button class="chip ${hf.part?'':'on'}" onclick="hfPart('')">전체</button>${parts.map(p=>`<button class="chip ${hf.part===p?'on':''}" onclick="hfPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
-  <div class="row between" style="margin-top:12px"><button class="chip on" style="min-height:40px" onclick="hfSort()">${hf.sort==='asc'?'날짜 ↑ 오래된순':'날짜 ↓ 최신순'}</button><button class="chip ${hf.edit?'on':''}" style="min-height:40px" onclick="hfEdit()">🗑 삭제 모드 ${hf.edit?'ON':'OFF'}</button></div>
+  <div class="row between" style="margin-top:12px"><button class="chip on" style="min-height:40px" onclick="hfSort()">${hf.sort==='asc'?'날짜 ↑ 오래된순':'날짜 ↓ 최신순'}</button><button class="chip ${hf.edit?'on':''}" style="min-height:40px" onclick="hfEdit()">삭제 모드 ${hf.edit?'ON':'OFF'}</button></div>
   <select class="input" style="margin-top:12px" onchange="hfEx(this.value)"><option value="">전체 종목 (${exs.length})</option>${exs.map(e=>`<option value="${esc(e)}" ${hf.ex===e?'selected':''}>${esc(e)} · ${cnt[e]}회</option>`).join('')}</select></div>
   <div id="hres">${histResults()}</div>`;
 }
@@ -381,7 +416,7 @@ function membersView(){
   const f=st.found,s=st.sel;
   const nameOf=id=>st.members.find(m=>m.id===id)?.name||'회원';
   return `<h2>담당 회원 관리</h2>
-  ${st.reqs.length?`<div class="card hl"><h3>📥 PT 신청 ${st.reqs.length}건</h3>${st.reqs.map(p=>`<div class="item"><div><b>${esc(nameOf(p.member_id))}</b> <span class="small muted">${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</span><div class="small muted">${esc(p.goal)}</div></div><div class="row"><button class="btn sm primary" onclick="setPT('${p.id}','scheduled')">승인</button><button class="btn sm" onclick="setPT('${p.id}','canceled')">거절</button></div></div>`).join('')}</div>`:''}
+  ${st.reqs.length?`<div class="card hl"><h3>PT 신청 ${st.reqs.length}건</h3>${st.reqs.map(p=>`<div class="item"><div><b>${esc(nameOf(p.member_id))}</b> <span class="small muted">${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</span><div class="small muted">${esc(p.goal)}</div></div><div class="row"><button class="btn sm primary" onclick="setPT('${p.id}','scheduled')">승인</button><button class="btn sm" onclick="setPT('${p.id}','canceled')">거절</button></div></div>`).join('')}</div>`:''}
   <div class="card"><h3>이메일로 회원 등록</h3><div class="row"><input id="m-q" class="input" type="email" placeholder="회원 이메일"><button class="btn sm primary" style="min-height:50px" onclick="searchMember()">검색</button></div>
   ${f===null?'<div class="small muted" style="margin-top:10px">해당 이메일의 회원을 찾지 못했어요</div>':''}
   ${f?`<div class="item" style="margin-top:8px"><div><b>${esc(f.name)}</b><span class="tag">${esc(f.level)}</span><div class="small muted">${esc(f.email)}</div></div>
@@ -415,7 +450,7 @@ function ptView(){
   <select class="input" style="width:auto;min-height:40px;padding:6px 10px" onchange="setPT('${p.id}',this.value)">${Object.entries(PT_STATUS).map(([k,v])=>`<option value="${k}" ${p.status===k?'selected':''}>${v}</option>`).join('')}</select></div>
   <div class="small muted" style="margin-top:6px">${esc(p.goal)||'목표 미입력'}</div>
   ${p.status==='requested'?`<div class="row" style="margin-top:10px"><button class="btn sm primary" onclick="setPT('${p.id}','scheduled')">승인</button><button class="btn sm" onclick="setPT('${p.id}','canceled')">거절</button></div>`:''}
-  ${p.status==='scheduled'&&p.pt_date<=today()?`<button class="btn ghost sm" style="margin-top:10px" onclick="recordOn('${p.pt_date}')">✏️ 이 수업 운동 기록하기</button>`:''}</div>`).join(''):'<div class="card center muted">등록된 PT 일정이 없어요</div>'}`;
+  ${p.status==='scheduled'&&p.pt_date<=today()?`<button class="btn ghost sm" style="margin-top:10px" onclick="recordOn('${p.pt_date}')">이 수업 운동 기록하기</button>`:''}</div>`).join(''):'<div class="card center muted">등록된 PT 일정이 없어요</div>'}`;
 }
 function addPT(){return run(async()=>{
   const date=$('#p-date').value,time=$('#p-time').value,goal=$('#p-goal').value.trim();
@@ -447,7 +482,7 @@ function inbodyView(){
   <button class="btn primary" onclick="saveInbody()">저장하기</button></div>
   ${rec.length?IB.map(([k,l,u,c])=>{const L=lastOf(k);if(!L)return '';const P=prevOf(k),F=firstOf(k);
     return `<div class="card"><div class="metric"><div><div class="small muted">${l} · ${fmtShort(L.measured_on)}</div><b>${num(L[k])}<span class="small muted"> ${u}${k==='weight'?bmi(num(L[k])):''}</span></b></div><div class="small muted">지난번 대비 ${dlt(num(L[k]),P?num(P[k]):null)}<br>처음 대비 ${dlt(num(L[k]),num(F[k]))}</div></div>${spark(asc.map(r=>num(r[k])),c)}</div>`}).join('')
-  +`<div class="card" style="padding:8px 10px"><div class="row between" style="padding:6px 4px"><b>측정 기록 ${rec.length}건</b><button class="chip ${st.hf.edit?'on':''}" style="min-height:36px" onclick="hfEdit()">🗑 삭제 모드 ${st.hf.edit?'ON':'OFF'}</button></div>
+  +`<div class="card" style="padding:8px 10px"><div class="row between" style="padding:6px 4px"><b>측정 기록 ${rec.length}건</b><button class="chip ${st.hf.edit?'on':''}" style="min-height:36px" onclick="hfEdit()">삭제 모드 ${st.hf.edit?'ON':'OFF'}</button></div>
   <table class="tbl" style="font-size:12px"><thead><tr><th>날짜</th><th>체중</th><th>골격근</th><th>체지방</th><th>체지방률</th><th>내장</th>${st.hf.edit?'<th></th>':''}</tr></thead><tbody>${rec.map(r=>`<tr><td class="d">${fmtShort(r.measured_on)}</td><td>${f1(r.weight)}</td><td>${f1(r.muscle)}</td><td>${f1(r.fat_mass)}</td><td>${r.fat_pct!=null?r.fat_pct+'%':'-'}</td><td>${f1(r.visceral_fat)}</td>${st.hf.edit?`<td><button class="btn sm danger" onclick="delInbody('${r.id}')">삭제</button></td>`:''}</tr>`).join('')}</tbody></table></div>`
   :'<div class="card center muted">아직 인바디 기록이 없어요</div>'}`;
 }
@@ -500,7 +535,7 @@ function myView(){
   const sel=(id,opts,val,blank)=>`<select id="${id}" class="input">${blank!=null?`<option value="">${blank}</option>`:''}${opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select>`;
   return `<h2>마이</h2>${st.needMig?migHint():''}
   <div class="card hl"><div class="row"><div class="avatar">${esc((m.name||'?').slice(0,1))}</div><div><b style="font-size:20px">${esc(m.name)} ${tr?'트레이너님':'회원님'}</b>
-  <div style="margin-top:6px">${tr?`<span class="tag pt">강사 코드 ${esc(st.myCode||'…')}</span>`:st.myTrainer?`<span class="tag pt">👨‍🏫 ${esc(st.myTrainer.name)} 트레이너</span>`:'<span class="tag">강사 미연결</span>'}</div></div></div></div>
+  <div style="margin-top:6px">${tr?`<span class="tag pt">강사 코드 ${esc(st.myCode||'…')}</span>`:st.myTrainer?`<span class="tag pt">${esc(st.myTrainer.name)} 트레이너</span>`:'<span class="tag">강사 미연결</span>'}</div></div></div></div>
   <h3 class="sec">내 정보</h3>
   <div class="card"><label class="lbl">이름</label><input id="p-name" class="input" value="${esc(m.name)}">
   <div class="grid2"><div><label class="lbl">숙련도</label>${sel('p-level',LEVELS,m.level)}</div><div><label class="lbl">목표</label>${sel('p-goal',GOALS,m.goal,'선택 안 함')}</div></div>
@@ -534,7 +569,7 @@ function render(){
   if(!st.me){app.innerHTML=authView();return}
   const V={home:homeView,record:recordView,history:historyView,members:membersView,pt:ptView,inbody:inbodyView,class:classView,my:myView};
   if(!tabList().some(([k])=>k===st.tab))st.tab=tabList()[0][0];
-  app.innerHTML=headerView()+`<main>${V[st.tab]()}</main>`+navView();
+  app.innerHTML=headerView()+`<main><div class="eyebrow">${EYEBROW[st.tab]||''}</div>${V[st.tab]()}</main>`+navView();
 }
 boot();
 </script>
