@@ -71,6 +71,7 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .login h1{line-height:0}.login .mark{display:block}
 .login .en{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:var(--m);margin-top:14px}
 .login .hello{font-size:20px;font-weight:700;margin-top:28px}
+.legal{display:flex;justify-content:center;gap:10px;margin:28px 0 8px;font-size:13px;color:var(--m)}.legal a{color:var(--m)}
 .social{display:flex;flex-direction:column;gap:8px;margin-top:24px}.social .btn{margin-top:0;display:flex;align-items:center;justify-content:center;gap:10px}
 .btn.kakao{background:#FEE500;color:rgba(0,0,0,.85)}.btn.naver{background:#03C75A;color:#fff}.btn.google{background:#131314;color:#E3E3E3;border:1px solid #8E918F}
 .or{display:flex;align-items:center;gap:12px;margin:24px 0 0;color:var(--m);font-size:13px}.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
@@ -304,6 +305,7 @@ function recommend(){
 }
 
 /* ===== 화면 ===== */
+const legalLinks=()=>`<div class="legal"><a href="privacy.html" target="_blank" rel="noopener">개인정보처리방침</a><span>·</span><a href="terms.html" target="_blank" rel="noopener">이용약관</a></div>`;
 function onboardView(){
   const o=st.ob;
   return `<div class="login"><h1 aria-label="믓">${logoSvg(64)}</h1><div class="hello">처음 오셨네요. 몇 가지만 알려주세요.</div>
@@ -312,7 +314,7 @@ function onboardView(){
   <label class="lbl">역할</label><div class="chips">${[['member','일반 회원'],['trainer','트레이너']].map(([k,l])=>`<button class="chip ${o.role===k?'on':''}" onclick="st.ob.role='${k}';st.ob.keep=$('#o-name').value;render()">${l}</button>`).join('')}</div>
   ${o.role==='trainer'?'':`<label class="lbl">운동 숙련도</label><div class="chips">${LEVELS.map(l=>`<button class="chip ${o.level===l?'on':''}" onclick="st.ob.level='${l}';st.ob.keep=$('#o-name').value;render()">${l}</button>`).join('')}</div>`}
   <button class="btn primary" onclick="finishOnboarding()">시작하기</button>
-  <button class="btn ghost" onclick="logout()">다른 계정으로 로그인</button></div>`;
+  <button class="btn ghost" onclick="logout()">다른 계정으로 로그인</button>${legalLinks()}</div>`;
 }
 function authView(){
   const su=st.authMode==='signup';
@@ -331,7 +333,7 @@ function authView(){
   <label class="lbl">비밀번호</label><input id="a-pw" class="input" type="password" autocomplete="${su?'new-password':'current-password'}">
   ${su?`<label class="lbl">역할</label><select id="a-role" class="input" onchange="$('#a-level-w').hidden=this.value==='trainer'"><option value="member">일반 회원</option><option value="trainer">트레이너</option></select>
   <div id="a-level-w"><label class="lbl">운동 숙련도</label><select id="a-level" class="input">${LEVELS.map(l=>`<option>${l}</option>`).join('')}</select></div>`:''}
-  <button class="btn primary" onclick="${su?'doSignup()':'doLogin()'}">${su?'가입하기':'로그인'}</button></div>`;
+  <button class="btn primary" onclick="${su?'doSignup()':'doLogin()'}">${su?'가입하기':'로그인'}</button>${legalLinks()}</div>`;
 }
 function headerView(){
   const m=st.me;
@@ -776,7 +778,7 @@ function myView(){
    :`<div class="card"><h3>강사님께 받은 코드를 입력해주세요</h3><input id="tcode" class="input code-in" inputmode="numeric" maxlength="4" placeholder="0000"><div class="small muted" style="margin-top:8px">공유받은 강사의 코드번호를 입력하면 자동으로 연결돼요.</div><button class="btn primary" onclick="linkTrainer()">연결하기</button></div>`}
   <h3 class="sec">화면</h3>
   <div class="card"><label class="lbl">글자 크기</label><div class="chips">${[[100,'기본'],[110,'크게'],[120,'아주 크게']].map(([v,l])=>`<button class="chip ${fs===v?'on':''}" onclick="setFont(${v})">${l}</button>`).join('')}</div></div>
-  <button class="btn" onclick="logout()">로그아웃</button>`;
+  <button class="btn" onclick="logout()">로그아웃</button>${legalLinks()}`;
 }
 function trainerCard(t){
   const row=(l,v)=>v?`<label class="lbl">${l}</label><div class="pre">${esc(v)}</div>`:'';
