@@ -74,23 +74,33 @@ alter table public.workout_logs enable row level security;
 alter table public.pt_schedules enable row level security;
 
 -- profiles: 본인 / 내 담당 회원 / 내 트레이너 / (트레이너가 이메일로 회원 검색)
+drop policy if exists profiles_select on public.profiles;
 create policy profiles_select on public.profiles for select using (
   id = auth.uid() or trainer_id = auth.uid() or id = public.my_trainer_id()
   or (public.is_trainer() and role = 'member'));
+drop policy if exists profiles_insert on public.profiles;
 create policy profiles_insert on public.profiles for insert with check (id = auth.uid());
 -- 트레이너만 회원 프로필 수정 가능(미배정 회원을 내 회원으로 등록, 노트/커리큘럼 작성)
+drop policy if exists profiles_update on public.profiles;
 create policy profiles_update on public.profiles for update
   using (public.is_trainer() and role = 'member' and (trainer_id is null or trainer_id = auth.uid()))
   with check (role = 'member' and trainer_id = auth.uid());
 
 -- workout_logs: 본인 기록 또는 내 담당 회원 기록
+drop policy if exists logs_select on public.workout_logs;
 create policy logs_select on public.workout_logs for select using (user_id = auth.uid() or public.is_my_member(user_id));
+drop policy if exists logs_insert on public.workout_logs;
 create policy logs_insert on public.workout_logs for insert with check (
   (user_id = auth.uid() and is_pt = false) or (public.is_my_member(user_id) and is_pt = true));
+drop policy if exists logs_delete on public.workout_logs;
 create policy logs_delete on public.workout_logs for delete using (user_id = auth.uid() or public.is_my_member(user_id));
 
 -- pt_schedules: 회원은 조회만, 담당 트레이너는 관리
+drop policy if exists pt_select on public.pt_schedules;
 create policy pt_select on public.pt_schedules for select using (member_id = auth.uid() or trainer_id = auth.uid());
+drop policy if exists pt_insert on public.pt_schedules;
 create policy pt_insert on public.pt_schedules for insert with check (trainer_id = auth.uid() and public.is_my_member(member_id));
+drop policy if exists pt_update on public.pt_schedules;
 create policy pt_update on public.pt_schedules for update using (trainer_id = auth.uid()) with check (trainer_id = auth.uid() and public.is_my_member(member_id));
+drop policy if exists pt_delete on public.pt_schedules;
 create policy pt_delete on public.pt_schedules for delete using (trainer_id = auth.uid());
