@@ -264,11 +264,12 @@ async function boot(){
       const at=+lsGet('mm-login-at');
       if(!at)lsSet('mm-login-at',Date.now());
       if(at&&Date.now()-at>KEEP_DAYS*864e5){await sb.auth.signOut();lsSet('mm-login-at',null);oauthErr=oauthErr||`로그인 유지 기간(${KEEP_DAYS}일)이 지났어요. 다시 로그인해 주세요`}
-      else await run(()=>afterLogin(session.user));
+      else{await run(()=>afterLogin(session.user));if(st.me&&!fromAuth)await run(restoreUi)}   /* 새 로그인(소셜 복귀 포함)은 홈에서 시작 */
     }
   }
   if(/(access_token|code|error)=/.test(location.search+location.hash))history.replaceState(null,'',location.pathname);
   render();
+  if(st._y){const y=st._y;st._y=0;requestAnimationFrame(()=>window.scrollTo(0,y))}
   if(oauthErr)toast(oauthErr.startsWith('로그인 유지')?oauthErr:'간편 로그인 실패: '+oauthErr.replace(/\+/g,' '));
 }
 /* 간편 로그인 (Supabase OAuth). 공급자 설정은 Supabase > Authentication > Sign In / Providers */
@@ -345,7 +346,7 @@ async function doSignup(){await run(async()=>{
   if(st.me&&'terms_agreed_at' in st.me&&!st.me.terms_agreed_at){try{await saveConsent();st.me.terms_agreed_at=new Date().toISOString()}catch(e){}}   /* 가입 폼에서 이미 동의함 */
   st.cs=newConsent();render();
 })}
-async function logout(){await sb.auth.signOut();lsSet('mm-login-at',null);Object.assign(st,{ob:undefined,me:null,members:[],sel:null,logs:[],pts:[],reqs:[],inbody:[],myTrainer:null,myCode:null,codeBusy:false,week:0,found:undefined,authMode:'login',wd:false,editFrom:null,cs:newConsent()});st.draft=newDraft();render()}
+async function logout(){await sb.auth.signOut();lsSet('mm-login-at',null);lsSet(UI_KEY,null);Object.assign(st,{ob:undefined,me:null,members:[],sel:null,logs:[],pts:[],reqs:[],inbody:[],myTrainer:null,myCode:null,codeBusy:false,week:0,found:undefined,authMode:'login',wd:false,editFrom:null,cs:newConsent()});st.draft=newDraft();render()}
 function setAuth(m){st.authMode=m;render()}
 
 /* ===== 데이터 로드 ===== */
@@ -385,6 +386,27 @@ async function loadData(){
   if(tp&&tp.role==='member'){const lv=curLevel();if(tp.level!==lv){tp.level=lv;sb.from('profiles').update({level:lv}).eq('id',tp.id).then(r=>r.error&&console.warn('level sync',r.error))}}
 }
 const reload=()=>run(async()=>{await loadData();render()});
+/* 화면 상태 보존: 앱을 나갔다 돌아오면(브라우저가 페이지를 다시 불러와도) 보던 탭·작성 중인 기록·필터·스크롤을 복원한다 */
+const UI_KEY='mm-ui',UI_TTL=864e5;
+function saveUi(){if(!st.me||st.me.onboarded===false)return;
+  try{lsSet(UI_KEY,JSON.stringify({uid:st.me.id,t:Date.now(),tab:st.tab,mode:st.mode,sel:st.sel?.id||null,draft:st.draft,routine:st.routine||null,hf:st.hf,week:st.week,ptMode:st.ptMode,ptDate:st.ptDate,editFrom:st.editFrom||null,y:window.scrollY}))}catch(e){}}
+async function restoreUi(){
+  let u;try{u=JSON.parse(lsGet(UI_KEY))}catch(e){return}
+  if(!u||u.uid!==st.me?.id||Date.now()-u.t>UI_TTL||st.me.onboarded===false)return;
+  const mode0=st.mode,sel0=st.sel?.id;
+  if(isTrainer()&&(u.mode==='trainer'||u.mode==='personal'))st.mode=u.mode;
+  if(coaching()&&u.sel&&st.members.some(m=>m.id===u.sel))st.sel=st.members.find(m=>m.id===u.sel);
+  if(st.mode!==mode0||st.sel?.id!==sel0)await loadData();
+  if(u.draft)st.draft={...newDraft(),...u.draft};
+  st.routine=u.routine||null;st.editFrom=u.editFrom||null;
+  if(u.hf)Object.assign(st.hf,u.hf);
+  st.week=u.week||0;st.ptMode=u.ptMode||st.ptMode;st.ptDate=u.ptDate||null;
+  if(u.tab)st.tab=u.tab;
+  st._y=u.y||0;
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveUi()});
+window.addEventListener('pagehide',saveUi);
+let uiT;document.addEventListener('input',()=>{clearTimeout(uiT);uiT=setTimeout(saveUi,400)});
 function go(t){if(st.draft?.id&&t!=='record'){st.draft=newDraft();st.editFrom=null}st.tab=t;render();window.scrollTo(0,0)}
 function toggleMode(){resetHF();st.mode=coaching()?'personal':'trainer';st.tab='home';st.draft=newDraft();reload()}
 function selectMember(id){resetHF();st.sel=st.members.find(m=>m.id===id)||null;st.draft=newDraft();reload()}
@@ -1018,6 +1040,7 @@ function render(){
   const V={home:()=>coaching()?trainerHomeView():homeView(),record:recordView,history:historyView,members:membersView,pt:ptView,inbody:inbodyView,class:classView,my:myView};
   if(!navTab())st.tab=tabList()[0][0];
   app.innerHTML=headerView()+`<main><div class="eyebrow">${EYEBROW[st.tab]||''}</div>${V[st.tab]()}</main>`+navView()+(st.wd?withdrawSheet():'');
+  saveUi();
 }
 boot();
 </script>
