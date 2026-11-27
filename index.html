@@ -137,6 +137,7 @@ header{padding:18px var(--gut) 0}
 nav{background:var(--bg);border-top:1px solid var(--line)}
 nav button{font-family:var(--mono);font-size:10px;letter-spacing:.08em;font-weight:500}
 nav button.on{color:var(--chalk)}nav button.on svg{color:var(--accent)}
+.exr{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:13px 2px;border:none;border-top:1px solid var(--line);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}.exr:active{background:var(--card2)}.exr.add b{color:var(--accent)}
 .savebar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(62px + env(safe-area-inset-bottom));width:100%;max-width:480px;display:flex;gap:8px;padding:10px var(--gut);background:var(--bg);border-top:1px solid var(--line);z-index:6}.savebar .btn{margin-top:0;min-height:52px}.savebar .btn.ghost{width:auto;flex:0 0 96px}
 input[type=number].input,.code-in{background:var(--card);border:1px solid var(--line);border-bottom:2px solid var(--line);border-radius:2px;padding:12px;font-family:var(--mono);font-size:20px;font-weight:700}
 input[type=number].input:focus{border-bottom-color:var(--accent)}
@@ -558,6 +559,7 @@ function recordForm(d,exs,cur){
   return `
   <div class="card"><label class="lbl">날짜</label><input type="date" class="input" value="${d.date}" onchange="st.draft.date=this.value">
   <label class="lbl">부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" onclick="pickPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
+  ${d.id?'':`<label class="lbl">종목 검색</label><input id="ex-q" class="input" type="search" placeholder="종목 이름으로 검색 (예: 벤치)" oninput="exSearch(this.value)" autocomplete="off"><div id="ex-res"></div>`}
   <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)"><option value="">종목을 선택하세요</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>+ 직접 입력</option></select>
   ${d.custom?`<input class="input" style="margin-top:8px" placeholder="종목 이름" value="${esc(d.customName)}" oninput="st.draft.customName=this.value">`:''}
   ${recentCard(d.custom?d.customName.trim():d.exercise)}
@@ -578,6 +580,26 @@ function recentCard(name){
   if(!rec.length)return '';
   return `<div class="fb" style="margin-top:10px"><b>최근 기록</b>${rec.map(l=>`<div style="margin-top:6px"><span class="small muted">${fmtDate(l.log_date)}${l.is_pt?' · PT':''}</span><div>${setsHtml(l)}</div></div>`).join('')}${st.draft.id?'':`<button class="btn ghost sm" style="margin-top:10px" onclick="fillLast()">지난번 그대로 채우기</button>`}</div>`;
 }
+/* 종목 검색: 모든 부위에서 찾고, 고르면 부위+종목이 바로 적용된다. 없으면 '직접 추가'로 이번 기록에 적용 (저장 시 종목 목록에도 등록) */
+const exNorm=x=>String(x).toLowerCase().replace(/\s+/g,'');
+function allEx(){const seen=new Set(),out=[];
+  const add=(part,name)=>{const k=part+'|'+name;if(!seen.has(k)){seen.add(k);out.push({part,name})}};
+  PARTS.forEach(pt=>(st.exercises[pt]||[]).forEach(n=>add(pt,n)));
+  Object.keys(st.exercises).forEach(pt=>(st.exercises[pt]||[]).forEach(n=>add(pt,n)));
+  st.logs.forEach(l=>add(l.part,l.exercise));return out}
+function exSearch(v){
+  const q=exNorm(v.trim()),box=$('#ex-res');if(!box)return;
+  if(!q){box.innerHTML='';st.exres=[];return}
+  const res=allEx().filter(e=>exNorm(e.name).includes(q)).sort((a,b)=>(exNorm(a.name).startsWith(q)?0:1)-(exNorm(b.name).startsWith(q)?0:1)).slice(0,30);
+  st.exres=res;
+  const exact=res.some(e=>exNorm(e.name)===q);
+  box.innerHTML=res.map((e,i)=>`<button class="exr" onclick="exPick(${i})"><b>${esc(e.name)}</b><span class="tag">${esc(partLabel(e.part))}</span></button>`).join('')
+    +(exact?'':`<button class="exr add" onclick="exAdd()"><b>+ “${esc(v.trim())}” 직접 추가</b><span class="small muted">부위: ${esc(partLabel(st.draft.part))}</span></button>`);
+}
+function exPick(i){const r=st.exres?.[i];if(!r)return;st.draft.part=r.part;st.draft.custom=false;st.draft.customName='';pickEx(r.name)}
+function exAdd(){const v=$('#ex-q').value.trim();if(!v)return;
+  if(v.length>60)return toast('종목 이름은 60자 이내로 입력해주세요');
+  const d=st.draft;d.custom=true;d.customName=v;d.exercise='';render();toast(`“${v}” 종목을 이번 기록에 적용했어요. 저장하면 종목 목록에도 추가돼요`)}
 function pickPart(p){st.draft.part=p;st.draft.custom=false;st.draft.customName='';pickEx(exercisesOf(p)[0])}
 function pickEx(e){
   const d=st.draft;
