@@ -100,6 +100,13 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .sheet{width:100%;max-width:480px;background:var(--card);border:1px solid var(--line);border-bottom:none;border-radius:var(--r) var(--r) 0 0;padding:20px var(--gut) calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
 .stats{display:flex;gap:8px}.stats div{flex:1;text-align:center}.stats b{display:block;white-space:nowrap;font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15}.stats span{font-size:12px;color:var(--m)}
 .ok{color:var(--green)}.bad{color:var(--bad)}
+.ck{display:flex;gap:10px;align-items:flex-start;padding:10px 0;font-size:14px;line-height:1.5;cursor:pointer}.ck input{width:20px;height:20px;margin:1px 0 0;flex-shrink:0;accent-color:var(--accent)}.ck a{color:var(--t)}
+.consent{margin-top:20px;padding:6px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}.consent .all{border-bottom:1px solid var(--line)}.req{color:var(--accent);font-weight:600}
+.recent{margin-left:8px;padding:2px 6px;border-radius:4px;background:var(--accent);color:#171717;font-size:11px;font-weight:700;vertical-align:middle}
+.navb{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:var(--r);background:var(--card2);color:var(--t);cursor:pointer;flex-shrink:0;padding:0}
+.back{border:none;background:none;color:var(--m);font-size:14px;font-family:inherit;padding:4px 0 8px;cursor:pointer}
+.card.menu{width:100%;display:flex;align-items:center;justify-content:space-between;color:inherit;font-family:inherit;font-size:inherit;text-align:left;cursor:pointer}.card.menu>div{display:flex;gap:12px;align-items:center}
+.wd{margin:14px 0;padding-left:20px;font-size:14px;line-height:1.8}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -124,14 +131,27 @@ const SUPABASE_URL=ENVS[ENV_NAME].url;
 const SUPABASE_ANON_KEY=ENVS[ENV_NAME].key;
 const CONFIG_OK=new URL(SUPABASE_URL).hostname.split('.').length>=3;
 if(IS_DEV)document.title='[DEV] 믓';
+/* 로그인은 항상 유지 (supabase-js 기본 localStorage), 마지막 로그인 후 30일이 지나면 boot()에서 로그아웃 */
+const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
+const lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
+const KEEP_DAYS=30;
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+try{localStorage.removeItem('mm-font');localStorage.removeItem('mm-keep')}catch(e){}   /* 글자 크기 설정 삭제됨 (이전 값 정리) */
 
 /* ===== 기본 데이터 ===== */
 /* 부위·종목은 Supabase exercises 테이블에서 불러옵니다 (supabase/exercises.sql). 아래는 부위 표시 순서/라벨 */
 const PARTS=['전신','하체','등','가슴','어깨','이두','삼두','복근_신전근','필라테스','애니멀플로우','BASIC'];
 const partLabel=p=>p==='복근_신전근'?'복근·신전근':p;
-const LEVELS=['초급','중급','고급'];
 const TARGET_REPS={초급:12,중급:10,고급:8};
+/* 운동 등급: 가입 때 묻지 않고 기록으로 자동 부여. 운동 기간 = 첫 기록부터 오늘까지, 운동한 날 = 기록이 있는 날짜 수 */
+const LEVEL_RULES=[['고급',1095,500,'운동 기간 3년 이상 · 운동한 날 500일 이상'],['중급',365,150,'운동 기간 1년 이상 · 운동한 날 150일 이상'],['초급',0,0,'처음 시작 ~ 중급 기준 전']];
+function levelStats(logs){
+  if(!logs.length)return{days:0,span:0};
+  const first=logs.reduce((a,l)=>l.log_date<a?l.log_date:a,logs[0].log_date);
+  return{days:new Set(logs.map(l=>l.log_date)).size,span:daysSince(first)};
+}
+function levelFromLogs(logs){const {days,span}=levelStats(logs);return LEVEL_RULES.find(([,s,d])=>span>=s&&days>=d)[0]}
+const curLevel=()=>levelFromLogs(st.logs);
 const PLANS={
   초급:[{label:'상체',parts:['가슴','등','어깨','이두','삼두']},{label:'하체',parts:['하체']}],
   중급:[{label:'밀기',parts:['가슴','어깨','삼두']},{label:'당기기',parts:['등','이두']},{label:'하체',parts:['하체']}],
@@ -172,8 +192,8 @@ st.draft=newDraft();
 
 /* ===== 인증 ===== */
 async function boot(){
-  applyFont();
   const q=new URLSearchParams(location.search+'&'+location.hash.slice(1));let oauthErr=q.get('error_description');
+  const fromAuth=/(access_token|code)=/.test(location.search+location.hash);
   if(CONFIG_OK&&q.get('code')&&q.get('state')&&q.get('state')===ssGet('naver_state')){   /* 네이버 로그인에서 돌아옴 */
     ssSet('naver_state',null);
     try{const r=await sb.functions.invoke('naver-auth',{body:{action:'callback',code:q.get('code'),state:q.get('state')}});
@@ -183,11 +203,19 @@ async function boot(){
   }
   if(CONFIG_OK){
     const {data:{session}}=await sb.auth.getSession();
-    if(session)await run(()=>afterLogin(session.user));
+    if(session){
+      const pend=ssGet('mm-pending-login');
+      if(fromAuth&&pend){lsSet('mm-last-login',pend);lsSet('mm-login-at',Date.now())}   /* 간편 로그인 성공 */
+      ssSet('mm-pending-login',null);
+      const at=+lsGet('mm-login-at');
+      if(!at)lsSet('mm-login-at',Date.now());
+      if(at&&Date.now()-at>KEEP_DAYS*864e5){await sb.auth.signOut();lsSet('mm-login-at',null);oauthErr=oauthErr||`로그인 유지 기간(${KEEP_DAYS}일)이 지났어요. 다시 로그인해 주세요`}
+      else await run(()=>afterLogin(session.user));
+    }
   }
   if(/(access_token|code|error)=/.test(location.search+location.hash))history.replaceState(null,'',location.pathname);
   render();
-  if(oauthErr)toast('간편 로그인 실패: '+oauthErr.replace(/\+/g,' '));
+  if(oauthErr)toast(oauthErr.startsWith('로그인 유지')?oauthErr:'간편 로그인 실패: '+oauthErr.replace(/\+/g,' '));
 }
 /* 간편 로그인 (Supabase OAuth). 공급자 설정은 Supabase > Authentication > Sign In / Providers */
 const appUrl=()=>location.origin+location.pathname.replace(/index\.html$/,'');
@@ -195,6 +223,7 @@ const ssGet=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
 const ssSet=(k,v)=>{try{v==null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v)}catch(e){}};
 async function fnErr(e){try{const b=await e.context.json();return b.error||e.message}catch(_){return e.message||String(e)}}
 async function oauth(provider){await run(async()=>{
+  ssSet('mm-pending-login',provider);
   if(provider==='naver'){   /* 네이버는 Edge Function(supabase/functions/naver-auth)으로 처리 */
     const state='nv'+crypto.getRandomValues(new Uint32Array(4)).join('');ssSet('naver_state',state);
     const r=await sb.functions.invoke('naver-auth',{body:{action:'start',state,redirect_uri:appUrl()}});
@@ -203,35 +232,66 @@ async function oauth(provider){await run(async()=>{
   }
   const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:appUrl()}});if(error)throw error;
 })}
+/* 약관 동의 (가입 폼 · 소셜 첫 가입 · 기존 회원 1회). 만 14세 미만은 보호자 동의 필요 */
+/* 만 14세 미만은 가입할 수 없다 (만 14세 이상 확인 필수) */
+const newConsent=()=>({terms:false,privacy:false,age:false});
+st.cs=newConsent();
+const consentOk=c=>c.terms&&c.privacy&&c.age;
+function csSet(k,v){st.cs[k]=v;
+  if(k==='all')st.cs.terms=st.cs.privacy=st.cs.age=v;
+  const keep=[...document.querySelectorAll('#app input.input')].map(i=>[i.id,i.value]);render();keep.forEach(([id,v])=>{const e=document.getElementById(id);if(e&&id)e.value=v})}
+const consentBox=()=>{const c=st.cs,ck=(k,label,req=true)=>`<label class="ck"><input type="checkbox" ${c[k]?'checked':''} onchange="csSet('${k}',this.checked)"><span>${req?'<b class="req">[필수]</b> ':''}${label}</span></label>`;
+  return `<div class="consent"><label class="ck all"><input type="checkbox" ${consentOk(c)?'checked':''} onchange="csSet('all',this.checked)"><span><b>전체 동의</b></span></label>
+  ${ck('terms','<a href="terms.html" target="_blank" rel="noopener">이용약관</a> 동의')}
+  ${ck('privacy','<a href="privacy.html" target="_blank" rel="noopener">개인정보 수집·이용</a> 동의 (운동 기록·인바디 등 건강 관련 정보 포함)')}
+  ${ck('age','만 14세 이상이에요')}<div class="small muted" style="margin:0 0 6px 30px">만 14세 미만은 가입할 수 없어요.</div></div>`};
+async function saveConsent(){
+  ok(await sb.rpc('agree_terms',{p_under14:false,p_guardian:false}));
+}
+async function agreeNow(){await run(async()=>{
+  if(!consentOk(st.cs))return toast('필수 항목에 동의해 주세요');
+  await saveConsent();st.me=ok(await sb.from('profiles').select('*').eq('id',st.me.id).single());st.cs=newConsent();render();toast('동의해 주셔서 고마워요');
+})}
 async function finishOnboarding(){await run(async()=>{
-  const name=$('#o-name').value.trim(),role=st.ob.role,level=role==='trainer'?'고급':st.ob.level;
+  const name=$('#o-name').value.trim(),role=st.ob.role;
   if(!name)return toast('이름을 입력해주세요');
-  ok(await sb.rpc('complete_onboarding',{p_name:name,p_role:role,p_level:level}));
+  if(!consentOk(st.cs))return toast('필수 약관에 동의해 주세요');
+  ok(await sb.rpc('complete_onboarding',{p_name:name,p_role:role,p_level:role==='trainer'?'고급':'초급'}));
+  try{await saveConsent()}catch(e){console.warn('consent save failed (migration_007?)',e)}
+  st.cs=newConsent();
   const {data:{user}}=await sb.auth.getUser();await afterLogin(user);render();toast('오늘도 좀 들어볼까?');
 })}
 async function afterLogin(user){
   let p=ok(await sb.from('profiles').select('*').eq('id',user.id).maybeSingle());
   if(!p){const m=user.user_metadata||{};
-    p=ok(await sb.from('profiles').insert({id:user.id,email:(user.email||'').toLowerCase(),name:m.name||m.full_name||m.nickname||'',role:m.role==='trainer'?'trainer':'member',level:LEVELS.includes(m.level)?m.level:'초급'}).select().single())}
+    p=ok(await sb.from('profiles').insert({id:user.id,email:(user.email||'').toLowerCase(),name:m.name||m.full_name||m.nickname||'',role:m.role==='trainer'?'trainer':'member',level:'초급'}).select().single())}
   st.me=p;st.mode=isTrainer()?'trainer':'personal';st.tab='home';st.draft=newDraft();resetHF();
   await loadExercises();await loadData();
 }
+function markLogin(m){lsSet('mm-last-login',m);lsSet('mm-login-at',Date.now())}
 async function doLogin(){await run(async()=>{
   const email=$('#a-email').value.trim(),password=$('#a-pw').value;
   if(!email||!password)return toast('이메일과 비밀번호를 입력해주세요');
   const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;
-  await afterLogin(data.user);render();
+  markLogin('email');await afterLogin(data.user);render();
 })}
 async function doSignup(){await run(async()=>{
   const email=$('#a-email').value.trim(),password=$('#a-pw').value,name=$('#a-name').value.trim();
-  const role=$('#a-role').value,level=role==='trainer'?'고급':$('#a-level').value;
+  const role=st.suRole||'member',c=st.cs;
   if(!email||!password||!name)return toast('이름, 이메일, 비밀번호를 모두 입력해주세요');
   if(password.length<6)return toast('비밀번호는 6자 이상이어야 해요');
-  const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,role,level}}});if(error)throw error;
-  if(data.session){await afterLogin(data.user);render()}
-  else{st.authMode='login';render();toast('가입 완료! 이메일 인증 후 로그인해주세요')}
+  if(!consentOk(c))return toast('필수 약관에 동의해 주세요');
+  const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,role,level:role==='trainer'?'고급':'초급',terms_agreed:true}}});if(error)throw error;
+  let user=data.session?data.user:null;
+  if(!user){   /* 이메일 인증을 쓰지 않으므로 바로 로그인 (Supabase Confirm email이 꺼져 있어야 함) */
+    const r=await sb.auth.signInWithPassword({email,password});
+    if(r.error){st.cs=newConsent();st.authMode='login';render();return toast('가입은 됐지만 로그인하지 못했어요: '+r.error.message)}
+    user=r.data.user}
+  markLogin('email');await afterLogin(user);
+  if(st.me&&'terms_agreed_at' in st.me&&!st.me.terms_agreed_at){try{await saveConsent();st.me.terms_agreed_at=new Date().toISOString()}catch(e){}}   /* 가입 폼에서 이미 동의함 */
+  st.cs=newConsent();render();
 })}
-async function logout(){await sb.auth.signOut();Object.assign(st,{ob:undefined,me:null,members:[],sel:null,logs:[],pts:[],reqs:[],inbody:[],myTrainer:null,myCode:null,codeBusy:false,week:0,found:undefined,authMode:'login'});st.draft=newDraft();render()}
+async function logout(){await sb.auth.signOut();lsSet('mm-login-at',null);Object.assign(st,{ob:undefined,me:null,members:[],sel:null,logs:[],pts:[],reqs:[],inbody:[],myTrainer:null,myCode:null,codeBusy:false,week:0,found:undefined,authMode:'login',wd:false,editFrom:null,cs:newConsent()});st.draft=newDraft();render()}
 function setAuth(m){st.authMode=m;render()}
 
 /* ===== 데이터 로드 ===== */
@@ -251,7 +311,7 @@ async function loadData(){
   }
   const tid=targetId();
   st.logs=tid?await fetchAll(()=>sb.from('workout_logs').select('*').eq('user_id',tid).order('log_date',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];
-  try{st.inbody=tid?await fetchAll(()=>sb.from('inbody_records').select('*').eq('user_id',tid).order('measured_on',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];st.needMig=!('goal' in st.me)||!('center_name' in st.me)||(st.inbody.length>0&&!('fat_mass' in st.inbody[0]))}
+  try{st.inbody=tid?await fetchAll(()=>sb.from('inbody_records').select('*').eq('user_id',tid).order('measured_on',{ascending:false}).order('created_at',{ascending:false}).order('id')):[];st.needMig=!('goal' in st.me)||!('center_name' in st.me)||!('terms_agreed_at' in st.me)||(st.inbody.length>0&&!('fat_mass' in st.inbody[0]))}
   catch(e){st.inbody=[];st.needMig=true}   /* migration_002 미실행 */
   st.pts=[];st.reqs=[];st.myTrainer=null;st.trainerPT=[];
   if(coaching())st.trainerPT=await fetchAll(()=>sb.from('pt_schedules').select('*').eq('trainer_id',me.id).order('pt_date').order('pt_time').order('id'));
@@ -267,9 +327,11 @@ async function loadData(){
     st.pts=ok(await sb.from('pt_schedules').select('*').eq('member_id',me.id).order('pt_date').order('pt_time'));
     if(st.me.trainer_id)st.myTrainer=ok(await sb.from('profiles').select('*').eq('id',st.me.trainer_id).maybeSingle());
   }
+  const tp=targetProfile();   /* 운동 등급은 기록으로 계산해 profiles.level에 맞춰 둔다 (트레이너 회원 목록·검색용) */
+  if(tp&&tp.role==='member'){const lv=curLevel();if(tp.level!==lv){tp.level=lv;sb.from('profiles').update({level:lv}).eq('id',tp.id).then(r=>r.error&&console.warn('level sync',r.error))}}
 }
 const reload=()=>run(async()=>{await loadData();render()});
-function go(t){st.tab=t;render();window.scrollTo(0,0)}
+function go(t){if(st.draft?.id&&t!=='record'){st.draft=newDraft();st.editFrom=null}st.tab=t;render();window.scrollTo(0,0)}
 function toggleMode(){resetHF();st.mode=coaching()?'personal':'trainer';st.tab='home';st.draft=newDraft();reload()}
 function selectMember(id){resetHF();st.sel=st.members.find(m=>m.id===id)||null;st.draft=newDraft();reload()}
 
@@ -283,7 +345,7 @@ function topExercises(p,n){
   return [...new Set([...Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]),...exercisesOf(p)])].slice(0,n);
 }
 function suggest(ex){
-  const level=targetProfile()?.level||'초급',tr=TARGET_REPS[level],last=lastRec(ex);
+  const level=curLevel(),tr=TARGET_REPS[level],last=lastRec(ex);
   if(!last)return{text:'첫 기록이에요! 가벼운 무게로 자세부터 잡아요',w:'',r:tr};
   const sets=last.sets,top=sets.reduce((a,s)=>+s.w>+a.w?s:a,sets[0]);
   let w=+top.w,r=+top.r,msg;
@@ -294,7 +356,7 @@ function suggest(ex){
   return{text:`지난번 ${top.w}kg×${top.r}회 · ${msg}`,w,r};
 }
 function recommend(){
-  const level=targetProfile()?.level||'초급';
+  const level=curLevel();
   let plan=PLANS[level];
   if(level==='초급'&&!st.logs.length)plan=[{label:'전신',parts:['하체','가슴','등']}];
   const pick=plan.map(g=>({...g,rest:Math.min(...g.parts.map(restDays))})).reduce((a,b)=>b.rest>a.rest?b:a);
@@ -308,46 +370,60 @@ function recommend(){
 const legalLinks=()=>`<div class="legal"><a href="privacy.html" target="_blank" rel="noopener">개인정보처리방침</a><span>·</span><a href="terms.html" target="_blank" rel="noopener">이용약관</a></div>`;
 function onboardView(){
   const o=st.ob;
-  return `<div class="login"><h1 aria-label="믓">${logoSvg(64)}</h1><div class="hello">처음 오셨네요. 몇 가지만 알려주세요.</div>
-  <p class="muted" style="margin-top:6px">한 번만 입력하면 돼요. 나중에 마이 탭에서 바꿀 수 있어요(역할 제외).</p>
+  return `<div class="login"><h1 aria-label="믓">${logoSvg(64)}</h1><div class="hello">처음 오셨네요. 두 가지만 알려주세요.</div>
+  <p class="muted" style="margin-top:6px">한 번만 입력하면 돼요. 역할은 나중에 바꿀 수 없어요.</p>
   <label class="lbl" style="margin-top:24px">이름</label><input id="o-name" class="input" value="${esc(st.me.name)}" autocomplete="name">
-  <label class="lbl">역할</label><div class="chips">${[['member','일반 회원'],['trainer','트레이너']].map(([k,l])=>`<button class="chip ${o.role===k?'on':''}" onclick="st.ob.role='${k}';st.ob.keep=$('#o-name').value;render()">${l}</button>`).join('')}</div>
-  ${o.role==='trainer'?'':`<label class="lbl">운동 숙련도</label><div class="chips">${LEVELS.map(l=>`<button class="chip ${o.level===l?'on':''}" onclick="st.ob.level='${l}';st.ob.keep=$('#o-name').value;render()">${l}</button>`).join('')}</div>`}
+  <label class="lbl">어떻게 쓰실 건가요?</label><div class="chips">${[['member','일반 회원'],['trainer','트레이너']].map(([k,l])=>`<button class="chip ${o.role===k?'on':''}" onclick="st.ob.role='${k}';st.ob.keep=$('#o-name').value;render()">${l}</button>`).join('')}</div>
+  <div class="small muted" style="margin-top:8px">${o.role==='trainer'?'회원을 관리하고 PT 일정·수업 기록을 남겨요. 내 개인 운동도 기록할 수 있어요.':'내 운동·인바디를 기록하고, 트레이너와 연결해 PT를 받아요.'}</div>
+  ${consentBox()}
   <button class="btn primary" onclick="finishOnboarding()">시작하기</button>
   <button class="btn ghost" onclick="logout()">다른 계정으로 로그인</button>${legalLinks()}</div>`;
 }
+function termsView(){
+  return `<div class="login"><h1 aria-label="믓">${logoSvg(64)}</h1><div class="hello">약관 동의가 필요해요</div>
+  <p class="muted" style="margin-top:6px">서비스 이용을 위해 한 번만 동의해 주세요.</p>
+  ${consentBox()}<button class="btn primary" onclick="agreeNow()">동의하고 계속하기</button>
+  <button class="btn ghost" onclick="logout()">로그아웃</button>${legalLinks()}</div>`;
+}
+const LOGIN_NAMES={kakao:'카카오',naver:'네이버',google:'Google',email:'이메일'};
+const recent=k=>lsGet('mm-last-login')===k?'<span class="recent">최근 로그인</span>':'';
 function authView(){
-  const su=st.authMode==='signup';
+  const su=st.authMode==='signup',last=lsGet('mm-last-login');
+  st.emailOpen??=last==='email';   /* 기본은 접힘. 지난번 이메일로 로그인했다면 펼쳐 둔다 */
+  const open=st.emailOpen||su;
   return `<div class="login"><h1 aria-label="믓">${logoSvg(96)}</h1><div class="en">MOVE &amp; STRENGTH</div><p class="muted" style="margin-top:6px">마실처럼 가볍게, 쇠질처럼 진심으로.</p><div class="hello">오늘도 좀 들어볼까?</div>
   ${IS_DEV?'<div class="card warn" style="margin-top:16px"><b>DEV 환경</b><div class="small muted" style="margin-top:4px">테스트용 데이터베이스예요. 여기서 입력한 내용은 운영 앱에 나타나지 않아요. 간편 로그인은 dev에서 따로 설정하기 전까지 이메일로 가입·로그인해 주세요.</div></div>':''}
   ${CONFIG_OK?'':'<div class="cfg">SUPABASE_URL이 프로젝트 주소가 아닙니다. index.html 상단의 SUPABASE_URL을 <b>https://&lt;project-ref&gt;.supabase.co</b> 형태로 바꿔주세요.</div>'}
   <div class="social">
-    <button class="btn kakao" onclick="oauth('kakao')"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3.5C6.8 3.5 2.6 6.8 2.6 10.9c0 2.6 1.7 4.9 4.3 6.2l-1.1 4c-.1.4.3.6.6.4l4.7-3.1c.3 0 .6.1.9.1 5.2 0 9.4-3.3 9.4-7.4S17.2 3.5 12 3.5z"/></svg>카카오로 시작하기</button>
-    <button class="btn naver" onclick="oauth('naver')"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M15.6 12.8 8.1 2H2v20h6.4V11.2L15.9 22H22V2h-6.4z"/></svg>네이버로 시작하기</button>
-    <button class="btn google" onclick="oauth('google')"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M22.6 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.2a6.6 6.6 0 0 1 0-4.3V7.1H2.1a11 11 0 0 0 0 9.9l3.7-2.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>Google로 계속하기</button>
+    <button class="btn kakao" onclick="oauth('kakao')"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3.5C6.8 3.5 2.6 6.8 2.6 10.9c0 2.6 1.7 4.9 4.3 6.2l-1.1 4c-.1.4.3.6.6.4l4.7-3.1c.3 0 .6.1.9.1 5.2 0 9.4-3.3 9.4-7.4S17.2 3.5 12 3.5z"/></svg>카카오로 시작하기${recent('kakao')}</button>
+    <button class="btn naver" onclick="oauth('naver')"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M15.6 12.8 8.1 2H2v20h6.4V11.2L15.9 22H22V2h-6.4z"/></svg>네이버로 시작하기${recent('naver')}</button>
+    <button class="btn google" onclick="oauth('google')"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M22.6 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.2a6.6 6.6 0 0 1 0-4.3V7.1H2.1a11 11 0 0 0 0 9.9l3.7-2.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>Google로 계속하기${recent('google')}</button>
   </div>
-  <div class="or"><span>또는 이메일로</span></div>
-  <div class="seg"><button class="${su?'':'on'}" onclick="setAuth('login')">로그인</button><button class="${su?'on':''}" onclick="setAuth('signup')">회원가입</button></div>
+  <div class="small muted" style="text-align:center;margin-top:12px">한 번 로그인하면 ${KEEP_DAYS}일 동안 유지돼요</div>
+  <button class="or" style="width:100%;background:none;border:none;font-family:inherit;cursor:pointer" onclick="st.emailOpen=!${open};st.authMode='login';render()" aria-expanded="${open}"><span>또는 이메일로 ${open?'▴':'▾'}${recent('email')}</span></button>
+  ${open?`<div class="seg"><button class="${su?'':'on'}" onclick="setAuth('login')">로그인</button><button class="${su?'on':''}" onclick="setAuth('signup')">회원가입</button></div>
   ${su?`<label class="lbl">이름</label><input id="a-name" class="input" autocomplete="name">`:''}
   <label class="lbl">이메일</label><input id="a-email" class="input" type="email" autocomplete="email">
   <label class="lbl">비밀번호</label><input id="a-pw" class="input" type="password" autocomplete="${su?'new-password':'current-password'}">
-  ${su?`<label class="lbl">역할</label><select id="a-role" class="input" onchange="$('#a-level-w').hidden=this.value==='trainer'"><option value="member">일반 회원</option><option value="trainer">트레이너</option></select>
-  <div id="a-level-w"><label class="lbl">운동 숙련도</label><select id="a-level" class="input">${LEVELS.map(l=>`<option>${l}</option>`).join('')}</select></div>`:''}
-  <button class="btn primary" onclick="${su?'doSignup()':'doLogin()'}">${su?'가입하기':'로그인'}</button>${legalLinks()}</div>`;
+  ${su?`<label class="lbl">역할</label><div class="chips">${[['member','일반 회원'],['trainer','트레이너']].map(([k,l])=>`<button class="chip ${(st.suRole||'member')===k?'on':''}" onclick="st.suRole='${k}';csSet('_','')">${l}</button>`).join('')}</div>${consentBox()}`:''}
+  <button class="btn primary" onclick="${su?'doSignup()':'doLogin()'}">${su?'가입하기':'로그인'}</button>`:''}${legalLinks()}</div>`;
 }
 function headerView(){
   const m=st.me;
-  return `<header><div class="brandrow">${logoSvg(28)}<b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원 · '+esc(m.level)}</span>${IS_DEV?'<span class="tag" style="color:var(--warn);font-family:var(--mono)">DEV</span>':''}</div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
+  return `<header><div class="brandrow">${logoSvg(28)}<b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원 · '+esc(curLevel())}</span>${IS_DEV?'<span class="tag" style="color:var(--warn);font-family:var(--mono)">DEV</span>':''}</div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
   ${isTrainer()?`<div style="padding:4px 16px 0"><button class="btn ghost" style="margin-top:8px" onclick="toggleMode()">${coaching()?'내 개인 운동 모드로 전환':'회원 관리 모드로 돌아가기'}</button></div>`:''}`;
 }
 const tabList=()=>coaching()?[['home','','홈'],['members','','회원'],['record','','기록'],['history','','히스토리'],['inbody','','인바디'],['pt','','PT'],['my','','마이']]
-  :[['home','','홈'],['record','','기록'],['history','','히스토리'],['inbody','','인바디'],...(isTrainer()?[]:[['class','','수업']]),['my','','마이']];
-const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${st.tab===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
+  :[['home','','홈'],['record','','기록'],['inbody','','인바디'],...(isTrainer()?[]:[['class','','수업']]),['my','','마이']];
+/* 회원·개인 모드의 운동 기록(히스토리)은 마이 > 운동 기록에서 연다 (하단 탭은 마이가 켜짐) */
+const SUB_TABS={history:'my'};
+const navTab=()=>tabList().some(([k])=>k===st.tab)?st.tab:SUB_TABS[st.tab];
+const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
 const mLabel=m=>`${esc(m.name)} · ${esc(m.member_code||m.level)}${m.is_managed?' · 앱 미사용':''}`;
 const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${mLabel(m)}</option>`).join('')}</select>`:'';
 const ptTag=p=>`<span class="st-tag st-${p.status}">${PT_STATUS[p.status]||p.status}</span>`;
 const noMember=()=>`<div class="card center muted">담당 회원이 없어요.<br>회원 탭에서 이름·이메일로 찾거나 직접 등록하고,<br>마이 탭의 강사 코드를 회원에게 알려주세요.</div>`;
-const migHint=()=>`<div class="card warn">DB 업데이트가 필요해요. Supabase SQL Editor에서 <b>supabase/</b> 폴더의 <b>migration_002 ~ 005</b>를 번호 순서대로 실행해 주세요. (인바디 · 내 정보 · 강사 코드 · 간편 로그인 · 회원 코드 · 트레이너 프로필)</div>`;
+const migHint=()=>`<div class="card warn">DB 업데이트가 필요해요. Supabase SQL Editor에서 <b>supabase/</b> 폴더의 아직 실행하지 않은 <b>migration_002 ~ 007</b>을 번호 순서대로 실행해 주세요. (인바디 · 간편 로그인 · 회원 코드 · 기록 수정 · 약관 동의 · 회원 탈퇴)</div>`;
 
 function openPT(memberId){resetHF();st.sel=st.members.find(m=>m.id===memberId)||st.sel;st.draft=newDraft();st.tab='record';reload();window.scrollTo(0,0)}
 function trainerHomeView(){
@@ -382,11 +458,18 @@ function weekStrip(){
   const days=[...Array(7)].map((_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);return localDate(d)});
   const dot=d=>{const done=st.logs.some(l=>l.log_date===d&&l.is_pt)||st.pts.some(p=>p.pt_date===d&&p.status==='completed'),plan=!done&&st.pts.some(p=>p.pt_date===d&&p.status==='scheduled');
     return (st.logs.some(l=>l.log_date===d&&!l.is_pt)?'<em class="dw"></em>':'')+(done?'<em class="dpd"></em>':'')+(plan?'<em class="dpp"></em>':'')+(st.inbody.some(x=>x.measured_on===d)?'<em class="db"></em>':'')};
-  return `<div class="card"><div class="row between"><b>${+days[3].slice(5,7)}월 ${st.week===0?'· 이번 주':''}</b><div><button class="x" style="font-size:20px" onclick="wk(-1)">‹</button><button class="x" style="font-size:20px" onclick="wk(1)">›</button></div></div>
+  return `<div class="card" data-swipe="week"><div class="row between"><b>${+days[3].slice(5,7)}월 ${st.week===0?'· 이번 주':`<button class="chip" style="min-height:32px;padding:0 10px;margin-left:6px" onclick="st.week=0;render()">이번 주</button>`}</b><div class="row" style="gap:8px">${navBtn('wk(-1)','이전 주',-1)}${navBtn('wk(1)','다음 주',1)}</div></div>
   <div class="wk">${days.map((d,i)=>`<button class="${d===today()?'today':''}" onclick="openDay('${d}')"><span>${'월화수목금토일'[i]}</span><b>${+d.slice(8)}</b><i>${dot(d)}</i></button>`).join('')}</div>
   <div class="legend"><em class="dw"></em>운동<em class="dpd"></em>PT 완료<em class="dpp"></em>PT 예정<em class="db"></em>인바디</div></div>`;
 }
 function wk(n){st.week+=n;render()}
+/* 좌우 이동 버튼 · 스와이프 (data-swipe 영역에서 옆으로 밀면 이전/다음) */
+const navBtn=(fn,label,dir)=>`<button class="navb" onclick="${fn}" aria-label="${label}"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="${dir<0?'M15 5 8 12l7 7':'M9 5l7 7-7 7'}"/></svg></button>`;
+const SWIPE={week:n=>wk(n),pt:n=>ptNav(n)};
+let swX=null,swY=0,swK=null;
+document.addEventListener('touchstart',e=>{const z=e.target.closest('[data-swipe]');if(!z||e.touches.length>1){swX=null;return}swK=z.dataset.swipe;swX=e.touches[0].clientX;swY=e.touches[0].clientY},{passive:true});
+document.addEventListener('touchend',e=>{if(swX==null)return;const t=e.changedTouches[0],dx=t.clientX-swX,dy=t.clientY-swY;swX=null;
+  if(Math.abs(dx)>=50&&Math.abs(dx)>Math.abs(dy)*1.5&&SWIPE[swK])SWIPE[swK](dx<0?1:-1)},{passive:true});
 function openDay(d){resetHF();st.hf.date=d;go('history')}
 function recordOn(d){st.draft=newDraft();st.draft.date=d;go('record')}
 function startEx(p,e){st.routine=null;loadItem({part:p,ex:e,r:suggest(e).r,w:suggest(e).w,text:suggest(e).text})}
@@ -407,7 +490,11 @@ function recordView(){
   if(coaching()&&!st.sel)return `<h2>회원 운동 기록</h2>${noMember()}`;
   const d=st.draft,exs=exercisesOf(d.part);
   const cur=d.custom?'__custom':d.exercise;
-  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 대신 기록`:'운동 기록'}</h2><p class="sub">${coaching()?'오늘 수업 내용을 남겨주세요. 회원에게 그대로 보여요.':'자, 쇠질하러 가자.'}</p>${coaching()?memberSelect():routineBar()}
+  if(d.id)return `<h2>기록 수정</h2><p class="sub">${coaching()?esc(st.sel.name)+' 회원 · ':''}${fmtDate(d.date)} ${esc(d.exercise)}</p>`+recordForm(d,exs,cur);
+  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 대신 기록`:'운동 기록'}</h2><p class="sub">${coaching()?'오늘 수업 내용을 남겨주세요. 회원에게 그대로 보여요.':'자, 쇠질하러 가자.'}</p>${coaching()?memberSelect():routineBar()}`+recordForm(d,exs,cur);
+}
+function recordForm(d,exs,cur){
+  return `
   <div class="card"><label class="lbl">날짜</label><input type="date" class="input" value="${d.date}" onchange="st.draft.date=this.value">
   <label class="lbl">부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" onclick="pickPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
   <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)"><option value="">종목을 선택하세요</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>+ 직접 입력</option></select>
@@ -421,7 +508,7 @@ function recordView(){
   <button class="btn ghost sm" onclick="addSet()">+ 세트 추가</button>
   <label class="lbl">피드백 ${coaching()?'(회원에게 전달 · 자세 · 통증 여부)':'(컨디션 · 통증 여부 등)'}</label><textarea class="input" placeholder="통증이나 부상이 있다면 꼭 적어주세요" oninput="st.draft.feedback=this.value">${esc(d.feedback)}</textarea>
   <label class="lbl">노트 ${coaching()?'(수업 메모 · 숙제 · 다음 수업 계획)':'(메모)'}</label><textarea class="input" style="min-height:70px" placeholder="${coaching()?'회원에게 보이는 노트예요':'자유 메모'}" oninput="st.draft.note=this.value">${esc(d.note)}</textarea>
-  <button class="btn primary" onclick="saveLog()">저장하기</button></div>`;
+  <button class="btn primary" onclick="saveLog()">${d.id?'수정 저장':'저장하기'}</button>${d.id?'<button class="btn ghost" onclick="cancelEdit()">취소</button>':''}</div>`;
 }
 function recentCard(name){
   if(!name)return '';const rec=st.logs.filter(l=>l.exercise===name).slice(0,3);
@@ -447,14 +534,18 @@ function saveLog(){return run(async()=>{
   const sets=d.sets.filter(s=>+s.r>0).map(s=>({w:+s.w||0,r:+s.r}));
   if(!sets.length)return toast('횟수를 1회 이상 입력해주세요');
   const prev=st.logs.filter(l=>l.exercise===exercise),prevBest=Math.max(0,...prev.flatMap(l=>l.sets.map(x=>+x.w||0))),newBest=Math.max(...sets.map(x=>x.w));
-  const pr=prev.length>0&&newBest>prevBest;
-  ok(await sb.from('workout_logs').insert({user_id:tid,log_date:d.date,part:d.part,exercise,sets,feedback:d.feedback.trim(),is_pt:coaching(),...(d.note.trim()?{note:d.note.trim()}:{})}));
+  const pr=!d.id&&prev.length>0&&newBest>prevBest;
+  if(d.id){   /* 기록 수정 */
+    const r=await sb.from('workout_logs').update({log_date:d.date,part:d.part,exercise,sets,feedback:d.feedback.trim(),note:d.note.trim()}).eq('id',d.id).select();
+    if(r.error)throw r.error;if(!r.data?.length)throw new Error('이 기록은 수정할 수 없어요 (DB 업데이트 migration_007 필요)');
+  }else ok(await sb.from('workout_logs').insert({user_id:tid,log_date:d.date,part:d.part,exercise,sets,feedback:d.feedback.trim(),is_pt:coaching(),...(d.note.trim()?{note:d.note.trim()}:{})}));
   if(!(st.exercises[d.part]||[]).includes(exercise)){   /* 새 종목이면 exercises 테이블에도 자동 저장 */
     try{ok(await sb.from('exercises').upsert({body_part:d.part,name:exercise},{onConflict:'body_part,name',ignoreDuplicates:true}));(st.exercises[d.part]??=[]).push(exercise)}
     catch(e){console.warn('exercise save failed',e)}
   }
-  const inRoutine=st.routine&&!coaching();
+  const inRoutine=st.routine&&!coaching()&&!d.id;
   st.draft=newDraft();st.draft.date=d.date;await loadData();
+  if(d.id){const b=st.editFrom;st.editFrom=null;st.draft=newDraft();go(b||'history');return toast('수정했어요')}
   if(inRoutine){const R=st.routine;if(R.i+1<R.items.length){R.i++;loadItem(R.items[R.i]);st.draft.date=d.date;render();return toast(pr?`오, 이건 좀 믓지다. ${newBest}kg 신기록 · 다음: ${R.items[R.i].ex}`:`좋아. 다음은 ${R.items[R.i].ex}`)}st.routine=null}
   render();toast(pr?`오, 이건 좀 믓지다. ${exercise} ${newBest}kg 신기록`:coaching()?'오늘의 쇠질 완료.':'오늘도 한 건 했다.');
 })}
@@ -465,7 +556,15 @@ const hasFb=l=>!!(l.feedback||l.note);
 const fbBody=l=>(l.feedback?esc(l.feedback):'')+(l.feedback&&l.note?'\n':'')+(l.note?'노트 · '+esc(l.note):'');
 function tgFb(b){const e=b.nextElementSibling;e.hidden=!e.hidden;b.textContent=e.hidden?'피드백 보기 ▸':'피드백 접기 ▾'}
 function tgFbRow(b){const r=b.closest('tr').nextElementSibling;r.hidden=!r.hidden}
-function logCard(l,open){return `<div class="card" style="padding:14px"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(partLabel(l.part))}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div>${st.hf.edit?`<button class="btn sm danger" onclick="delLog('${l.id}')">삭제</button>`:''}</div>
+/* 수정 권한: 회원은 PT가 아닌 본인 기록, 트레이너는 담당 회원의 PT 기록·가져온 기록 (migration_007 logs_update) */
+const canEdit=l=>coaching()?(l.is_pt||l.imported):!l.is_pt;
+const editBtns=(l,sty='')=>`<span class="row" style="gap:6px;display:inline-flex;${sty}">${canEdit(l)?`<button class="btn sm" onclick="editLog('${l.id}')">수정</button>`:''}<button class="btn sm danger" onclick="delLog('${l.id}')">삭제</button></span>`;
+function editLog(id){const l=st.logs.find(x=>x.id===id);if(!l)return;
+  st.routine=null;st.editFrom='history';
+  st.draft={id:l.id,date:l.log_date,part:l.part,exercise:l.exercise,custom:false,customName:'',sets:l.sets.map(x=>({w:x.w,r:x.r})),feedback:l.feedback||'',note:l.note||''};
+  go('record')}
+function cancelEdit(){st.draft=newDraft();const b=st.editFrom;st.editFrom=null;go(b||'record')}
+function logCard(l,open){return `<div class="card" style="padding:14px"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(partLabel(l.part))}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div>${st.hf.edit?editBtns(l):''}</div>
   <div>${setsHtml(l)}</div>${hasFb(l)?`<button class="x fbtn" onclick="tgFb(this)">피드백 ${open?'접기 ▾':'보기 ▸'}</button><div class="fb" ${open?'':'hidden'}>${fbBody(l)}</div>`:''}</div>`}
 function filteredLogs(){const {q,part,ex,date}=st.hf,qq=q.trim().toLowerCase();
   return st.logs.filter(l=>(!date||l.log_date===date)&&(!part||l.part===part)&&(!ex||l.exercise===ex)&&(!qq||l.exercise.toLowerCase().includes(qq)||(l.feedback||'').toLowerCase().includes(qq)||(l.note||'').toLowerCase().includes(qq)))}
@@ -483,7 +582,7 @@ function exDetail(list,limit){
   <table class="tbl"><thead><tr><th>세트</th><th>최소</th><th>최대</th><th>횟수</th></tr></thead><tbody>${mm.map(m=>`<tr><td>${m.n}set</td><td>${kg(m.min)}</td><td>${kg(m.max)}</td><td>${m.cnt}번</td></tr>`).join('')}</tbody></table></div>
   <div class="card" style="padding:8px 12px"><table class="tbl"><thead><tr><th>날짜</th><th>세트 (kg × 횟수)</th><th></th></tr></thead><tbody>${list.slice(0,limit).map(l=>
     `<tr><td class="d">${fmtShort(l.log_date)}${l.is_pt?'<div class="pt">PT</div>':''}</td><td>${l.sets.map(x=>`<span class="pr"><b>${+x.w?x.w:'맨몸'}</b><i>×</i>${x.r}</span>`).join('')}</td>
-    <td style="white-space:nowrap;text-align:right">${hasFb(l)?`<button class="x" style="padding:0 6px" onclick="tgFbRow(this)" aria-label="피드백 보기">${ico('msg',18)}</button>`:''}${st.hf.edit?`<button class="btn sm danger" style="margin-left:6px" onclick="delLog('${l.id}')">삭제</button>`:''}</td></tr>`
+    <td style="white-space:nowrap;text-align:right">${hasFb(l)?`<button class="x" style="padding:0 6px" onclick="tgFbRow(this)" aria-label="피드백 보기">${ico('msg',18)}</button>`:''}${st.hf.edit?editBtns(l,'margin-left:6px'):''}</td></tr>`
     +(hasFb(l)?`<tr class="fbr" hidden><td colspan="3">${fbBody(l)}</td></tr>`:'')).join('')}</tbody></table></div>`;
 }
 function histResults(){
@@ -501,11 +600,11 @@ function historyView(){
   const hf=st.hf,have=new Set(st.logs.map(l=>l.part)),parts=[...PARTS,...have].filter((p,i,a)=>have.has(p)&&a.indexOf(p)===i);
   const cnt={};st.logs.filter(l=>!hf.part||l.part===hf.part).forEach(l=>cnt[l.exercise]=(cnt[l.exercise]||0)+1);
   const exs=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b,'ko'));
-  return `<h2>${coaching()?`${esc(st.sel.name)} 회원 히스토리`:'내 운동 히스토리'}</h2><p class="sub">남과 비교 말고 어제의 나와 비교.</p>${coaching()?memberSelect():''}
+  return `${coaching()?'':`<button class="back" onclick="go('my')">‹ 마이</button>`}<h2>${coaching()?`${esc(st.sel.name)} 회원 히스토리`:'운동 기록'}</h2><p class="sub">남과 비교 말고 어제의 나와 비교.</p>${coaching()?memberSelect():''}
   <div class="card"><input class="input" type="search" placeholder="종목 · 피드백 · 노트 검색" value="${esc(hf.q)}" oninput="hfQ(this.value)">
   ${hf.date?`<button class="chip on" style="margin-top:12px" onclick="hfDate()">${fmtDate(hf.date)} ✕</button>`:''}
   <div class="chips" style="margin-top:12px"><button class="chip ${hf.part?'':'on'}" onclick="hfPart('')">전체</button>${parts.map(p=>`<button class="chip ${hf.part===p?'on':''}" onclick="hfPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
-  <div class="row between" style="margin-top:12px"><button class="chip on" style="min-height:40px" onclick="hfSort()">${hf.sort==='asc'?'날짜 ↑ 오래된순':'날짜 ↓ 최신순'}</button><button class="chip ${hf.edit?'on':''}" style="min-height:40px" onclick="hfEdit()">삭제 모드 ${hf.edit?'ON':'OFF'}</button></div>
+  <div class="row between" style="margin-top:12px"><button class="chip on" style="min-height:40px" onclick="hfSort()">${hf.sort==='asc'?'날짜 ↑ 오래된순':'날짜 ↓ 최신순'}</button><button class="chip ${hf.edit?'on':''}" style="min-height:40px" onclick="hfEdit()">편집 모드 ${hf.edit?'ON':'OFF'}</button></div>
   <select class="input" style="margin-top:12px" onchange="hfEx(this.value)"><option value="">전체 종목 (${exs.length})</option>${exs.map(e=>`<option value="${esc(e)}" ${hf.ex===e?'selected':''}>${esc(e)} · ${cnt[e]}회</option>`).join('')}</select></div>
   <div id="hres">${histResults()}</div>`;
 }
@@ -527,11 +626,11 @@ function membersView(){
   ${Array.isArray(f)?(f.length?f.map(x=>`<div class="item"><div><b>${esc(x.name)}</b> <span class="tag">${esc(x.member_code||'')}</span><div class="small muted">${x.email_hint?esc(x.email_hint):x.is_managed?'앱 미사용 회원':'이메일 없음'} · ${esc(x.level)}</div></div>
     ${x.trainer_state==='mine'?'<span class="ok small">내 회원</span>':x.trainer_state==='other'?'<span class="muted small">다른 트레이너</span>':`<button class="btn sm primary" onclick="addMember('${x.id}')">등록</button>`}</div>`).join(''):'<div class="small muted" style="margin-top:10px">찾는 회원이 없어요. 앱을 쓰지 않는 회원이면 아래에서 직접 등록하세요.</div>'):''}</div>
   <div class="card"><h3>회원 직접 등록</h3><div class="small muted">이메일이 없거나 앱을 쓰지 않는 회원도 등록할 수 있어요. 고유 회원코드가 자동으로 붙어 동명이인도 구분돼요.</div>
-  <div class="grid2"><div><label class="lbl">이름</label><input id="mm-name" class="input"></div><div><label class="lbl">숙련도</label><select id="mm-level" class="input">${LEVELS.map(l=>`<option>${l}</option>`).join('')}</select></div></div>
+  <label class="lbl">이름</label><input id="mm-name" class="input"><div class="small muted" style="margin-top:6px">운동 등급은 기록이 쌓이면 자동으로 정해져요.</div>
   <button class="btn ghost" onclick="addManaged()">등록하기</button></div>
   ${impCard()}
   ${st.members.length?`<div class="card"><h3>회원 선택</h3>${memberSelect()}
-  ${s?`<div class="small muted">회원코드 ${esc(s.member_code||'-')} · ${s.is_managed?'앱 미사용 회원':esc(s.email||'이메일 없음')} · 숙련도 ${esc(s.level)}</div>
+  ${s?`<div class="small muted">회원코드 ${esc(s.member_code||'-')} · ${s.is_managed?'앱 미사용 회원':esc(s.email||'이메일 없음')} · 운동 등급 ${esc(s.level)}</div>
   <label class="lbl">회원 특징 · 트레이너만 보는 메모</label><textarea id="m-notes" class="input" placeholder="체형, 부상 이력, 성향 등">${esc(st.mnote?.notes)}</textarea>
   <label class="lbl">운동 방향 / 커리큘럼 · 트레이너만 보는 메모</label><textarea id="m-cur" class="input" placeholder="목표와 주차별 운동 방향">${esc(st.mnote?.curriculum)}</textarea>
   <button class="btn primary" onclick="saveNotes()">저장하기</button>`:''}</div>`:noMember()}`;
@@ -619,8 +718,8 @@ function searchMember(){return run(async()=>{
   render();$('#m-q').value=q;
 })}
 function addManaged(){return run(async()=>{
-  const name=$('#mm-name').value.trim(),level=$('#mm-level').value;if(!name)return toast('이름을 입력해주세요');
-  const m=ok(await sb.rpc('create_managed_member',{p_name:name,p_level:level}));
+  const name=$('#mm-name').value.trim();if(!name)return toast('이름을 입력해주세요');
+  const m=ok(await sb.rpc('create_managed_member',{p_name:name,p_level:'초급'}));
   st.sel={id:m.id};st.found=undefined;await loadData();render();toast(`${m.name} 회원을 등록했어요 · 회원코드 ${m.member_code}`);
 })}
 function addMember(id){return run(async()=>{
@@ -655,9 +754,10 @@ function ptView(){
   return `<h2>PT 일정</h2>
   <button class="btn primary" style="margin-top:0" onclick="ptOpenForm()">+ PT 일정 등록</button>
   <div class="seg"><button class="${mode==='day'?'on':''}" onclick="ptSetMode('day')">일</button><button class="${mode==='week'?'on':''}" onclick="ptSetMode('week')">주</button></div>
-  <div class="row between" style="margin:12px 0 4px"><button class="chip" style="min-width:44px" onclick="ptNav(-1)" aria-label="이전">‹</button><div style="text-align:center"><b>${title}</b><div class="small muted">${list.length}건${canceled.length?` · 취소 ${canceled.length}건`:''}</div></div><button class="chip" style="min-width:44px" onclick="ptNav(1)" aria-label="다음">›</button></div>
+  <div data-swipe="pt"><div class="row between" style="margin:12px 0 4px">${navBtn('ptNav(-1)',mode==='day'?'이전 날':'이전 주',-1)}<div style="text-align:center"><b>${title}</b><div class="small muted">${list.length}건${canceled.length?` · 취소 ${canceled.length}건`:''}</div></div>${navBtn('ptNav(1)',mode==='day'?'다음 날':'다음 주',1)}</div>
   ${d!==today()&&mode==='day'||mode==='week'&&from!==weekStart(today())?`<button class="chip" style="margin:8px 0" onclick="ptToday()">오늘로</button>`:''}
-  ${body}${st.ptf?ptSheet():''}`;
+  <div class="small muted" style="margin:4px 0;text-align:center">옆으로 밀어서 ${mode==='day'?'날짜':'주'} 이동</div>
+  ${body}</div>${st.ptf?ptSheet():''}`;
 }
 function ptSetMode(m){st.ptMode=m;render()}
 function ptNav(n){st.ptDate=addDays(st.ptDate||today(),n*(st.ptMode==='week'?7:1));render()}
@@ -749,20 +849,20 @@ function requestPT(){return run(async()=>{
 function cancelReq(id){if(!confirm('PT 신청을 취소할까요?'))return;run(async()=>{ok(await sb.from('pt_schedules').update({status:'canceled'}).eq('id',id));await loadData();render()})}
 
 /* ===== 마이페이지 ===== */
-function getFont(){try{return +localStorage.getItem('mm-font')||100}catch(e){return 100}}
-function applyFont(){document.body.style.zoom=getFont()/100}
-function setFont(v){try{localStorage.setItem('mm-font',v)}catch(e){}applyFont();render()}
 function ensureCode(){if(st.myCode!==null||st.codeBusy)return;st.codeBusy=true;
   sb.rpc('my_trainer_code').then(({data,error})=>{st.myCode=error?'':(data||'');if(error)st.needMig=true;if(st.tab==='my')render()})}
 function myView(){
-  const m=st.me,tr=isTrainer(),fs=getFont();if(tr)ensureCode();
+  const m=st.me,tr=isTrainer();if(tr)ensureCode();
   const sel=(id,opts,val,blank)=>`<select id="${id}" class="input">${blank!=null?`<option value="">${blank}</option>`:''}${opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select>`;
   return `<h2>마이</h2>${st.needMig?migHint():''}
   <div class="card hl"><div class="row"><div class="avatar">${esc((m.name||'?').slice(0,1))}</div><div><b style="font-size:20px">${esc(m.name)} ${tr?'트레이너님':'회원님'}</b>
   <div style="margin-top:6px">${tr?`<span class="tag pt">강사 코드 ${esc(st.myCode||'…')}</span>`:st.myTrainer?`<span class="tag pt">${esc(st.myTrainer.name)} 트레이너</span>`:'<span class="tag">강사 미연결</span>'}</div></div></div></div>
+  <h3 class="sec">운동</h3>
+  <button class="card menu" onclick="resetHF();go('history')"><div>${ico('history',22)}<div><b>운동 기록</b><div class="small muted">${st.logs.length?`총 ${st.logs.length}건 · 검색 · 종목별 최고 무게 · 수정`:'아직 기록이 없어요'}</div></div></div><span class="muted">›</span></button>
+  ${levelCard()}
   <h3 class="sec">내 정보</h3>
   <div class="card"><label class="lbl">이름</label><input id="p-name" class="input" value="${esc(m.name)}">
-  <div class="grid2">${tr?'':`<div><label class="lbl">숙련도</label>${sel('p-level',LEVELS,m.level)}</div>`}<div><label class="lbl">목표</label>${sel('p-goal',GOALS,m.goal,'선택 안 함')}</div></div>
+  <label class="lbl">목표</label>${sel('p-goal',GOALS,m.goal,'선택 안 함')}
   <div class="grid2"><div><label class="lbl">키 (cm)</label><input id="p-height" type="number" inputmode="decimal" class="input" value="${m.height_cm??''}"></div><div><label class="lbl">시작 체중 (kg)</label><input id="p-sw" type="number" inputmode="decimal" class="input" value="${m.start_weight??''}"></div></div>
   <div class="grid2"><div><label class="lbl">생년월일</label><input id="p-birth" type="date" class="input" value="${m.birth_date||''}"></div><div><label class="lbl">성별</label>${sel('p-gender',['여성','남성'],m.gender,'선택 안 함')}</div></div>
   <div class="small muted" style="margin-top:12px">${esc(m.email||'')}${m.member_code?' · 회원코드 '+esc(m.member_code):''}</div>
@@ -776,10 +876,33 @@ function myView(){
   ${tr?`<div class="card"><div class="small muted">내 강사 코드</div><div class="code">${st.myCode===null?'…':esc(st.myCode)||'----'}</div><div class="small muted">회원에게 이 4자리 코드를 알려주면 회원이 마이 탭에서 입력해 직접 연결돼요.</div>${st.myCode?'<button class="btn ghost" onclick="copyCode()">코드 복사</button>':''}</div>`
    :st.myTrainer?trainerCard(st.myTrainer)
    :`<div class="card"><h3>강사님께 받은 코드를 입력해주세요</h3><input id="tcode" class="input code-in" inputmode="numeric" maxlength="4" placeholder="0000"><div class="small muted" style="margin-top:8px">공유받은 강사의 코드번호를 입력하면 자동으로 연결돼요.</div><button class="btn primary" onclick="linkTrainer()">연결하기</button></div>`}
-  <h3 class="sec">화면</h3>
-  <div class="card"><label class="lbl">글자 크기</label><div class="chips">${[[100,'기본'],[110,'크게'],[120,'아주 크게']].map(([v,l])=>`<button class="chip ${fs===v?'on':''}" onclick="setFont(${v})">${l}</button>`).join('')}</div></div>
-  <button class="btn" onclick="logout()">로그아웃</button>${legalLinks()}`;
+  <button class="btn" onclick="logout()">로그아웃</button>
+  <button class="btn ghost" style="color:var(--m)" onclick="st.wd=true;render()">회원 탈퇴</button>${legalLinks()}`;
 }
+function levelCard(){
+  const lv=curLevel(),{days,span}=levelStats(st.logs),i=LEVEL_RULES.findIndex(r=>r[0]===lv),next=LEVEL_RULES[i-1];
+  const need=next?[next[1]>span?`운동 기간 ${next[1]-span}일`:'',next[2]>days?`운동한 날 ${next[2]-days}일`:''].filter(Boolean).join(' · '):'';
+  return `<div class="card"><div class="row between"><div><div class="small muted">운동 등급 · 기록으로 자동 부여</div><b style="font-size:20px">${lv}</b></div><div class="small muted" style="text-align:right">운동한 날 ${days}일<br>운동 기간 ${span}일</div></div>
+  ${next?`<div class="small" style="margin-top:10px">${esc(next[0])}까지 ${need} 남았어요</div>`:'<div class="small" style="margin-top:10px">최고 등급이에요. 오, 이건 좀 믓지다.</div>'}
+  <button class="x fbtn" onclick="tgFb(this)">등급 기준 보기 ▸</button><div class="fb" hidden>${LEVEL_RULES.map(([l,,,t])=>`<div><b>${l}</b> · ${t}</div>`).join('')}<div class="muted" style="margin-top:6px">추천 운동의 분할과 목표 횟수(초급 12회 · 중급 10회 · 고급 8회)가 등급에 맞춰져요.</div></div></div>`;
+}
+/* 회원 탈퇴 (migration_007 delete_my_account) */
+function withdrawSheet(){const tr=isTrainer(),managed=st.members.filter(m=>m.is_managed).length;
+  return `<div class="sheet-back" onclick="if(event.target===this){st.wd=false;render()}"><div class="sheet" role="dialog" aria-label="회원 탈퇴"><h3 style="margin:0 0 8px">정말 탈퇴하시겠어요?</h3>
+  <div class="small muted">탈퇴하면 아래 정보가 <b style="color:var(--t)">바로 삭제되고 되돌릴 수 없어요.</b></div>
+  <ul class="wd">
+    <li>운동 기록 ${st.logs.length&&!coaching()?st.logs.length+'건':''}과 피드백·노트</li>
+    <li>인바디 기록</li><li>PT 일정과 수업 기록</li><li>내 정보와 로그인 계정 (간편 로그인 연결 포함)</li>
+    ${tr?`<li>트레이너 프로필·강사 코드·회원 메모${managed?` · 직접 등록한 앱 미사용 회원 ${managed}명과 그 기록`:''}</li><li>담당 회원들은 '강사 미연결' 상태가 돼요 (회원 본인의 기록은 남아요)</li>`:'<li>담당 트레이너와의 연결</li>'}
+  </ul>
+  <label class="ck"><input type="checkbox" id="wd-ok"><span>위 내용을 확인했고, 탈퇴에 동의해요</span></label>
+  <button class="btn danger" onclick="withdraw()">탈퇴하기</button><button class="btn ghost" onclick="st.wd=false;render()">취소</button></div></div>`}
+function withdraw(){return run(async()=>{
+  if(!$('#wd-ok').checked)return toast('확인 항목에 체크해 주세요');
+  const r=await sb.rpc('delete_my_account');
+  if(r.error)throw new Error(/function|schema cache/i.test(r.error.message)?'탈퇴 기능은 DB 업데이트(migration_007) 후 쓸 수 있어요':r.error.message);
+  lsSet('mm-last-login',null);await logout();toast('탈퇴가 완료됐어요. 그동안 함께해서 고마웠어요.');
+})}
 function trainerCard(t){
   const row=(l,v)=>v?`<label class="lbl">${l}</label><div class="pre">${esc(v)}</div>`:'';
   return `<div class="card"><div class="row"><div class="avatar">${esc((t.name||'?').slice(0,1))}</div><div><div class="small muted">담당 트레이너</div><b style="font-size:18px">${esc(t.name)}</b>${t.center_name?`<div class="small muted">${esc(t.center_name)}</div>`:''}</div></div>
@@ -790,7 +913,7 @@ function saveMe(){return run(async()=>{
   const num=id=>{const v=$(id).value;return v===''?null:+v},name=$('#p-name').value.trim();
   if(!name)return toast('이름을 입력해주세요');
   const tr=isTrainer();
-  const upd={name,...(tr?{center_name:$('#p-center').value.trim(),career:$('#p-career').value.trim(),specialty:$('#p-spec').value.trim(),bio:$('#p-bio').value.trim()}:{level:$('#p-level').value}),goal:$('#p-goal').value,height_cm:num('#p-height'),start_weight:num('#p-sw'),birth_date:$('#p-birth').value||null,gender:$('#p-gender').value};
+  const upd={name,...(tr?{center_name:$('#p-center').value.trim(),career:$('#p-career').value.trim(),specialty:$('#p-spec').value.trim(),bio:$('#p-bio').value.trim()}:{}),goal:$('#p-goal').value,height_cm:num('#p-height'),start_weight:num('#p-sw'),birth_date:$('#p-birth').value||null,gender:$('#p-gender').value};
   st.me=ok(await sb.from('profiles').update(upd).eq('id',st.me.id).select().single());render();toast('저장했어요');
 })}
 function linkTrainer(){return run(async()=>{
@@ -804,10 +927,11 @@ function copyCode(){navigator.clipboard?.writeText(st.myCode).then(()=>toast('�
 function render(){
   const app=$('#app');
   if(!st.me){app.innerHTML=authView();return}
-  if(st.me.onboarded===false){st.ob??={role:'member',level:'초급'};app.innerHTML=onboardView();if(st.ob.keep!=null){$('#o-name').value=st.ob.keep;delete st.ob.keep}return}
+  if(st.me.onboarded===false){st.ob??={role:'member'};app.innerHTML=onboardView();if(st.ob.keep!=null){$('#o-name').value=st.ob.keep;delete st.ob.keep}return}
+  if('terms_agreed_at' in st.me&&!st.me.terms_agreed_at){app.innerHTML=termsView();return}   /* migration_007 이후, 동의 기록이 없는 기존 회원 */
   const V={home:()=>coaching()?trainerHomeView():homeView(),record:recordView,history:historyView,members:membersView,pt:ptView,inbody:inbodyView,class:classView,my:myView};
-  if(!tabList().some(([k])=>k===st.tab))st.tab=tabList()[0][0];
-  app.innerHTML=headerView()+`<main><div class="eyebrow">${EYEBROW[st.tab]||''}</div>${V[st.tab]()}</main>`+navView();
+  if(!navTab())st.tab=tabList()[0][0];
+  app.innerHTML=headerView()+`<main><div class="eyebrow">${EYEBROW[st.tab]||''}</div>${V[st.tab]()}</main>`+navView()+(st.wd?withdrawSheet():'');
 }
 boot();
 </script>
