@@ -102,10 +102,6 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .stats{display:flex;gap:8px}.stats div{flex:1;text-align:center}.stats b{display:block;white-space:nowrap;font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15}.stats span{font-size:12px;color:var(--m)}
 .ok{color:var(--green)}.bad{color:var(--bad)}
 .wm{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:var(--m)}
-.ledger{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;background:var(--card)}
-.ledger div{padding:14px 8px 12px;text-align:center;border-left:1px solid var(--line)}.ledger div:first-child{border-left:none}
-.ledger b{display:block;font-family:var(--mono);font-size:34px;font-weight:700;letter-spacing:-.04em;line-height:1.1;color:var(--chalk)}.ledger b.hot{color:var(--accent)}.ledger b small{font-size:15px;color:var(--m);font-weight:500}
-.ledger span{font-size:12px;color:var(--m)}
 .ptcard{border-left:3px solid var(--accent)}
 nav button.fab{overflow:visible;color:var(--m)}nav button.fab.on{color:var(--chalk)}
 .fabc{display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:var(--r);background:var(--accent);margin-top:-22px;margin-bottom:2px;box-shadow:0 0 0 5px var(--iron);font-style:normal}.fabc svg{color:var(--iron)!important}
@@ -118,6 +114,51 @@ nav button.fab:active .fabc{background:var(--pd)}
 .card.menu{width:100%;display:flex;align-items:center;justify-content:space-between;color:inherit;font-family:inherit;font-size:inherit;text-align:left;cursor:pointer}.card.menu>div{display:flex;gap:12px;align-items:center}
 .wd{margin:14px 0;padding-left:20px;font-size:14px;line-height:1.8}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== 운동일지 포스터 레이어: 박스를 걷어내고 선·큰 글자·한 장의 슬래브로 위계를 만든다 ===== */
+h2{font-size:36px;font-weight:900;letter-spacing:-.045em;line-height:1.1;margin:6px 0 14px}
+.sub{margin:-6px 0 20px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--m)}
+.eyebrow{margin-top:20px}
+.card{background:transparent;border:none;border-top:1px solid var(--line);border-radius:0;padding:20px 0;margin-bottom:0}
+.card h3{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--m);text-transform:uppercase;margin-bottom:14px}
+.card.hl{margin:20px calc(var(--gut) * -1);padding:26px var(--gut) 28px;border:none;border-radius:0}
+.card.hl h3{color:var(--t);font-family:var(--sans);font-size:22px;font-weight:900;letter-spacing:-.03em;text-transform:none}
+.card.warn{border:1px solid var(--warn);border-radius:var(--r);padding:14px 16px;margin:16px 0}
+.ptcard{border-left:none;border-top:1px solid var(--line)}
+.ptcard h3::before{content:"";display:inline-block;width:8px;height:8px;background:var(--accent);margin-right:8px;vertical-align:1px}
+.chip,.input,select.input,textarea.input,.stp,.seg,.btn{border-radius:2px}
+.input,select.input,textarea.input{background:transparent;border:none;border-bottom:2px solid var(--line);border-radius:0;padding:12px 2px}
+.input:focus,select.input:focus,textarea.input:focus{outline:none;border-bottom-color:var(--accent)}
+textarea.input{border:1px solid var(--line);border-bottom-width:2px;padding:12px}
+.btn.primary{border-radius:2px;font-weight:900;letter-spacing:-.01em;min-height:56px}
+.btn.ghost{border-width:1.5px}
+.chip{background:transparent;border-color:var(--line);color:var(--m)}.chip.on{background:var(--chalk);color:var(--iron);border-color:var(--chalk)}
+.pill{border-radius:2px;background:transparent}
+.set{margin-bottom:10px}.stp{background:transparent}.stp button{background:var(--card2)}
+.fb{border-radius:2px}
+header{padding:18px var(--gut) 0}
+nav{background:var(--bg);border-top:1px solid var(--line)}
+nav button{font-family:var(--mono);font-size:10px;letter-spacing:.08em;font-weight:500}
+nav button.on{color:var(--chalk)}nav button.on svg{color:var(--accent)}
+.fabc{border-radius:2px}
+input[type=number].input,.code-in{background:var(--card);border:1px solid var(--line);border-bottom:2px solid var(--line);border-radius:2px;padding:12px;font-family:var(--mono);font-size:20px;font-weight:700}
+input[type=number].input:focus{border-bottom-color:var(--accent)}
+.hero{display:flex;align-items:flex-end;gap:18px;padding:4px 0 22px}
+.hero .n{font-family:var(--mono);font-size:120px;font-weight:700;letter-spacing:-.08em;line-height:.8;color:var(--chalk)}.hero .n.hot{color:var(--accent)}
+.hero .side{padding-bottom:4px;min-width:0}.hero .side b{display:block;font-size:22px;font-weight:900;letter-spacing:-.03em;line-height:1.2}.hero .side span{display:block;font-size:13px;color:var(--m);margin-top:6px}
+.hero .side i{display:inline-block;font-style:normal;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--m);margin-top:2px}
+.wk{gap:6px}.wk button b{width:100%;height:56px;line-height:56px;border-radius:2px;background:var(--card);font-size:17px}
+.wk button.tr b{background:var(--green)}.wk button.today b{outline:2px solid var(--accent);outline-offset:2px}
+.wk button span{font-size:11px;margin-bottom:6px}
+.wk i{margin-top:2px}
+.card.week{border-top:1px solid var(--line)}
+.item{padding:14px 0}
+.date{margin-top:28px;border-bottom:none;padding-bottom:2px;color:var(--chalk);font-weight:700}
+.sec{margin-top:32px}
+.metric b{font-size:44px;font-weight:900}
+.stats b{font-family:var(--mono);font-weight:700}
+.card.menu{border-bottom:1px solid var(--line);border-top:1px solid var(--line);margin-top:-1px;padding:18px 0}
+.avatar{border-radius:2px}
 </style>
 </head>
 <body>
@@ -468,7 +509,7 @@ function homeView(){
     ${ups.length?ups.map(p=>`<div class="item"><div><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b>${p.goal?`<div class="small muted">${esc(p.goal)}</div>`:''}</div>${ptTag(p)}</div>`).join(''):'<div class="muted small" style="margin-top:12px">예정된 PT가 없어요</div>'}`
     :`<div class="muted small">아직 담당 트레이너가 없어요. 트레이너에게 받은 4자리 강사 코드를 입력하면 PT 일정이 여기에 표시돼요.</div><button class="btn ghost" onclick="go('my')">+ 강사 연결하기</button>`}</div>`:'';
   return `<h2>${head}</h2><p class="sub">${fmtDate(today())}${idle>=7?` · 마지막 운동 ${idle}일 전`:''}</p>
-  <div class="ledger"><div><b class="${sk?'hot':''}">${sk}</b><span>연속 일</span></div><div><b>${weekDays()}<small>/7</small></b><span>이번 주 운동</span></div><div><b>${idle==null?'-':idle===0?'오늘':`${idle}<small>일 전</small>`}</b><span>마지막 운동</span></div></div>
+  <div class="hero"><div class="n ${sk?'hot':''}">${sk}</div><div class="side"><b>${sk?'일 연속<br>쇠질 중':'연속 기록<br>0일'}</b><span>이번 주 ${weekDays()}/7일 · ${idle==null?'아직 기록 없음':idle===0?'오늘 운동함':`마지막 ${idle}일 전`}</span></div></div>
   ${weekStrip()}
   ${r.warns.map(l=>`<div class="card warn">직전 피드백에 통증/부상 언급이 있어요 (${esc(l.exercise)}): “${esc(l.feedback)}”<br>무리하지 말고 무게를 낮추거나 해당 부위를 쉬어가세요.</div>`).join('')}
   <div class="card hl"><div class="row between"><h3 style="margin:0">오늘의 추천 · ${esc(r.pick.label)}</h3><span class="tag">${esc(levelName(r.level))}</span></div>
@@ -482,7 +523,7 @@ function weekStrip(){
   const days=[...Array(7)].map((_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);return localDate(d)});
   const dot=d=>{const done=st.logs.some(l=>l.log_date===d&&l.is_pt)||st.pts.some(p=>p.pt_date===d&&p.status==='completed'),plan=!done&&st.pts.some(p=>p.pt_date===d&&p.status==='scheduled');
     return (done?'<em class="dpd"></em>':'')+(plan?'<em class="dpp"></em>':'')+(st.inbody.some(x=>x.measured_on===d)?'<em class="db"></em>':'')};
-  return `<div class="card" data-swipe="week"><div class="row between"><b>${+days[3].slice(5,7)}월 ${st.week===0?'· 이번 주':`<button class="chip" style="min-height:32px;padding:0 10px;margin-left:6px" onclick="st.week=0;render()">이번 주</button>`}</b><div class="row" style="gap:8px">${navBtn('wk(-1)','이전 주',-1)}${navBtn('wk(1)','다음 주',1)}</div></div>
+  return `<div class="card week" data-swipe="week"><div class="row between"><b>${+days[3].slice(5,7)}월 ${st.week===0?'· 이번 주':`<button class="chip" style="min-height:32px;padding:0 10px;margin-left:6px" onclick="st.week=0;render()">이번 주</button>`}</b><div class="row" style="gap:8px">${navBtn('wk(-1)','이전 주',-1)}${navBtn('wk(1)','다음 주',1)}</div></div>
   <div class="wk">${days.map((d,i)=>`<button class="${d===today()?'today':''} ${st.logs.some(l=>l.log_date===d)?'tr':''}" onclick="openDay('${d}')"><span>${'MTWTFSS'[i]}</span><b>${+d.slice(8)}</b><i>${dot(d)}</i></button>`).join('')}</div>
   <div class="legend"><em class="dfill"></em>운동한 날<em class="dpd"></em>PT 완료<em class="dpp"></em>PT 예정<em class="db"></em>인바디</div></div>`;
 }
@@ -590,7 +631,7 @@ function editLog(id){const l=st.logs.find(x=>x.id===id);if(!l)return;
   st.draft={id:l.id,date:l.log_date,part:l.part,exercise:l.exercise,custom:false,customName:'',sets:l.sets.map(x=>({w:x.w,r:x.r})),feedback:l.feedback||'',note:l.note||''};
   go('record')}
 function cancelEdit(){st.draft=newDraft();const b=st.editFrom;st.editFrom=null;go(b||'record')}
-function logCard(l,open){return `<div class="card" style="padding:14px"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(partLabel(l.part))}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div>${st.hf.edit?editBtns(l):''}</div>
+function logCard(l,open){return `<div class="card" style="padding:14px 0"><div class="row between"><div><b>${esc(l.exercise)}</b><span class="tag">${esc(partLabel(l.part))}</span>${l.is_pt?'<span class="tag pt">PT</span>':''}</div>${st.hf.edit?editBtns(l):''}</div>
   <div>${setsHtml(l)}</div>${hasFb(l)?`<button class="x fbtn" onclick="tgFb(this)">피드백 ${open?'접기 ▾':'보기 ▸'}</button><div class="fb" ${open?'':'hidden'}>${fbBody(l)}</div>`:''}</div>`}
 function filteredLogs(){const {q,part,ex,date}=st.hf,qq=q.trim().toLowerCase();
   return st.logs.filter(l=>(!date||l.log_date===date)&&(!part||l.part===part)&&(!ex||l.exercise===ex)&&(!qq||l.exercise.toLowerCase().includes(qq)||(l.feedback||'').toLowerCase().includes(qq)||(l.note||'').toLowerCase().includes(qq)))}
