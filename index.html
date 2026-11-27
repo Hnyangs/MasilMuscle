@@ -103,9 +103,6 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .ok{color:var(--green)}.bad{color:var(--bad)}
 .wm{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:var(--m)}
 .ptcard{border-left:3px solid var(--accent)}
-nav button.fab{overflow:visible;color:var(--m)}nav button.fab.on{color:var(--chalk)}
-.fabc{display:flex;align-items:center;justify-content:center;width:52px;height:32px;border-radius:var(--r);background:var(--accent);margin:0 0 1px;font-style:normal}.fabc svg{color:var(--iron)!important}
-nav button.fab:active .fabc{background:var(--pd)}
 .ck{display:flex;gap:10px;align-items:flex-start;padding:10px 0;font-size:14px;line-height:1.5;cursor:pointer}.ck input{width:20px;height:20px;margin:1px 0 0;flex-shrink:0;accent-color:var(--accent)}.ck a{color:var(--t)}
 .consent{margin-top:20px;padding:6px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}.consent .all{border-bottom:1px solid var(--line)}.req{color:var(--accent);font-weight:600}
 .recent{margin-left:8px;padding:2px 6px;border-radius:4px;background:var(--accent);color:#171717;font-size:11px;font-weight:700;vertical-align:middle}
@@ -140,7 +137,6 @@ header{padding:18px var(--gut) 0}
 nav{background:var(--bg);border-top:1px solid var(--line)}
 nav button{font-family:var(--mono);font-size:10px;letter-spacing:.08em;font-weight:500}
 nav button.on{color:var(--chalk)}nav button.on svg{color:var(--accent)}
-.fabc{border-radius:2px}
 .savebar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(62px + env(safe-area-inset-bottom));width:100%;max-width:480px;display:flex;gap:8px;padding:10px var(--gut);background:var(--bg);border-top:1px solid var(--line);z-index:6}.savebar .btn{margin-top:0;min-height:52px}.savebar .btn.ghost{width:auto;flex:0 0 96px}
 input[type=number].input,.code-in{background:var(--card);border:1px solid var(--line);border-bottom:2px solid var(--line);border-radius:2px;padding:12px;font-family:var(--mono);font-size:20px;font-weight:700}
 input[type=number].input:focus{border-bottom-color:var(--accent)}
@@ -475,9 +471,7 @@ const tabList=()=>coaching()?[['home','','홈'],['members','','회원'],['record
 /* 회원·개인 모드의 운동 기록(히스토리)은 마이 > 운동 기록에서 연다 (하단 탭은 마이가 켜짐) */
 const SUB_TABS={history:'my'};
 const navTab=()=>tabList().some(([k])=>k===st.tab)?st.tab:SUB_TABS[st.tab];
-const navView=()=>`<nav>${tabList().map(([k,i,l])=>k==='record'&&!coaching()
-  ?`<button class="fab ${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}"><i class="fabc">${ico(k,20)}</i>${l}</button>`
-  :`<button class="${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
+const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
 const mLabel=m=>`${esc(m.name)} · ${esc(m.member_code||levelName(m.level))}${m.is_managed?' · 앱 미사용':''}`;
 const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${mLabel(m)}</option>`).join('')}</select>`:'';
 const ptTag=p=>`<span class="st-tag st-${p.status}">${PT_STATUS[p.status]||p.status}</span>`;
