@@ -15,21 +15,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: prod
-            url: ${{ secrets.SUPABASE_URL || 'https://htizcjneaagxffqumvdm.supabase.co' }}
-            key: ${{ secrets.SUPABASE_ANON_KEY || 'sb_publishable_QSMXmg5fLDukFoU6Lo3J-w_0Sb3a33q' }}
-          - name: dev
-            url: ${{ secrets.DEV_SUPABASE_URL || 'https://spxlwrnmtmwgegjmopgw.supabase.co' }}
-            key: ${{ secrets.DEV_SUPABASE_ANON_KEY || 'sb_publishable_TNHoLrz-TVHEGSvdmg0kbg__we5T5aJ' }}
-    name: ping (${{ matrix.name }})
+        target: [prod, dev]
+    name: ping (${{ matrix.target }})
     steps:
       - name: Ping Supabase REST API
+        # secrets는 matrix에서 쓸 수 없어서 step의 env에서 고릅니다.
         env:
-          SUPABASE_URL: ${{ matrix.url }}
-          SUPABASE_ANON_KEY: ${{ matrix.key }}
+          SUPABASE_URL: ${{ matrix.target == 'prod' && (secrets.SUPABASE_URL || 'https://htizcjneaagxffqumvdm.supabase.co') || (secrets.DEV_SUPABASE_URL || 'https://spxlwrnmtmwgegjmopgw.supabase.co') }}
+          SUPABASE_ANON_KEY: ${{ matrix.target == 'prod' && (secrets.SUPABASE_ANON_KEY || 'sb_publishable_QSMXmg5fLDukFoU6Lo3J-w_0Sb3a33q') || (secrets.DEV_SUPABASE_ANON_KEY || 'sb_publishable_TNHoLrz-TVHEGSvdmg0kbg__we5T5aJ') }}
         run: |
           curl -fsS --retry 3 --max-time 30 \
             -H "apikey: $SUPABASE_ANON_KEY" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
-            "${SUPABASE_URL%/}/rest/v1/profiles?select=id&limit=1" -o /dev/null -w "HTTP %{http_code}\n"
+            "${SUPABASE_URL%/}/rest/v1/profiles?select=id&limit=1" -o /dev/null -w "${{ matrix.target }}: HTTP %{http_code}\n"
