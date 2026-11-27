@@ -55,10 +55,10 @@ textarea.input{min-height:96px;resize:vertical}
 .x{border:none;background:none;color:var(--m);font-size:14px;padding:10px;cursor:pointer;font-family:inherit}.x.del{color:var(--bad)}
 .set{display:grid;grid-template-columns:26px 1fr 1fr 28px;gap:8px;align-items:center;margin-bottom:8px}
 .sn{width:26px;height:26px;border-radius:var(--r-sm);background:var(--card2);color:var(--green);font-family:var(--mono);font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.stp{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;background:var(--card2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden}
-.stp button{height:52px;border:none;background:var(--graphite);color:var(--t);font-size:22px;font-weight:700;cursor:pointer}
+.stp{display:grid;grid-template-columns:34px 1fr 34px;align-items:center;background:var(--card2);border-radius:var(--r);border:1px solid var(--line);overflow:hidden}
+.stp button{height:52px;padding:0;border:none;background:var(--graphite);color:var(--t);font-size:22px;font-weight:700;cursor:pointer}
 .stp button:active{background:var(--accent);color:var(--iron)}
-.stp input{width:100%;height:52px;border:none;background:transparent;color:var(--t);text-align:center;font-size:19px;font-weight:800;font-family:inherit;min-width:0}
+.stp input{width:100%;height:52px;padding:0;border:none;background:transparent;color:var(--t);text-align:center;font-size:19px;font-weight:800;font-family:inherit;min-width:0}
 .stp input:focus{outline:none}
 .item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 0;border-top:1px solid var(--line)}.item:first-of-type{border-top:none}
 .date{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.04em;color:var(--m);margin:24px 2px 8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
@@ -87,8 +87,9 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .code{font-family:var(--mono);font-size:44px;font-weight:700;letter-spacing:12px;color:var(--accent);margin:6px 0}.code-in{font-family:var(--mono);font-size:28px;text-align:center;letter-spacing:16px;font-weight:700}
 .sec{font-family:var(--mono);margin:28px 2px 10px;font-size:12px;font-weight:500;letter-spacing:.12em;color:var(--m)}
 .wk{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px}.wk button{border:none;background:none;color:var(--t);font-family:inherit;padding:4px 0;cursor:pointer}
-.wk button span{display:block;font-size:12px;color:var(--m)}.wk button b{display:block;font-size:16px;font-weight:700;width:36px;height:36px;line-height:36px;margin:4px auto;border-radius:var(--r)}.wk button.today b{background:var(--accent);color:var(--iron)}
-.wk i{display:flex;justify-content:center;gap:3px;height:6px}em.dw,em.dp,em.db{display:inline-block;width:6px;height:6px;border-radius:1px}em.dw{background:var(--chalk)}em.dpd{display:inline-block;width:6px;height:6px;border-radius:1px;background:var(--green)}em.dpp{display:inline-block;width:6px;height:6px;border-radius:1px;background:var(--plan)}em.db{background:var(--accent)}
+.wk button span{display:block;font-size:12px;color:var(--m)}.wk button b{display:block;font-size:16px;font-weight:700;width:36px;height:36px;line-height:36px;margin:4px auto;border-radius:var(--r)}.wk button b{height:44px;line-height:44px;font-family:var(--mono)}.wk button.tr b{background:var(--green);color:var(--iron)}.wk button.today b{outline:2px solid var(--accent);outline-offset:2px}
+.wk button span{font-family:var(--mono);letter-spacing:.08em}
+.wk i{display:flex;justify-content:center;gap:3px;height:6px}em.dw,em.dp,em.db{display:inline-block;width:6px;height:6px;border-radius:1px}em.dw{background:var(--chalk)}em.dfill{display:inline-block;width:10px;height:10px;border-radius:2px;background:var(--green)}em.dpd{display:inline-block;width:6px;height:6px;border-radius:1px;background:var(--green)}em.dpp{display:inline-block;width:6px;height:6px;border-radius:1px;background:var(--plan)}em.db{background:var(--accent)}
 .legend{display:flex;gap:4px;align-items:center;justify-content:center;font-size:12px;color:var(--m);margin-top:12px}.legend em{margin-left:10px}
 .metric{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}.metric b{font-size:36px;font-weight:800;letter-spacing:-.03em;line-height:1.1}.metric .small{text-align:right}
 .st-tag{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:var(--r-sm);border:1px solid currentColor;white-space:nowrap}
@@ -100,6 +101,15 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .sheet{width:100%;max-width:480px;background:var(--card);border:1px solid var(--line);border-bottom:none;border-radius:var(--r) var(--r) 0 0;padding:20px var(--gut) calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow:auto}
 .stats{display:flex;gap:8px}.stats div{flex:1;text-align:center}.stats b{display:block;white-space:nowrap;font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.15}.stats span{font-size:12px;color:var(--m)}
 .ok{color:var(--green)}.bad{color:var(--bad)}
+.wm{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:var(--m)}
+.ledger{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:var(--r);margin-bottom:12px;background:var(--card)}
+.ledger div{padding:14px 8px 12px;text-align:center;border-left:1px solid var(--line)}.ledger div:first-child{border-left:none}
+.ledger b{display:block;font-family:var(--mono);font-size:34px;font-weight:700;letter-spacing:-.04em;line-height:1.1;color:var(--chalk)}.ledger b.hot{color:var(--accent)}.ledger b small{font-size:15px;color:var(--m);font-weight:500}
+.ledger span{font-size:12px;color:var(--m)}
+.ptcard{border-left:3px solid var(--accent)}
+nav button.fab{overflow:visible;color:var(--m)}nav button.fab.on{color:var(--chalk)}
+.fabc{display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:var(--r);background:var(--accent);margin-top:-22px;margin-bottom:2px;box-shadow:0 0 0 5px var(--iron);font-style:normal}.fabc svg{color:var(--iron)!important}
+nav button.fab:active .fabc{background:var(--pd)}
 .ck{display:flex;gap:10px;align-items:flex-start;padding:10px 0;font-size:14px;line-height:1.5;cursor:pointer}.ck input{width:20px;height:20px;margin:1px 0 0;flex-shrink:0;accent-color:var(--accent)}.ck a{color:var(--t)}
 .consent{margin-top:20px;padding:6px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}.consent .all{border-bottom:1px solid var(--line)}.req{color:var(--accent);font-weight:600}
 .recent{margin-left:8px;padding:2px 6px;border-radius:4px;background:var(--accent);color:#171717;font-size:11px;font-weight:700;vertical-align:middle}
@@ -415,15 +425,17 @@ function authView(){
 }
 function headerView(){
   const m=st.me;
-  return `<header><div class="brandrow">${logoSvg(28)}<b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원 · '+esc(curLevel())}</span>${IS_DEV?'<span class="tag" style="color:var(--warn);font-family:var(--mono)">DEV</span>':''}</div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
+  return `<header><div class="brandrow">${logoSvg(28)}<span class="wm">MOVE &amp; STRENGTH</span>${IS_DEV?'<span class="tag" style="color:var(--warn);font-family:var(--mono)">DEV</span>':''}</div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
   ${isTrainer()?`<div style="padding:4px 16px 0"><button class="btn ghost" style="margin-top:8px" onclick="toggleMode()">${coaching()?'내 개인 운동 모드로 전환':'회원 관리 모드로 돌아가기'}</button></div>`:''}`;
 }
 const tabList=()=>coaching()?[['home','','홈'],['members','','회원'],['record','','기록'],['history','','히스토리'],['inbody','','인바디'],['pt','','PT'],['my','','마이']]
-  :[['home','','홈'],['record','','기록'],['inbody','','인바디'],...(isTrainer()?[]:[['class','','수업']]),['my','','마이']];
+  :[['home','','홈'],['inbody','','인바디'],['record','','기록'],...(isTrainer()?[]:[['class','','수업']]),['my','','마이']];
 /* 회원·개인 모드의 운동 기록(히스토리)은 마이 > 운동 기록에서 연다 (하단 탭은 마이가 켜짐) */
 const SUB_TABS={history:'my'};
 const navTab=()=>tabList().some(([k])=>k===st.tab)?st.tab:SUB_TABS[st.tab];
-const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
+const navView=()=>`<nav>${tabList().map(([k,i,l])=>k==='record'&&!coaching()
+  ?`<button class="fab ${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}"><i class="fabc">${ico(k,24)}</i>${l}</button>`
+  :`<button class="${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
 const mLabel=m=>`${esc(m.name)} · ${esc(m.member_code||levelName(m.level))}${m.is_managed?' · 앱 미사용':''}`;
 const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${mLabel(m)}</option>`).join('')}</select>`:'';
 const ptTag=p=>`<span class="st-tag st-${p.status}">${PT_STATUS[p.status]||p.status}</span>`;
@@ -444,28 +456,35 @@ function trainerHomeView(){
   ${later.length?`<h3 class="sec">다가오는 PT</h3><div class="card">${later.map(p=>`<div class="item"><div><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b> <span class="small">${esc(nameOf(p.member_id))}</span>${p.goal?`<div class="small muted">${esc(p.goal)}</div>`:''}</div>${ptTag(p)}</div>`).join('')}</div>`:''}`;
 }
 function nextPT(){return st.pts.filter(p=>p.status==='scheduled'&&p.pt_date>=today())}
+/* 연속 운동일: 오늘(없으면 어제)부터 거꾸로 이어진 운동한 날 수 */
+function streak(){const ds=new Set(st.logs.map(l=>l.log_date));let d=ds.has(today())?today():addDays(today(),-1),n=0;while(ds.has(d)){n++;d=addDays(d,-1)}return n}
+function weekDays(){const f=weekStart(today());return new Set([...Array(7)].map((_,i)=>addDays(f,i)).filter(d=>st.logs.some(l=>l.log_date===d))).size}
 function homeView(){
   const me=st.me,r=recommend(),ups=nextPT().slice(0,3);
-  const card=me.role==='member'?`<div class="card hl"><h3>PT 일정</h3>
+  const idle=st.logs.length?daysSince(st.logs[0].log_date):null,did=idle===0,sk=streak();
+  const head=did?'오늘 한 건 했다.':idle==null?'첫 쇠질, 가볍게.':idle>=7?'쇠가 기다린다.':'오늘도 좀 들어볼까?';
+  const ptcard=me.role==='member'?`<div class="card ptcard"><h3>PT 일정</h3>
     ${st.myTrainer?`<div class="small muted">담당 트레이너 · ${esc(st.myTrainer.name)}${st.myTrainer.center_name?' · '+esc(st.myTrainer.center_name):''}</div>
     ${ups.length?ups.map(p=>`<div class="item"><div><b>${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</b>${p.goal?`<div class="small muted">${esc(p.goal)}</div>`:''}</div>${ptTag(p)}</div>`).join(''):'<div class="muted small" style="margin-top:12px">예정된 PT가 없어요</div>'}`
     :`<div class="muted small">아직 담당 트레이너가 없어요. 트레이너에게 받은 4자리 강사 코드를 입력하면 PT 일정이 여기에 표시돼요.</div><button class="btn ghost" onclick="go('my')">+ 강사 연결하기</button>`}</div>`:'';
-  const idle=st.logs.length?daysSince(st.logs[0].log_date):0;
-  return `<h2>오늘도 좀 들어볼까?</h2>${weekStrip()}${idle>=7?`<div class="card warn"><b>쇠가 기다린다.</b><div class="small muted" style="margin-top:4px">마지막 운동이 ${idle}일 전이에요. 가볍게 한 세트부터.</div></div>`:''}${card}
+  return `<h2>${head}</h2><p class="sub">${fmtDate(today())}${idle>=7?` · 마지막 운동 ${idle}일 전`:''}</p>
+  <div class="ledger"><div><b class="${sk?'hot':''}">${sk}</b><span>연속 일</span></div><div><b>${weekDays()}<small>/7</small></b><span>이번 주 운동</span></div><div><b>${idle==null?'-':idle===0?'오늘':`${idle}<small>일 전</small>`}</b><span>마지막 운동</span></div></div>
+  ${weekStrip()}
   ${r.warns.map(l=>`<div class="card warn">직전 피드백에 통증/부상 언급이 있어요 (${esc(l.exercise)}): “${esc(l.feedback)}”<br>무리하지 말고 무게를 낮추거나 해당 부위를 쉬어가세요.</div>`).join('')}
-  <div class="card"><div class="row between"><h3 style="margin:0">오늘의 추천 · ${esc(r.pick.label)}</h3><span class="tag">${esc(r.level)}</span></div>
+  <div class="card hl"><div class="row between"><h3 style="margin:0">오늘의 추천 · ${esc(r.pick.label)}</h3><span class="tag">${esc(levelName(r.level))}</span></div>
   <div class="small muted" style="margin:6px 0 4px">${r.pick.parts.map(p=>`${partLabel(p)} ${fmtRest(restDays(p))}`).join(' · ')} → 가장 오래 쉰 분할이에요</div>
   ${r.items.map((i,k)=>`<div class="item"><div><b>${esc(i.ex)}</b> <span class="tag">${esc(partLabel(i.part))}</span><div class="small muted">${esc(i.text)}</div></div><button class="btn sm" onclick="startRoutine(${k})">기록</button></div>`).join('')}
-  ${r.items.length?'<button class="btn primary" onclick="startRoutine(0)">추천 운동으로 시작하기</button><div class="small muted" style="margin-top:8px;text-align:center">횟수는 채워 드려요. 무게는 직접 입력해 주세요.</div>':''}</div>`;
+  ${r.items.length?'<button class="btn primary" onclick="startRoutine(0)">추천 운동으로 시작하기</button><div class="small muted" style="margin-top:8px;text-align:center">횟수는 채워 드려요. 무게는 직접 입력해 주세요.</div>':''}</div>
+  ${ptcard}`;
 }
 function weekStrip(){
   const base=new Date(today()+'T00:00');base.setDate(base.getDate()-(base.getDay()+6)%7+st.week*7);
   const days=[...Array(7)].map((_,i)=>{const d=new Date(base);d.setDate(base.getDate()+i);return localDate(d)});
   const dot=d=>{const done=st.logs.some(l=>l.log_date===d&&l.is_pt)||st.pts.some(p=>p.pt_date===d&&p.status==='completed'),plan=!done&&st.pts.some(p=>p.pt_date===d&&p.status==='scheduled');
-    return (st.logs.some(l=>l.log_date===d&&!l.is_pt)?'<em class="dw"></em>':'')+(done?'<em class="dpd"></em>':'')+(plan?'<em class="dpp"></em>':'')+(st.inbody.some(x=>x.measured_on===d)?'<em class="db"></em>':'')};
+    return (done?'<em class="dpd"></em>':'')+(plan?'<em class="dpp"></em>':'')+(st.inbody.some(x=>x.measured_on===d)?'<em class="db"></em>':'')};
   return `<div class="card" data-swipe="week"><div class="row between"><b>${+days[3].slice(5,7)}월 ${st.week===0?'· 이번 주':`<button class="chip" style="min-height:32px;padding:0 10px;margin-left:6px" onclick="st.week=0;render()">이번 주</button>`}</b><div class="row" style="gap:8px">${navBtn('wk(-1)','이전 주',-1)}${navBtn('wk(1)','다음 주',1)}</div></div>
-  <div class="wk">${days.map((d,i)=>`<button class="${d===today()?'today':''}" onclick="openDay('${d}')"><span>${'월화수목금토일'[i]}</span><b>${+d.slice(8)}</b><i>${dot(d)}</i></button>`).join('')}</div>
-  <div class="legend"><em class="dw"></em>운동<em class="dpd"></em>PT 완료<em class="dpp"></em>PT 예정<em class="db"></em>인바디</div></div>`;
+  <div class="wk">${days.map((d,i)=>`<button class="${d===today()?'today':''} ${st.logs.some(l=>l.log_date===d)?'tr':''}" onclick="openDay('${d}')"><span>${'MTWTFSS'[i]}</span><b>${+d.slice(8)}</b><i>${dot(d)}</i></button>`).join('')}</div>
+  <div class="legend"><em class="dfill"></em>운동한 날<em class="dpd"></em>PT 완료<em class="dpp"></em>PT 예정<em class="db"></em>인바디</div></div>`;
 }
 function wk(n){st.week+=n;render()}
 /* 좌우 이동 버튼 · 스와이프 (data-swipe 영역에서 옆으로 밀면 이전/다음) */
@@ -499,6 +518,7 @@ function recordView(){
   return `<h2>${coaching()?`${esc(st.sel.name)} 회원 대신 기록`:'운동 기록'}</h2><p class="sub">${coaching()?'오늘 수업 내용을 남겨주세요. 회원에게 그대로 보여요.':'자, 쇠질하러 가자.'}</p>${coaching()?memberSelect():routineBar()}`+recordForm(d,exs,cur);
 }
 function recordForm(d,exs,cur){
+  const nm=d.custom?d.customName.trim():d.exercise,pv=!d.id&&nm?lastRec(nm):null,ph=(i,k,def)=>{const v=pv?.sets[i]?.[k];return v?String(v):def};
   return `
   <div class="card"><label class="lbl">날짜</label><input type="date" class="input" value="${d.date}" onchange="st.draft.date=this.value">
   <label class="lbl">부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" onclick="pickPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
@@ -507,18 +527,19 @@ function recordForm(d,exs,cur){
   ${recentCard(d.custom?d.customName.trim():d.exercise)}
   <label class="lbl">세트 (무게 kg · 횟수) · ${d.sets.length}세트</label>
   ${d.sets.map((s,i)=>`<div class="set"><span class="sn">${i+1}</span>
-    <div class="stp"><button onclick="adj(${i},'w',-2.5)">−</button><input type="number" inputmode="decimal" value="${s.w}" placeholder="kg" oninput="st.draft.sets[${i}].w=this.value"><button onclick="adj(${i},'w',2.5)">+</button></div>
-    <div class="stp"><button onclick="adj(${i},'r',-1)">−</button><input type="number" inputmode="numeric" value="${s.r}" placeholder="회" oninput="st.draft.sets[${i}].r=this.value"><button onclick="adj(${i},'r',1)">+</button></div>
+    <div class="stp"><button onclick="adj(${i},'w',-2.5)">−</button><input type="number" inputmode="decimal" value="${s.w}" placeholder="${ph(i,'w','kg')}" oninput="st.draft.sets[${i}].w=this.value"><button onclick="adj(${i},'w',2.5)">+</button></div>
+    <div class="stp"><button onclick="adj(${i},'r',-1)">−</button><input type="number" inputmode="numeric" value="${s.r}" placeholder="${ph(i,'r','회')}" oninput="st.draft.sets[${i}].r=this.value"><button onclick="adj(${i},'r',1)">+</button></div>
     <button class="x" onclick="delSet(${i})">✕</button></div>`).join('')}
   <button class="btn ghost sm" onclick="addSet()">+ 세트 추가</button>
   <label class="lbl">피드백 ${coaching()?'(회원에게 전달 · 자세 · 통증 여부)':'(컨디션 · 통증 여부 등)'}</label><textarea class="input" placeholder="통증이나 부상이 있다면 꼭 적어주세요" oninput="st.draft.feedback=this.value">${esc(d.feedback)}</textarea>
   <label class="lbl">노트 ${coaching()?'(수업 메모 · 숙제 · 다음 수업 계획)':'(메모)'}</label><textarea class="input" style="min-height:70px" placeholder="${coaching()?'회원에게 보이는 노트예요':'자유 메모'}" oninput="st.draft.note=this.value">${esc(d.note)}</textarea>
   <button class="btn primary" onclick="saveLog()">${d.id?'수정 저장':'저장하기'}</button>${d.id?'<button class="btn ghost" onclick="cancelEdit()">취소</button>':''}</div>`;
 }
+function fillLast(){const d=st.draft,l=lastRec(d.custom?d.customName.trim():d.exercise);if(!l)return;d.sets=l.sets.map(x=>({w:x.w,r:x.r}));render();toast('지난번 기록을 채웠어요. 오늘은 한 개 더.')}
 function recentCard(name){
   if(!name)return '';const rec=st.logs.filter(l=>l.exercise===name).slice(0,3);
   if(!rec.length)return '';
-  return `<div class="fb" style="margin-top:10px"><b>최근 기록</b>${rec.map(l=>`<div style="margin-top:6px"><span class="small muted">${fmtDate(l.log_date)}${l.is_pt?' · PT':''}</span><div>${setsHtml(l)}</div></div>`).join('')}</div>`;
+  return `<div class="fb" style="margin-top:10px"><b>최근 기록</b>${rec.map(l=>`<div style="margin-top:6px"><span class="small muted">${fmtDate(l.log_date)}${l.is_pt?' · PT':''}</span><div>${setsHtml(l)}</div></div>`).join('')}${st.draft.id?'':`<button class="btn ghost sm" style="margin-top:10px" onclick="fillLast()">지난번 그대로 채우기</button>`}</div>`;
 }
 function pickPart(p){st.draft.part=p;st.draft.custom=false;st.draft.customName='';pickEx(exercisesOf(p)[0])}
 function pickEx(e){
