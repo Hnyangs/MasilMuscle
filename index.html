@@ -102,7 +102,6 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .ok{color:var(--green)}.bad{color:var(--bad)}
 .ck{display:flex;gap:10px;align-items:flex-start;padding:10px 0;font-size:14px;line-height:1.5;cursor:pointer}.ck input{width:20px;height:20px;margin:1px 0 0;flex-shrink:0;accent-color:var(--accent)}.ck a{color:var(--t)}
 .consent{margin-top:20px;padding:6px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}.consent .all{border-bottom:1px solid var(--line)}.req{color:var(--accent);font-weight:600}
-.ck.keep{justify-content:center;margin-top:8px;color:var(--m)}
 .recent{margin-left:8px;padding:2px 6px;border-radius:4px;background:var(--accent);color:#171717;font-size:11px;font-weight:700;vertical-align:middle}
 .navb{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:var(--r);background:var(--card2);color:var(--t);cursor:pointer;flex-shrink:0;padding:0}
 .back{border:none;background:none;color:var(--m);font-size:14px;font-family:inherit;padding:4px 0 8px;cursor:pointer}
@@ -132,18 +131,12 @@ const SUPABASE_URL=ENVS[ENV_NAME].url;
 const SUPABASE_ANON_KEY=ENVS[ENV_NAME].key;
 const CONFIG_OK=new URL(SUPABASE_URL).hostname.split('.').length>=3;
 if(IS_DEV)document.title='[DEV] 믓';
-/* 로그인 유지: 켜면 localStorage(30일), 끄면 sessionStorage(브라우저를 닫으면 로그아웃) */
+/* 로그인은 항상 유지 (supabase-js 기본 localStorage), 마지막 로그인 후 30일이 지나면 boot()에서 로그아웃 */
 const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const lsSet=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}};
 const KEEP_DAYS=30;
-const keepOn=()=>lsGet('mm-keep')!=='0';
-const authStore={
-  getItem:k=>{try{return (keepOn()?localStorage:sessionStorage).getItem(k)}catch(e){return null}},
-  setItem:(k,v)=>{try{(keepOn()?localStorage:sessionStorage).setItem(k,v)}catch(e){}},
-  removeItem:k=>{try{localStorage.removeItem(k);sessionStorage.removeItem(k)}catch(e){}}
-};
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{storage:authStore}});
-try{localStorage.removeItem('mm-font')}catch(e){}   /* 글자 크기 설정 삭제됨 (이전 값 정리) */
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+try{localStorage.removeItem('mm-font');localStorage.removeItem('mm-keep')}catch(e){}   /* 글자 크기 설정 삭제됨 (이전 값 정리) */
 
 /* ===== 기본 데이터 ===== */
 /* 부위·종목은 Supabase exercises 테이블에서 불러옵니다 (supabase/exercises.sql). 아래는 부위 표시 순서/라벨 */
@@ -151,7 +144,7 @@ const PARTS=['전신','하체','등','가슴','어깨','이두','삼두','복근
 const partLabel=p=>p==='복근_신전근'?'복근·신전근':p;
 const TARGET_REPS={초급:12,중급:10,고급:8};
 /* 운동 등급: 가입 때 묻지 않고 기록으로 자동 부여. 운동 기간 = 첫 기록부터 오늘까지, 운동한 날 = 기록이 있는 날짜 수 */
-const LEVEL_RULES=[['고급',365,150,'운동 기간 1년 이상 · 운동한 날 150일 이상'],['중급',90,36,'운동 기간 3개월 이상 · 운동한 날 36일 이상 (주 3회 × 3개월)'],['초급',0,0,'처음 시작 ~ 중급 기준 전']];
+const LEVEL_RULES=[['고급',1095,500,'운동 기간 3년 이상 · 운동한 날 500일 이상'],['중급',365,150,'운동 기간 1년 이상 · 운동한 날 150일 이상'],['초급',0,0,'처음 시작 ~ 중급 기준 전']];
 function levelStats(logs){
   if(!logs.length)return{days:0,span:0};
   const first=logs.reduce((a,l)=>l.log_date<a?l.log_date:a,logs[0].log_date);
@@ -216,7 +209,7 @@ async function boot(){
       ssSet('mm-pending-login',null);
       const at=+lsGet('mm-login-at');
       if(!at)lsSet('mm-login-at',Date.now());
-      if(keepOn()&&at&&Date.now()-at>KEEP_DAYS*864e5){await sb.auth.signOut();lsSet('mm-login-at',null);oauthErr=oauthErr||`로그인 유지 기간(${KEEP_DAYS}일)이 지났어요. 다시 로그인해 주세요`}
+      if(at&&Date.now()-at>KEEP_DAYS*864e5){await sb.auth.signOut();lsSet('mm-login-at',null);oauthErr=oauthErr||`로그인 유지 기간(${KEEP_DAYS}일)이 지났어요. 다시 로그인해 주세요`}
       else await run(()=>afterLogin(session.user));
     }
   }
@@ -229,7 +222,6 @@ const appUrl=()=>location.origin+location.pathname.replace(/index\.html$/,'');
 const ssGet=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
 const ssSet=(k,v)=>{try{v==null?sessionStorage.removeItem(k):sessionStorage.setItem(k,v)}catch(e){}};
 async function fnErr(e){try{const b=await e.context.json();return b.error||e.message}catch(_){return e.message||String(e)}}
-function setKeep(on){lsSet('mm-keep',on?null:'0')}
 async function oauth(provider){await run(async()=>{
   ssSet('mm-pending-login',provider);
   if(provider==='naver'){   /* 네이버는 Edge Function(supabase/functions/naver-auth)으로 처리 */
@@ -241,20 +233,20 @@ async function oauth(provider){await run(async()=>{
   const {error}=await sb.auth.signInWithOAuth({provider,options:{redirectTo:appUrl()}});if(error)throw error;
 })}
 /* 약관 동의 (가입 폼 · 소셜 첫 가입 · 기존 회원 1회). 만 14세 미만은 보호자 동의 필요 */
-const newConsent=()=>({terms:false,privacy:false,under14:false,guardian:false});
+/* 만 14세 미만은 가입할 수 없다 (만 14세 이상 확인 필수) */
+const newConsent=()=>({terms:false,privacy:false,age:false});
 st.cs=newConsent();
-const consentOk=c=>c.terms&&c.privacy&&(!c.under14||c.guardian);
-function csSet(k,v){st.cs[k]=v;if(k==='under14'&&!v)st.cs.guardian=false;
-  if(k==='all'){st.cs.terms=st.cs.privacy=v;if(st.cs.under14)st.cs.guardian=v}
+const consentOk=c=>c.terms&&c.privacy&&c.age;
+function csSet(k,v){st.cs[k]=v;
+  if(k==='all')st.cs.terms=st.cs.privacy=st.cs.age=v;
   const keep=[...document.querySelectorAll('#app input.input')].map(i=>[i.id,i.value]);render();keep.forEach(([id,v])=>{const e=document.getElementById(id);if(e&&id)e.value=v})}
 const consentBox=()=>{const c=st.cs,ck=(k,label,req=true)=>`<label class="ck"><input type="checkbox" ${c[k]?'checked':''} onchange="csSet('${k}',this.checked)"><span>${req?'<b class="req">[필수]</b> ':''}${label}</span></label>`;
-  return `<div class="consent"><label class="ck all"><input type="checkbox" ${c.terms&&c.privacy&&(!c.under14||c.guardian)?'checked':''} onchange="csSet('all',this.checked)"><span><b>전체 동의</b></span></label>
+  return `<div class="consent"><label class="ck all"><input type="checkbox" ${consentOk(c)?'checked':''} onchange="csSet('all',this.checked)"><span><b>전체 동의</b></span></label>
   ${ck('terms','<a href="terms.html" target="_blank" rel="noopener">이용약관</a> 동의')}
   ${ck('privacy','<a href="privacy.html" target="_blank" rel="noopener">개인정보 수집·이용</a> 동의 (운동 기록·인바디 등 건강 관련 정보 포함)')}
-  ${ck('under14','만 14세 미만이에요',false)}
-  ${c.under14?`${ck('guardian','보호자(법정대리인)가 위 내용을 확인하고 동의했어요')}<div class="small muted" style="margin:4px 0 0 30px">만 14세 미만은 보호자 동의가 있어야 가입할 수 있어요.</div>`:''}</div>`};
+  ${ck('age','만 14세 이상이에요')}<div class="small muted" style="margin:0 0 6px 30px">만 14세 미만은 가입할 수 없어요.</div></div>`};
 async function saveConsent(){
-  const c=st.cs;ok(await sb.rpc('agree_terms',{p_under14:c.under14,p_guardian:c.guardian}));
+  ok(await sb.rpc('agree_terms',{p_under14:false,p_guardian:false}));
 }
 async function agreeNow(){await run(async()=>{
   if(!consentOk(st.cs))return toast('필수 항목에 동의해 주세요');
@@ -289,12 +281,15 @@ async function doSignup(){await run(async()=>{
   if(!email||!password||!name)return toast('이름, 이메일, 비밀번호를 모두 입력해주세요');
   if(password.length<6)return toast('비밀번호는 6자 이상이어야 해요');
   if(!consentOk(c))return toast('필수 약관에 동의해 주세요');
-  const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,role,level:role==='trainer'?'고급':'초급',terms_agreed:true,under14:c.under14,guardian_agreed:c.guardian}}});if(error)throw error;
-  st.cs=newConsent();
-  if(data.session){markLogin('email');await afterLogin(data.user);
-    if(st.me&&'terms_agreed_at' in st.me&&!st.me.terms_agreed_at){st.cs={terms:true,privacy:true,under14:c.under14,guardian:c.guardian};try{await saveConsent();st.me.terms_agreed_at=new Date().toISOString()}catch(e){}st.cs=newConsent()}
-    render()}
-  else{st.authMode='login';render();toast('가입 완료! 이메일 인증 후 로그인해주세요')}
+  const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,role,level:role==='trainer'?'고급':'초급',terms_agreed:true}}});if(error)throw error;
+  let user=data.session?data.user:null;
+  if(!user){   /* 이메일 인증을 쓰지 않으므로 바로 로그인 (Supabase Confirm email이 꺼져 있어야 함) */
+    const r=await sb.auth.signInWithPassword({email,password});
+    if(r.error){st.cs=newConsent();st.authMode='login';render();return toast('가입은 됐지만 로그인하지 못했어요: '+r.error.message)}
+    user=r.data.user}
+  markLogin('email');await afterLogin(user);
+  if(st.me&&'terms_agreed_at' in st.me&&!st.me.terms_agreed_at){try{await saveConsent();st.me.terms_agreed_at=new Date().toISOString()}catch(e){}}   /* 가입 폼에서 이미 동의함 */
+  st.cs=newConsent();render();
 })}
 async function logout(){await sb.auth.signOut();lsSet('mm-login-at',null);Object.assign(st,{ob:undefined,me:null,members:[],sel:null,logs:[],pts:[],reqs:[],inbody:[],myTrainer:null,myCode:null,codeBusy:false,week:0,found:undefined,authMode:'login',wd:false,editFrom:null,cs:newConsent()});st.draft=newDraft();render()}
 function setAuth(m){st.authMode=m;render()}
@@ -404,7 +399,7 @@ function authView(){
     <button class="btn naver" onclick="oauth('naver')"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M15.6 12.8 8.1 2H2v20h6.4V11.2L15.9 22H22V2h-6.4z"/></svg>네이버로 시작하기${recent('naver')}</button>
     <button class="btn google" onclick="oauth('google')"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M22.6 12.3c0-.8-.1-1.5-.2-2.2H12v4.2h5.9a5 5 0 0 1-2.2 3.3v2.7h3.6c2.1-1.9 3.3-4.8 3.3-8z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.6-2.7c-1 .7-2.2 1.1-3.7 1.1-2.9 0-5.3-1.9-6.2-4.5H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.2a6.6 6.6 0 0 1 0-4.3V7.1H2.1a11 11 0 0 0 0 9.9l3.7-2.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.7l3.2-3.2A11 11 0 0 0 2.1 7.1l3.7 2.8C6.7 7.3 9.1 5.4 12 5.4z"/></svg>Google로 계속하기${recent('google')}</button>
   </div>
-  <label class="ck keep"><input type="checkbox" ${keepOn()?'checked':''} onchange="setKeep(this.checked)"><span>로그인 상태 유지 (${KEEP_DAYS}일)</span></label>
+  <div class="small muted" style="text-align:center;margin-top:12px">한 번 로그인하면 ${KEEP_DAYS}일 동안 유지돼요</div>
   <button class="or" style="width:100%;background:none;border:none;font-family:inherit;cursor:pointer" onclick="st.emailOpen=!${open};st.authMode='login';render()" aria-expanded="${open}"><span>또는 이메일로 ${open?'▴':'▾'}${recent('email')}</span></button>
   ${open?`<div class="seg"><button class="${su?'':'on'}" onclick="setAuth('login')">로그인</button><button class="${su?'on':''}" onclick="setAuth('signup')">회원가입</button></div>
   ${su?`<label class="lbl">이름</label><input id="a-name" class="input" autocomplete="name">`:''}
