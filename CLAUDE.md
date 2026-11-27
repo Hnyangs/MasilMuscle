@@ -25,7 +25,7 @@ SQL is applied manually in each project's SQL Editor and must stay identical: `s
 
 ## Legal pages
 
-`privacy.html` and `terms.html` (static, repo root, brand-styled) are linked from the login, onboarding and My screens (`legalLinks()`) and from the Google OAuth consent branding (`https://hnyangs.github.io/movenstrength/privacy.html` / `terms.html`). They describe the data the app actually collects and who can see it (trainers see linked members' records; trainer memos about a member are hidden from the member; there is **no self-service account deletion** yet, so deletion is by request). **Update them whenever data collection, hosting or providers change.** Operator/contact (public): 홍정은, hongnyangj@gmail.com, plus GitHub Issues. They are a general draft, not legal advice. Not yet implemented: an explicit consent checkbox / stored consent timestamp at signup.
+`privacy.html` and `terms.html` (static, repo root, brand-styled) are linked from the login, onboarding and My screens (`legalLinks()`) and from the Google OAuth consent branding (`https://hnyangs.github.io/movenstrength/privacy.html` / `terms.html`). They describe the data the app actually collects and who can see it (trainers see linked members' records; trainer memos about a member are hidden from the member; there is **no self-service account deletion** yet, so deletion is by request). **Update them whenever data collection, hosting or providers change.** Operator/contact (public): 홍정은, hongnyangj@gmail.com. They are a general draft, not legal advice. Not yet implemented: an explicit consent checkbox / stored consent timestamp at signup.
 
 ## Running
 
