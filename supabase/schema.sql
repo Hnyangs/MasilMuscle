@@ -1,4 +1,4 @@
--- MasilMuscle Supabase 스키마. Supabase 대시보드 > SQL Editor에서 한 번 실행하세요.
+-- 믓 Supabase 스키마. Supabase 대시보드 > SQL Editor에서 한 번 실행하세요.
 -- (Authentication > Providers > Email 사용. 이메일 인증을 켜 두면 가입 후 인증 메일 확인이 필요합니다.)
 
 create table if not exists public.profiles (
