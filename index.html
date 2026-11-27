@@ -144,7 +144,11 @@ const PARTS=['전신','하체','등','가슴','어깨','이두','삼두','복근
 const partLabel=p=>p==='복근_신전근'?'복근·신전근':p;
 const TARGET_REPS={초급:12,중급:10,고급:8};
 /* 운동 등급: 가입 때 묻지 않고 기록으로 자동 부여. 운동 기간 = 첫 기록부터 오늘까지, 운동한 날 = 기록이 있는 날짜 수 */
-const LEVEL_RULES=[['고급',1095,500,'운동 기간 3년 이상 · 운동한 날 500일 이상'],['중급',365,150,'운동 기간 1년 이상 · 운동한 날 150일 이상'],['초급',0,0,'처음 시작 ~ 중급 기준 전']];
+const LEVEL_RULES=[['선수',1825,900,'운동 기간 5년 이상 · 운동한 날 900일 이상'],['고인물',1095,500,'운동 기간 3년 이상 · 운동한 날 500일 이상'],['헬창',365,150,'운동 기간 1년 이상 · 운동한 날 150일 이상'],['헬스러',90,36,'운동 기간 3개월 이상 · 운동한 날 36일 이상 (주 3회 × 3개월)'],['헬린이',0,0,'이제 막 시작 ~ 헬스러 기준 전']];
+/* 추천 분할·목표 횟수는 3단계(초급/중급/고급)로 묶어 쓴다. 옛 값(초급/중급/고급)도 표시·계산에 호환 */
+const PLAN_KEY={헬린이:'초급',헬스러:'초급',헬창:'중급',고인물:'고급',선수:'고급',초급:'초급',중급:'중급',고급:'고급'};
+const LEGACY_LEVEL={초급:'헬린이',중급:'헬창',고급:'고인물'};
+const levelName=l=>LEGACY_LEVEL[l]||l||'헬린이';
 function levelStats(logs){
   if(!logs.length)return{days:0,span:0};
   const first=logs.reduce((a,l)=>l.log_date<a?l.log_date:a,logs[0].log_date);
@@ -152,6 +156,7 @@ function levelStats(logs){
 }
 function levelFromLogs(logs){const {days,span}=levelStats(logs);return LEVEL_RULES.find(([,s,d])=>span>=s&&days>=d)[0]}
 const curLevel=()=>levelFromLogs(st.logs);
+const planLevel=()=>PLAN_KEY[curLevel()];
 const PLANS={
   초급:[{label:'상체',parts:['가슴','등','어깨','이두','삼두']},{label:'하체',parts:['하체']}],
   중급:[{label:'밀기',parts:['가슴','어깨','삼두']},{label:'당기기',parts:['등','이두']},{label:'하체',parts:['하체']}],
@@ -345,7 +350,7 @@ function topExercises(p,n){
   return [...new Set([...Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]),...exercisesOf(p)])].slice(0,n);
 }
 function suggest(ex){
-  const level=curLevel(),tr=TARGET_REPS[level],last=lastRec(ex);
+  const tr=TARGET_REPS[planLevel()],last=lastRec(ex);
   if(!last)return{text:'첫 기록이에요! 가벼운 무게로 자세부터 잡아요',w:'',r:tr};
   const sets=last.sets,top=sets.reduce((a,s)=>+s.w>+a.w?s:a,sets[0]);
   let w=+top.w,r=+top.r,msg;
@@ -356,9 +361,9 @@ function suggest(ex){
   return{text:`지난번 ${top.w}kg×${top.r}회 · ${msg}`,w,r};
 }
 function recommend(){
-  const level=curLevel();
-  let plan=PLANS[level];
-  if(level==='초급'&&!st.logs.length)plan=[{label:'전신',parts:['하체','가슴','등']}];
+  const level=curLevel(),pl=planLevel();
+  let plan=PLANS[pl];
+  if(pl==='초급'&&!st.logs.length)plan=[{label:'전신',parts:['하체','가슴','등']}];
   const pick=plan.map(g=>({...g,rest:Math.min(...g.parts.map(restDays))})).reduce((a,b)=>b.rest>a.rest?b:a);
   const per=pick.parts.length>=3?1:2;
   const items=pick.parts.flatMap(p=>topExercises(p,per).map(ex=>({part:p,ex,...suggest(ex)}))).slice(0,5);
@@ -419,7 +424,7 @@ const tabList=()=>coaching()?[['home','','홈'],['members','','회원'],['record
 const SUB_TABS={history:'my'};
 const navTab=()=>tabList().some(([k])=>k===st.tab)?st.tab:SUB_TABS[st.tab];
 const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
-const mLabel=m=>`${esc(m.name)} · ${esc(m.member_code||m.level)}${m.is_managed?' · 앱 미사용':''}`;
+const mLabel=m=>`${esc(m.name)} · ${esc(m.member_code||levelName(m.level))}${m.is_managed?' · 앱 미사용':''}`;
 const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${mLabel(m)}</option>`).join('')}</select>`:'';
 const ptTag=p=>`<span class="st-tag st-${p.status}">${PT_STATUS[p.status]||p.status}</span>`;
 const noMember=()=>`<div class="card center muted">담당 회원이 없어요.<br>회원 탭에서 이름·이메일로 찾거나 직접 등록하고,<br>마이 탭의 강사 코드를 회원에게 알려주세요.</div>`;
@@ -623,14 +628,14 @@ function membersView(){
   return `<h2>담당 회원 관리</h2>
   ${st.reqs.length?`<div class="card hl"><h3>PT 신청 ${st.reqs.length}건</h3>${st.reqs.map(p=>`<div class="item"><div><b>${esc(nameOf(p.member_id))}</b> <span class="small muted">${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}</span><div class="small muted">${esc(p.goal)}</div></div><div class="row"><button class="btn sm primary" onclick="setPT('${p.id}','scheduled')">승인</button><button class="btn sm" onclick="setPT('${p.id}','canceled')">거절</button></div></div>`).join('')}</div>`:''}
   <div class="card"><h3>회원 찾기</h3><div class="row"><input id="m-q" class="input" placeholder="이름 · 회원코드 · 이메일" onkeydown="if(event.key==='Enter')searchMember()"><button class="btn sm primary" style="min-height:48px" onclick="searchMember()">검색</button></div>
-  ${Array.isArray(f)?(f.length?f.map(x=>`<div class="item"><div><b>${esc(x.name)}</b> <span class="tag">${esc(x.member_code||'')}</span><div class="small muted">${x.email_hint?esc(x.email_hint):x.is_managed?'앱 미사용 회원':'이메일 없음'} · ${esc(x.level)}</div></div>
+  ${Array.isArray(f)?(f.length?f.map(x=>`<div class="item"><div><b>${esc(x.name)}</b> <span class="tag">${esc(x.member_code||'')}</span><div class="small muted">${x.email_hint?esc(x.email_hint):x.is_managed?'앱 미사용 회원':'이메일 없음'} · ${esc(levelName(x.level))}</div></div>
     ${x.trainer_state==='mine'?'<span class="ok small">내 회원</span>':x.trainer_state==='other'?'<span class="muted small">다른 트레이너</span>':`<button class="btn sm primary" onclick="addMember('${x.id}')">등록</button>`}</div>`).join(''):'<div class="small muted" style="margin-top:10px">찾는 회원이 없어요. 앱을 쓰지 않는 회원이면 아래에서 직접 등록하세요.</div>'):''}</div>
   <div class="card"><h3>회원 직접 등록</h3><div class="small muted">이메일이 없거나 앱을 쓰지 않는 회원도 등록할 수 있어요. 고유 회원코드가 자동으로 붙어 동명이인도 구분돼요.</div>
   <label class="lbl">이름</label><input id="mm-name" class="input"><div class="small muted" style="margin-top:6px">운동 등급은 기록이 쌓이면 자동으로 정해져요.</div>
   <button class="btn ghost" onclick="addManaged()">등록하기</button></div>
   ${impCard()}
   ${st.members.length?`<div class="card"><h3>회원 선택</h3>${memberSelect()}
-  ${s?`<div class="small muted">회원코드 ${esc(s.member_code||'-')} · ${s.is_managed?'앱 미사용 회원':esc(s.email||'이메일 없음')} · 운동 등급 ${esc(s.level)}</div>
+  ${s?`<div class="small muted">회원코드 ${esc(s.member_code||'-')} · ${s.is_managed?'앱 미사용 회원':esc(s.email||'이메일 없음')} · 운동 등급 ${esc(levelName(s.level))}</div>
   <label class="lbl">회원 특징 · 트레이너만 보는 메모</label><textarea id="m-notes" class="input" placeholder="체형, 부상 이력, 성향 등">${esc(st.mnote?.notes)}</textarea>
   <label class="lbl">운동 방향 / 커리큘럼 · 트레이너만 보는 메모</label><textarea id="m-cur" class="input" placeholder="목표와 주차별 운동 방향">${esc(st.mnote?.curriculum)}</textarea>
   <button class="btn primary" onclick="saveNotes()">저장하기</button>`:''}</div>`:noMember()}`;
@@ -884,7 +889,7 @@ function levelCard(){
   const need=next?[next[1]>span?`운동 기간 ${next[1]-span}일`:'',next[2]>days?`운동한 날 ${next[2]-days}일`:''].filter(Boolean).join(' · '):'';
   return `<div class="card"><div class="row between"><div><div class="small muted">운동 등급 · 기록으로 자동 부여</div><b style="font-size:20px">${lv}</b></div><div class="small muted" style="text-align:right">운동한 날 ${days}일<br>운동 기간 ${span}일</div></div>
   ${next?`<div class="small" style="margin-top:10px">${esc(next[0])}까지 ${need} 남았어요</div>`:'<div class="small" style="margin-top:10px">최고 등급이에요. 오, 이건 좀 믓지다.</div>'}
-  <button class="x fbtn" onclick="tgFb(this)">등급 기준 보기 ▸</button><div class="fb" hidden>${LEVEL_RULES.map(([l,,,t])=>`<div><b>${l}</b> · ${t}</div>`).join('')}<div class="muted" style="margin-top:6px">추천 운동의 분할과 목표 횟수(초급 12회 · 중급 10회 · 고급 8회)가 등급에 맞춰져요.</div></div></div>`;
+  <button class="x fbtn" onclick="const e=this.nextElementSibling;e.hidden=!e.hidden;this.textContent=e.hidden?'등급 기준 보기 ▸':'등급 기준 접기 ▾'">등급 기준 보기 ▸</button><div class="fb" hidden>${LEVEL_RULES.map(([l,,,t])=>`<div><b>${l}</b> · ${t}</div>`).join('')}<div class="muted" style="margin-top:6px">추천 운동은 헬린이·헬스러 / 헬창 / 고인물·선수 세 가지 분할로 나뉘고, 목표 횟수는 12회 · 10회 · 8회예요.</div></div></div>`;
 }
 /* 회원 탈퇴 (migration_007 delete_my_account) */
 function withdrawSheet(){const tr=isTrainer(),managed=st.members.filter(m=>m.is_managed).length;

@@ -1,5 +1,5 @@
 -- 믓 Supabase 통합 설정: 새 프로젝트(dev 등)에서 이 파일 하나를 SQL Editor에 붙여넣고 Run 하면 됩니다.
--- 아래 파일을 순서대로 이어 붙인 것입니다: schema.sql, exercises.sql, migration_002_mypage_inbody.sql, migration_003_inbody_fields.sql, migration_004_social_login.sql, migration_005_trainer_tools.sql, migration_006_sheet_import.sql, migration_007_edit_consent_withdraw.sql
+-- 아래 파일을 순서대로 이어 붙인 것입니다: schema.sql, exercises.sql, migration_002_mypage_inbody.sql, migration_003_inbody_fields.sql, migration_004_social_login.sql, migration_005_trainer_tools.sql, migration_006_sheet_import.sql, migration_007_edit_consent_withdraw.sql, migration_008_level_names.sql
 -- 여러 번 실행해도 안전합니다(이미 있는 것은 건너뛰거나 덮어씀). 데이터는 지우지 않습니다.
 -- 이 파일은 생성물입니다. 원본 SQL을 바꾸면 CLAUDE.md의 'Environments' 항목에 적힌 명령으로 다시 만드세요.
 
@@ -927,3 +927,14 @@ begin
 end $$;
 revoke execute on function public.delete_my_account() from public, anon;
 grant execute on function public.delete_my_account() to authenticated;
+
+-- ======================================================================
+-- migration_008_level_names.sql
+-- ======================================================================
+-- 008: 운동 등급 이름 변경 (헬린이 · 헬스러 · 헬창 · 고인물 · 선수)
+-- 등급은 앱이 운동 기록으로 자동 계산해 profiles.level 에 저장한다. 이전 값(초급/중급/고급)도 계속 허용한다.
+-- migration_007 실행 후, Supabase SQL Editor에서 실행하세요. (여러 번 실행해도 안전)
+
+alter table public.profiles drop constraint if exists profiles_level_check;
+alter table public.profiles add constraint profiles_level_check
+  check (level in ('초급','중급','고급','헬린이','헬스러','헬창','고인물','선수'));
