@@ -108,11 +108,21 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 /* ===== 설정 =====
-   SUPABASE_URL은 반드시 프로젝트 고유 주소(https://<project-ref>.supabase.co)여야 합니다.
-   (anon/publishable 키는 공개 키이며, 데이터 보호는 supabase/schema.sql의 RLS 정책이 담당합니다) */
-const SUPABASE_URL='https://htizcjneaagxffqumvdm.supabase.co';
-const SUPABASE_ANON_KEY='sb_publishable_QSMXmg5fLDukFoU6Lo3J-w_0Sb3a33q';
+   접속한 주소(hostname)로 운영/dev Supabase를 고릅니다. 운영 DB는 PROD_HOSTS 주소에서만 쓰고,
+   그 외 모든 주소(Vercel 미리보기·production, localhost, 파일 열기)는 dev DB로 연결되어 실수로 운영 데이터를 건드리지 않습니다.
+   URL은 프로젝트 고유 주소(https://<project-ref>.supabase.co, /rest/v1/ 없음)여야 합니다.
+   (publishable 키는 공개 키이며, 데이터 보호는 supabase/ 의 RLS 정책이 담당합니다) */
+const ENVS={
+  prod:{url:'https://htizcjneaagxffqumvdm.supabase.co',key:'sb_publishable_QSMXmg5fLDukFoU6Lo3J-w_0Sb3a33q'},
+  dev:{url:'https://spxlwrnmtmwgegjmopgw.supabase.co',key:'sb_publishable_TNHoLrz-TVHEGSvdmg0kbg__we5T5aJ'}
+};
+const PROD_HOSTS=['hnyangs.github.io'];
+const ENV_NAME=PROD_HOSTS.includes(location.hostname)?'prod':'dev';
+const IS_DEV=ENV_NAME==='dev';
+const SUPABASE_URL=ENVS[ENV_NAME].url;
+const SUPABASE_ANON_KEY=ENVS[ENV_NAME].key;
 const CONFIG_OK=new URL(SUPABASE_URL).hostname.split('.').length>=3;
+if(IS_DEV)document.title='[DEV] 믓';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
 /* ===== 기본 데이터 ===== */
@@ -307,6 +317,7 @@ function onboardView(){
 function authView(){
   const su=st.authMode==='signup';
   return `<div class="login"><h1 aria-label="믓">${logoSvg(96)}</h1><div class="en">MOVE &amp; STRENGTH</div><p class="muted" style="margin-top:6px">마실처럼 가볍게, 쇠질처럼 진심으로.</p><div class="hello">오늘도 좀 들어볼까?</div>
+  ${IS_DEV?'<div class="card warn" style="margin-top:16px"><b>DEV 환경</b><div class="small muted" style="margin-top:4px">테스트용 데이터베이스예요. 여기서 입력한 내용은 운영 앱에 나타나지 않아요. 간편 로그인은 dev에서 따로 설정하기 전까지 이메일로 가입·로그인해 주세요.</div></div>':''}
   ${CONFIG_OK?'':'<div class="cfg">SUPABASE_URL이 프로젝트 주소가 아닙니다. index.html 상단의 SUPABASE_URL을 <b>https://&lt;project-ref&gt;.supabase.co</b> 형태로 바꿔주세요.</div>'}
   <div class="social">
     <button class="btn kakao" onclick="oauth('kakao')"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M12 3.5C6.8 3.5 2.6 6.8 2.6 10.9c0 2.6 1.7 4.9 4.3 6.2l-1.1 4c-.1.4.3.6.6.4l4.7-3.1c.3 0 .6.1.9.1 5.2 0 9.4-3.3 9.4-7.4S17.2 3.5 12 3.5z"/></svg>카카오로 시작하기</button>
@@ -324,7 +335,7 @@ function authView(){
 }
 function headerView(){
   const m=st.me;
-  return `<header><div class="brandrow">${logoSvg(28)}<b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원 · '+esc(m.level)}</span></div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
+  return `<header><div class="brandrow">${logoSvg(28)}<b>${esc(m.name)}</b><span class="tag">${isTrainer()?'트레이너':'회원 · '+esc(m.level)}</span>${IS_DEV?'<span class="tag" style="color:var(--warn);font-family:var(--mono)">DEV</span>':''}</div>${st.needMig?`<button class="tag" style="color:var(--warn);border:none" onclick="go('my')">DB 업데이트 필요</button>`:''}</header>
   ${isTrainer()?`<div style="padding:4px 16px 0"><button class="btn ghost" style="margin-top:8px" onclick="toggleMode()">${coaching()?'내 개인 운동 모드로 전환':'회원 관리 모드로 돌아가기'}</button></div>`:''}`;
 }
 const tabList=()=>coaching()?[['home','','홈'],['members','','회원'],['record','','기록'],['history','','히스토리'],['inbody','','인바디'],['pt','','PT'],['my','','마이']]

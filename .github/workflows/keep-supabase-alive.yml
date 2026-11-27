@@ -1,7 +1,8 @@
 name: Keep Supabase alive
 
-# 무료 플랜 프로젝트의 일시 중지를 막기 위해 매일 09:00 KST(= 00:00 UTC)에 가벼운 GET 요청을 보냅니다.
-# 저장소 Settings > Secrets and variables > Actions 에 SUPABASE_URL, SUPABASE_ANON_KEY를 등록하세요.
+# 무료 플랜 프로젝트의 일시 중지를 막기 위해 매일 09:00 KST(= 00:00 UTC)에 운영·dev 두 프로젝트에 가벼운 GET 요청을 보냅니다.
+# 주소와 publishable 키는 공개 값(앱 index.html에도 들어 있음)이라 별도 시크릿 없이 동작합니다.
+# 시크릿 SUPABASE_URL / SUPABASE_ANON_KEY (운영), DEV_SUPABASE_URL / DEV_SUPABASE_ANON_KEY (dev)를 등록하면 그 값이 우선합니다.
 # (스케줄 워크플로는 기본 브랜치에 있어야 실행됩니다)
 on:
   schedule:
@@ -11,15 +12,23 @@ on:
 jobs:
   ping:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: prod
+            url: ${{ secrets.SUPABASE_URL || 'https://htizcjneaagxffqumvdm.supabase.co' }}
+            key: ${{ secrets.SUPABASE_ANON_KEY || 'sb_publishable_QSMXmg5fLDukFoU6Lo3J-w_0Sb3a33q' }}
+          - name: dev
+            url: ${{ secrets.DEV_SUPABASE_URL || 'https://spxlwrnmtmwgegjmopgw.supabase.co' }}
+            key: ${{ secrets.DEV_SUPABASE_ANON_KEY || 'sb_publishable_TNHoLrz-TVHEGSvdmg0kbg__we5T5aJ' }}
+    name: ping (${{ matrix.name }})
     steps:
       - name: Ping Supabase REST API
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ matrix.url }}
+          SUPABASE_ANON_KEY: ${{ matrix.key }}
         run: |
-          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::error::SUPABASE_URL / SUPABASE_ANON_KEY secrets are not set"; exit 1
-          fi
           curl -fsS --retry 3 --max-time 30 \
             -H "apikey: $SUPABASE_ANON_KEY" \
             -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
