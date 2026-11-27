@@ -103,9 +103,6 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .ok{color:var(--green)}.bad{color:var(--bad)}
 .wm{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:var(--m)}
 .ptcard{border-left:3px solid var(--accent)}
-nav button.fab{overflow:visible;color:var(--m)}nav button.fab.on{color:var(--chalk)}
-.fabc{display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:var(--r);background:var(--accent);margin-top:-22px;margin-bottom:2px;box-shadow:0 0 0 5px var(--iron);font-style:normal}.fabc svg{color:var(--iron)!important}
-nav button.fab:active .fabc{background:var(--pd)}
 .ck{display:flex;gap:10px;align-items:flex-start;padding:10px 0;font-size:14px;line-height:1.5;cursor:pointer}.ck input{width:20px;height:20px;margin:1px 0 0;flex-shrink:0;accent-color:var(--accent)}.ck a{color:var(--t)}
 .consent{margin-top:20px;padding:6px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}.consent .all{border-bottom:1px solid var(--line)}.req{color:var(--accent);font-weight:600}
 .recent{margin-left:8px;padding:2px 6px;border-radius:4px;background:var(--accent);color:#171717;font-size:11px;font-weight:700;vertical-align:middle}
@@ -140,7 +137,8 @@ header{padding:18px var(--gut) 0}
 nav{background:var(--bg);border-top:1px solid var(--line)}
 nav button{font-family:var(--mono);font-size:10px;letter-spacing:.08em;font-weight:500}
 nav button.on{color:var(--chalk)}nav button.on svg{color:var(--accent)}
-.fabc{border-radius:2px}
+.exr{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:13px 2px;border:none;border-top:1px solid var(--line);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}.exr:active{background:var(--card2)}.exr.add b{color:var(--accent)}
+.savebar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(62px + env(safe-area-inset-bottom));width:100%;max-width:480px;display:flex;gap:8px;padding:10px var(--gut);background:var(--bg);border-top:1px solid var(--line);z-index:6}.savebar .btn{margin-top:0;min-height:52px}.savebar .btn.ghost{width:auto;flex:0 0 96px}
 input[type=number].input,.code-in{background:var(--card);border:1px solid var(--line);border-bottom:2px solid var(--line);border-radius:2px;padding:12px;font-family:var(--mono);font-size:20px;font-weight:700}
 input[type=number].input:focus{border-bottom-color:var(--accent)}
 .hero{display:flex;align-items:flex-end;gap:18px;padding:4px 0 22px}
@@ -243,7 +241,7 @@ const isTrainer=()=>st.me?.role==='trainer';
 const coaching=()=>isTrainer()&&st.mode==='trainer';
 const targetId=()=>coaching()?st.sel?.id:st.me.id;
 const targetProfile=()=>coaching()?st.sel:st.me;
-const newDraft=()=>({date:today(),part:'가슴',exercise:'',custom:false,customName:'',sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}],feedback:'',note:''});
+const newDraft=()=>({date:today(),part:'',exercise:'',custom:false,customName:'',sets:[{w:'',r:''}],feedback:'',note:''});
 st.draft=newDraft();
 
 /* ===== 인증 ===== */
@@ -266,11 +264,12 @@ async function boot(){
       const at=+lsGet('mm-login-at');
       if(!at)lsSet('mm-login-at',Date.now());
       if(at&&Date.now()-at>KEEP_DAYS*864e5){await sb.auth.signOut();lsSet('mm-login-at',null);oauthErr=oauthErr||`로그인 유지 기간(${KEEP_DAYS}일)이 지났어요. 다시 로그인해 주세요`}
-      else await run(()=>afterLogin(session.user));
+      else{await run(()=>afterLogin(session.user));if(st.me&&!fromAuth)await run(restoreUi)}   /* 새 로그인(소셜 복귀 포함)은 홈에서 시작 */
     }
   }
   if(/(access_token|code|error)=/.test(location.search+location.hash))history.replaceState(null,'',location.pathname);
   render();
+  if(st._y){const y=st._y;st._y=0;requestAnimationFrame(()=>window.scrollTo(0,y))}
   if(oauthErr)toast(oauthErr.startsWith('로그인 유지')?oauthErr:'간편 로그인 실패: '+oauthErr.replace(/\+/g,' '));
 }
 /* 간편 로그인 (Supabase OAuth). 공급자 설정은 Supabase > Authentication > Sign In / Providers */
@@ -347,7 +346,7 @@ async function doSignup(){await run(async()=>{
   if(st.me&&'terms_agreed_at' in st.me&&!st.me.terms_agreed_at){try{await saveConsent();st.me.terms_agreed_at=new Date().toISOString()}catch(e){}}   /* 가입 폼에서 이미 동의함 */
   st.cs=newConsent();render();
 })}
-async function logout(){await sb.auth.signOut();lsSet('mm-login-at',null);Object.assign(st,{ob:undefined,me:null,members:[],sel:null,logs:[],pts:[],reqs:[],inbody:[],myTrainer:null,myCode:null,codeBusy:false,week:0,found:undefined,authMode:'login',wd:false,editFrom:null,cs:newConsent()});st.draft=newDraft();render()}
+async function logout(){await sb.auth.signOut();lsSet('mm-login-at',null);lsSet(UI_KEY,null);Object.assign(st,{ob:undefined,me:null,members:[],sel:null,logs:[],pts:[],reqs:[],inbody:[],myTrainer:null,myCode:null,codeBusy:false,week:0,found:undefined,authMode:'login',wd:false,editFrom:null,cs:newConsent()});st.draft=newDraft();render()}
 function setAuth(m){st.authMode=m;render()}
 
 /* ===== 데이터 로드 ===== */
@@ -387,6 +386,27 @@ async function loadData(){
   if(tp&&tp.role==='member'){const lv=curLevel();if(tp.level!==lv){tp.level=lv;sb.from('profiles').update({level:lv}).eq('id',tp.id).then(r=>r.error&&console.warn('level sync',r.error))}}
 }
 const reload=()=>run(async()=>{await loadData();render()});
+/* 화면 상태 보존: 앱을 나갔다 돌아오면(브라우저가 페이지를 다시 불러와도) 보던 탭·작성 중인 기록·필터·스크롤을 복원한다 */
+const UI_KEY='mm-ui',UI_TTL=864e5;
+function saveUi(){if(!st.me||st.me.onboarded===false)return;
+  try{lsSet(UI_KEY,JSON.stringify({uid:st.me.id,t:Date.now(),tab:st.tab,mode:st.mode,sel:st.sel?.id||null,draft:st.draft,routine:st.routine||null,hf:st.hf,week:st.week,ptMode:st.ptMode,ptDate:st.ptDate,editFrom:st.editFrom||null,y:window.scrollY}))}catch(e){}}
+async function restoreUi(){
+  let u;try{u=JSON.parse(lsGet(UI_KEY))}catch(e){return}
+  if(!u||u.uid!==st.me?.id||Date.now()-u.t>UI_TTL||st.me.onboarded===false)return;
+  const mode0=st.mode,sel0=st.sel?.id;
+  if(isTrainer()&&(u.mode==='trainer'||u.mode==='personal'))st.mode=u.mode;
+  if(coaching()&&u.sel&&st.members.some(m=>m.id===u.sel))st.sel=st.members.find(m=>m.id===u.sel);
+  if(st.mode!==mode0||st.sel?.id!==sel0)await loadData();
+  if(u.draft)st.draft={...newDraft(),...u.draft};
+  st.routine=u.routine||null;st.editFrom=u.editFrom||null;
+  if(u.hf)Object.assign(st.hf,u.hf);
+  st.week=u.week||0;st.ptMode=u.ptMode||st.ptMode;st.ptDate=u.ptDate||null;
+  if(u.tab)st.tab=u.tab;
+  st._y=u.y||0;
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveUi()});
+window.addEventListener('pagehide',saveUi);
+let uiT;document.addEventListener('input',()=>{clearTimeout(uiT);uiT=setTimeout(saveUi,400)});
 function go(t){if(st.draft?.id&&t!=='record'){st.draft=newDraft();st.editFrom=null}st.tab=t;render();window.scrollTo(0,0)}
 function toggleMode(){resetHF();st.mode=coaching()?'personal':'trainer';st.tab='home';st.draft=newDraft();reload()}
 function selectMember(id){resetHF();st.sel=st.members.find(m=>m.id===id)||null;st.draft=newDraft();reload()}
@@ -474,9 +494,7 @@ const tabList=()=>coaching()?[['home','','홈'],['members','','회원'],['record
 /* 회원·개인 모드의 운동 기록(히스토리)은 마이 > 운동 기록에서 연다 (하단 탭은 마이가 켜짐) */
 const SUB_TABS={history:'my'};
 const navTab=()=>tabList().some(([k])=>k===st.tab)?st.tab:SUB_TABS[st.tab];
-const navView=()=>`<nav>${tabList().map(([k,i,l])=>k==='record'&&!coaching()
-  ?`<button class="fab ${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}"><i class="fabc">${ico(k,24)}</i>${l}</button>`
-  :`<button class="${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
+const navView=()=>`<nav>${tabList().map(([k,i,l])=>`<button class="${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
 const mLabel=m=>`${esc(m.name)} · ${esc(m.member_code||levelName(m.level))}${m.is_managed?' · 앱 미사용':''}`;
 const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${mLabel(m)}</option>`).join('')}</select>`:'';
 const ptTag=p=>`<span class="st-tag st-${p.status}">${PT_STATUS[p.status]||p.status}</span>`;
@@ -540,7 +558,7 @@ function recordOn(d){st.draft=newDraft();st.draft.date=d;go('record')}
 function startEx(p,e){st.routine=null;loadItem({part:p,ex:e,r:suggest(e).r,w:suggest(e).w,text:suggest(e).text})}
 function loadItem(it){
   const d=st.draft=newDraft();d.part=it.part;d.exercise=it.ex;d.hint=it.text;
-  const n=Math.max(3,lastRec(it.ex)?.sets.length||3);d.sets=Array.from({length:n},()=>({w:'',r:it.r}));   /* 무게는 직접 입력 */
+  d.sets=[{w:'',r:it.r}];   /* 무게는 직접 입력 */
   st.tab='record';render();window.scrollTo(0,0);
 }
 function startRoutine(k){const items=recommend().items;if(!items.length)return;st.routine={items,i:k};loadItem(items[k])}
@@ -563,7 +581,8 @@ function recordForm(d,exs,cur){
   return `
   <div class="card"><label class="lbl">날짜</label><input type="date" class="input" value="${d.date}" onchange="st.draft.date=this.value">
   <label class="lbl">부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" onclick="pickPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
-  <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)"><option value="">종목을 선택하세요</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>+ 직접 입력</option></select>
+  ${d.id?'':`<label class="lbl">종목 검색</label><input id="ex-q" class="input" type="search" placeholder="종목 이름으로 검색 (예: 벤치)" oninput="exSearch(this.value)" autocomplete="off"><div id="ex-res"></div>`}
+  <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)" ${d.part?'':'disabled'}><option value="">${d.part?'종목을 선택하세요':'부위를 먼저 선택하세요 (또는 위에서 검색)'}</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>+ 직접 입력</option></select>
   ${d.custom?`<input class="input" style="margin-top:8px" placeholder="종목 이름" value="${esc(d.customName)}" oninput="st.draft.customName=this.value">`:''}
   ${recentCard(d.custom?d.customName.trim():d.exercise)}
   <label class="lbl">세트 (무게 kg · 횟수) · ${d.sets.length}세트</label>
@@ -574,20 +593,42 @@ function recordForm(d,exs,cur){
   <button class="btn ghost sm" onclick="addSet()">+ 세트 추가</button>
   <label class="lbl">피드백 ${coaching()?'(회원에게 전달 · 자세 · 통증 여부)':'(컨디션 · 통증 여부 등)'}</label><textarea class="input" placeholder="통증이나 부상이 있다면 꼭 적어주세요" oninput="st.draft.feedback=this.value">${esc(d.feedback)}</textarea>
   <label class="lbl">노트 ${coaching()?'(수업 메모 · 숙제 · 다음 수업 계획)':'(메모)'}</label><textarea class="input" style="min-height:70px" placeholder="${coaching()?'회원에게 보이는 노트예요':'자유 메모'}" oninput="st.draft.note=this.value">${esc(d.note)}</textarea>
-  <button class="btn primary" onclick="saveLog()">${d.id?'수정 저장':'저장하기'}</button>${d.id?'<button class="btn ghost" onclick="cancelEdit()">취소</button>':''}</div>`;
+  </div><div style="height:76px"></div>
+  <div class="savebar">${d.id?'<button class="btn ghost" onclick="cancelEdit()">취소</button>':''}<button class="btn primary" onclick="saveLog()">${d.id?'수정 저장':'저장하기'}</button></div>`;
 }
 function fillLast(){const d=st.draft,l=lastRec(d.custom?d.customName.trim():d.exercise);if(!l)return;d.sets=l.sets.map(x=>({w:x.w,r:x.r}));render();toast('지난번 기록을 채웠어요. 오늘은 한 개 더.')}
 function recentCard(name){
-  if(!name)return '';const rec=st.logs.filter(l=>l.exercise===name).slice(0,3);
+  if(!name)return '';const rec=st.logs.filter(l=>l.exercise===name).slice(0,1);
   if(!rec.length)return '';
   return `<div class="fb" style="margin-top:10px"><b>최근 기록</b>${rec.map(l=>`<div style="margin-top:6px"><span class="small muted">${fmtDate(l.log_date)}${l.is_pt?' · PT':''}</span><div>${setsHtml(l)}</div></div>`).join('')}${st.draft.id?'':`<button class="btn ghost sm" style="margin-top:10px" onclick="fillLast()">지난번 그대로 채우기</button>`}</div>`;
 }
+/* 종목 검색: 모든 부위에서 찾고, 고르면 부위+종목이 바로 적용된다. 없으면 '직접 추가'로 이번 기록에 적용 (저장 시 종목 목록에도 등록) */
+const exNorm=x=>String(x).toLowerCase().replace(/\s+/g,'');
+function allEx(){const seen=new Set(),out=[];
+  const add=(part,name)=>{const k=part+'|'+name;if(!seen.has(k)){seen.add(k);out.push({part,name})}};
+  PARTS.forEach(pt=>(st.exercises[pt]||[]).forEach(n=>add(pt,n)));
+  Object.keys(st.exercises).forEach(pt=>(st.exercises[pt]||[]).forEach(n=>add(pt,n)));
+  st.logs.forEach(l=>add(l.part,l.exercise));return out}
+function exSearch(v){
+  const q=exNorm(v.trim()),box=$('#ex-res');if(!box)return;
+  if(!q){box.innerHTML='';st.exres=[];return}
+  const res=allEx().filter(e=>exNorm(e.name).includes(q)).sort((a,b)=>(exNorm(a.name).startsWith(q)?0:1)-(exNorm(b.name).startsWith(q)?0:1)).slice(0,30);
+  st.exres=res;
+  const exact=res.some(e=>exNorm(e.name)===q);
+  box.innerHTML=res.map((e,i)=>`<button class="exr" onclick="exPick(${i})"><b>${esc(e.name)}</b><span class="tag">${esc(partLabel(e.part))}</span></button>`).join('')
+    +(exact?'':`<button class="exr add" onclick="exAdd()"><b>+ “${esc(v.trim())}” 직접 추가</b><span class="small muted">${st.draft.part?'부위: '+esc(partLabel(st.draft.part)):'부위를 먼저 선택하세요'}</span></button>`);
+}
+function exPick(i){const r=st.exres?.[i];if(!r)return;st.draft.part=r.part;st.draft.custom=false;st.draft.customName='';pickEx(r.name)}
+function exAdd(){const v=$('#ex-q').value.trim();if(!v)return;
+  if(!st.draft.part)return toast('부위를 먼저 선택해주세요');
+  if(v.length>60)return toast('종목 이름은 60자 이내로 입력해주세요');
+  const d=st.draft;d.custom=true;d.customName=v;d.exercise='';render();toast(`“${v}” 종목을 이번 기록에 적용했어요. 저장하면 종목 목록에도 추가돼요`)}
 function pickPart(p){st.draft.part=p;st.draft.custom=false;st.draft.customName='';pickEx(exercisesOf(p)[0])}
 function pickEx(e){
   const d=st.draft;
   if(e==='__custom'){d.custom=true;d.exercise='';d.customName=''}
   else if(!e){d.custom=false;d.exercise=''}
-  else{d.custom=false;d.exercise=e;const s=suggest(e),n=Math.max(3,lastRec(e)?.sets.length||3);d.sets=Array.from({length:n},()=>({w:s.w,r:s.r}))}
+  else{d.custom=false;d.exercise=e;const s=suggest(e);d.sets=[{w:s.w,r:s.r}]}
   render();
 }
 function adj(i,k,dv){const s=st.draft.sets[i];s[k]=Math.max(0,Math.round(((+s[k]||0)+dv)*10)/10);render()}
@@ -596,6 +637,7 @@ function delSet(i){const d=st.draft;d.sets.splice(i,1);if(!d.sets.length)d.sets.
 function saveLog(){return run(async()=>{
   const d=st.draft,tid=targetId(),exercise=(d.custom?d.customName:d.exercise).trim();
   if(!tid)return toast('회원을 먼저 선택해주세요');
+  if(!d.part)return toast('부위를 선택해주세요');
   if(!exercise)return toast('종목을 선택하거나 입력해주세요');
   if(exercise.length>60)return toast('종목 이름은 60자 이내로 입력해주세요');
   const sets=d.sets.filter(s=>+s.r>0).map(s=>({w:+s.w||0,r:+s.r}));
@@ -1000,6 +1042,7 @@ function render(){
   const V={home:()=>coaching()?trainerHomeView():homeView(),record:recordView,history:historyView,members:membersView,pt:ptView,inbody:inbodyView,class:classView,my:myView};
   if(!navTab())st.tab=tabList()[0][0];
   app.innerHTML=headerView()+`<main><div class="eyebrow">${EYEBROW[st.tab]||''}</div>${V[st.tab]()}</main>`+navView()+(st.wd?withdrawSheet():'');
+  saveUi();
 }
 boot();
 </script>
