@@ -144,11 +144,11 @@ const PARTS=['전신','하체','등','가슴','어깨','이두','삼두','복근
 const partLabel=p=>p==='복근_신전근'?'복근·신전근':p;
 const TARGET_REPS={초급:12,중급:10,고급:8};
 /* 운동 등급: 가입 때 묻지 않고 기록으로 자동 부여. 운동 기간 = 첫 기록부터 오늘까지, 운동한 날 = 기록이 있는 날짜 수 */
-const LEVEL_RULES=[['믓쟁이',1825,900,'운동 기간 5년 이상 · 운동한 날 900일 이상','오, 이건 좀 믓지다.'],['쇠박이',1095,500,'운동 기간 3년 이상 · 운동한 날 500일 이상','쇠에 박혔다. 헬스장이 집.'],['쇠질러',365,150,'운동 기간 1년 이상 · 운동한 날 150일 이상','쇠질이 일상이 됐다.'],['쇠맛',90,36,'운동 기간 3개월 이상 · 운동한 날 36일 이상 (주 3회 × 3개월)','쇠맛 좀 들었다.'],['구경꾼',0,0,'이제 막 시작 ~ 쇠맛 기준 전','아직 쇠를 구경하는 중.']];
-/* 추천 분할·목표 횟수는 3단계(초급/중급/고급)로 묶어 쓴다. 옛 값(초급/중급/고급, 헬린이~선수)도 표시·계산에 호환 */
-const PLAN_KEY={구경꾼:'초급',쇠맛:'초급',쇠질러:'중급',쇠박이:'고급',믓쟁이:'고급',초급:'초급',중급:'중급',고급:'고급',헬린이:'초급',헬스러:'초급',헬창:'중급',고인물:'고급',선수:'고급'};
-const LEGACY_LEVEL={초급:'구경꾼',중급:'쇠질러',고급:'쇠박이',헬린이:'구경꾼',헬스러:'쇠맛',헬창:'쇠질러',고인물:'쇠박이',선수:'믓쟁이'};
-const levelName=l=>LEGACY_LEVEL[l]||l||'구경꾼';
+const LEVEL_RULES=[['믓쟁이',1825,900,'운동 기간 5년 이상 · 운동한 날 900일 이상','오, 이건 좀 믓지다.'],['마스터',1095,500,'운동 기간 3년 이상 · 운동한 날 500일 이상','꾸준함이라는 가장 강력한 무기를 손에 넣었다.'],['빌더',365,150,'운동 기간 1년 이상 · 운동한 날 150일 이상','땀방울이 모여 탄탄한 몸과 체력을 빚어냈다.'],['루티너',90,36,'운동 기간 3개월 이상 · 운동한 날 36일 이상 (주 3회 × 3개월)','작심삼일을 넘어 나만의 운동 루틴을 만들었다.'],['스타터',0,0,'이제 막 시작 ~ 루티너 기준 전','변화의 첫 발걸음을 뗀 용기 있는 시작.']];
+/* 추천 분할·목표 횟수는 3단계(초급/중급/고급)로 묶어 쓴다. 옛 값(초급/중급/고급, 이전에 쓰던 등급 이름)도 표시·계산에 호환 */
+const PLAN_KEY={스타터:'초급',루티너:'초급',빌더:'중급',마스터:'고급',믓쟁이:'고급',초급:'초급',중급:'중급',고급:'고급',헬린이:'초급',헬스러:'초급',헬창:'중급',고인물:'고급',선수:'고급',구경꾼:'초급',쇠맛:'초급',쇠질러:'중급',쇠박이:'고급'};
+const LEGACY_LEVEL={초급:'스타터',중급:'빌더',고급:'마스터',헬린이:'스타터',헬스러:'루티너',헬창:'빌더',고인물:'마스터',선수:'믓쟁이',구경꾼:'스타터',쇠맛:'루티너',쇠질러:'빌더',쇠박이:'마스터'};
+const levelName=l=>LEGACY_LEVEL[l]||l||'스타터';
 function levelStats(logs){
   if(!logs.length)return{days:0,span:0};
   const first=logs.reduce((a,l)=>l.log_date<a?l.log_date:a,logs[0].log_date);
@@ -890,7 +890,7 @@ function levelCard(){
   return `<div class="card"><div class="row between"><div><div class="small muted">운동 등급 · 기록으로 자동 부여</div><b style="font-size:20px">${lv}</b></div><div class="small muted" style="text-align:right">운동한 날 ${days}일<br>운동 기간 ${span}일</div></div>
   <div class="small muted" style="margin-top:6px">${esc(LEVEL_RULES[i][4])}</div>
   ${next?`<div class="small" style="margin-top:10px">${esc(next[0])}까지 ${need} 남았어요</div>`:'<div class="small" style="margin-top:10px">최고 등급이에요. 오, 이건 좀 믓지다.</div>'}
-  <button class="x fbtn" onclick="const e=this.nextElementSibling;e.hidden=!e.hidden;this.textContent=e.hidden?'등급 기준 보기 ▸':'등급 기준 접기 ▾'">등급 기준 보기 ▸</button><div class="fb" hidden>${LEVEL_RULES.map(([l,,,t,q])=>`<div style="margin-bottom:6px"><b>${l}</b> · ${t}<div class="muted">${q}</div></div>`).reverse().join('')}<div class="muted" style="margin-top:6px">추천 운동은 구경꾼·쇠맛 / 쇠질러 / 쇠박이·믓쟁이 세 가지 분할로 나뉘고, 목표 횟수는 12회 · 10회 · 8회예요.</div></div></div>`;
+  <button class="x fbtn" onclick="const e=this.nextElementSibling;e.hidden=!e.hidden;this.textContent=e.hidden?'등급 기준 보기 ▸':'등급 기준 접기 ▾'">등급 기준 보기 ▸</button><div class="fb" hidden>${LEVEL_RULES.map(([l,,,t,q])=>`<div style="margin-bottom:6px"><b>${l}</b> · ${t}<div class="muted">${q}</div></div>`).reverse().join('')}<div class="muted" style="margin-top:6px">추천 운동은 스타터·루티너 / 빌더 / 마스터·믓쟁이 세 가지 분할로 나뉘고, 목표 횟수는 12회 · 10회 · 8회예요.</div></div></div>`;
 }
 /* 회원 탈퇴 (migration_007 delete_my_account) */
 function withdrawSheet(){const tr=isTrainer(),managed=st.members.filter(m=>m.is_managed).length;
