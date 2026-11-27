@@ -241,7 +241,7 @@ const isTrainer=()=>st.me?.role==='trainer';
 const coaching=()=>isTrainer()&&st.mode==='trainer';
 const targetId=()=>coaching()?st.sel?.id:st.me.id;
 const targetProfile=()=>coaching()?st.sel:st.me;
-const newDraft=()=>({date:today(),part:'가슴',exercise:'',custom:false,customName:'',sets:[{w:'',r:''}],feedback:'',note:''});
+const newDraft=()=>({date:today(),part:'',exercise:'',custom:false,customName:'',sets:[{w:'',r:''}],feedback:'',note:''});
 st.draft=newDraft();
 
 /* ===== 인증 ===== */
@@ -582,7 +582,7 @@ function recordForm(d,exs,cur){
   <div class="card"><label class="lbl">날짜</label><input type="date" class="input" value="${d.date}" onchange="st.draft.date=this.value">
   <label class="lbl">부위</label><div class="chips">${PARTS.map(p=>`<button class="chip ${d.part===p?'on':''}" onclick="pickPart('${p}')">${partLabel(p)}</button>`).join('')}</div>
   ${d.id?'':`<label class="lbl">종목 검색</label><input id="ex-q" class="input" type="search" placeholder="종목 이름으로 검색 (예: 벤치)" oninput="exSearch(this.value)" autocomplete="off"><div id="ex-res"></div>`}
-  <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)"><option value="">종목을 선택하세요</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>+ 직접 입력</option></select>
+  <label class="lbl">종목</label><select class="input" onchange="pickEx(this.value)" ${d.part?'':'disabled'}><option value="">${d.part?'종목을 선택하세요':'부위를 먼저 선택하세요 (또는 위에서 검색)'}</option>${exs.map(e=>`<option ${cur===e?'selected':''}>${esc(e)}</option>`).join('')}<option value="__custom" ${d.custom?'selected':''}>+ 직접 입력</option></select>
   ${d.custom?`<input class="input" style="margin-top:8px" placeholder="종목 이름" value="${esc(d.customName)}" oninput="st.draft.customName=this.value">`:''}
   ${recentCard(d.custom?d.customName.trim():d.exercise)}
   <label class="lbl">세트 (무게 kg · 횟수) · ${d.sets.length}세트</label>
@@ -616,10 +616,11 @@ function exSearch(v){
   st.exres=res;
   const exact=res.some(e=>exNorm(e.name)===q);
   box.innerHTML=res.map((e,i)=>`<button class="exr" onclick="exPick(${i})"><b>${esc(e.name)}</b><span class="tag">${esc(partLabel(e.part))}</span></button>`).join('')
-    +(exact?'':`<button class="exr add" onclick="exAdd()"><b>+ “${esc(v.trim())}” 직접 추가</b><span class="small muted">부위: ${esc(partLabel(st.draft.part))}</span></button>`);
+    +(exact?'':`<button class="exr add" onclick="exAdd()"><b>+ “${esc(v.trim())}” 직접 추가</b><span class="small muted">${st.draft.part?'부위: '+esc(partLabel(st.draft.part)):'부위를 먼저 선택하세요'}</span></button>`);
 }
 function exPick(i){const r=st.exres?.[i];if(!r)return;st.draft.part=r.part;st.draft.custom=false;st.draft.customName='';pickEx(r.name)}
 function exAdd(){const v=$('#ex-q').value.trim();if(!v)return;
+  if(!st.draft.part)return toast('부위를 먼저 선택해주세요');
   if(v.length>60)return toast('종목 이름은 60자 이내로 입력해주세요');
   const d=st.draft;d.custom=true;d.customName=v;d.exercise='';render();toast(`“${v}” 종목을 이번 기록에 적용했어요. 저장하면 종목 목록에도 추가돼요`)}
 function pickPart(p){st.draft.part=p;st.draft.custom=false;st.draft.customName='';pickEx(exercisesOf(p)[0])}
@@ -636,6 +637,7 @@ function delSet(i){const d=st.draft;d.sets.splice(i,1);if(!d.sets.length)d.sets.
 function saveLog(){return run(async()=>{
   const d=st.draft,tid=targetId(),exercise=(d.custom?d.customName:d.exercise).trim();
   if(!tid)return toast('회원을 먼저 선택해주세요');
+  if(!d.part)return toast('부위를 선택해주세요');
   if(!exercise)return toast('종목을 선택하거나 입력해주세요');
   if(exercise.length>60)return toast('종목 이름은 60자 이내로 입력해주세요');
   const sets=d.sets.filter(s=>+s.r>0).map(s=>({w:+s.w||0,r:+s.r}));
