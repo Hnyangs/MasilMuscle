@@ -104,7 +104,7 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--chalk)}nav butto
 .wm{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:var(--m)}
 .ptcard{border-left:3px solid var(--accent)}
 nav button.fab{overflow:visible;color:var(--m)}nav button.fab.on{color:var(--chalk)}
-.fabc{display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:var(--r);background:var(--accent);margin-top:-22px;margin-bottom:2px;box-shadow:0 0 0 5px var(--iron);font-style:normal}.fabc svg{color:var(--iron)!important}
+.fabc{display:flex;align-items:center;justify-content:center;width:52px;height:32px;border-radius:var(--r);background:var(--accent);margin:0 0 1px;font-style:normal}.fabc svg{color:var(--iron)!important}
 nav button.fab:active .fabc{background:var(--pd)}
 .ck{display:flex;gap:10px;align-items:flex-start;padding:10px 0;font-size:14px;line-height:1.5;cursor:pointer}.ck input{width:20px;height:20px;margin:1px 0 0;flex-shrink:0;accent-color:var(--accent)}.ck a{color:var(--t)}
 .consent{margin-top:20px;padding:6px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}.consent .all{border-bottom:1px solid var(--line)}.req{color:var(--accent);font-weight:600}
@@ -141,6 +141,7 @@ nav{background:var(--bg);border-top:1px solid var(--line)}
 nav button{font-family:var(--mono);font-size:10px;letter-spacing:.08em;font-weight:500}
 nav button.on{color:var(--chalk)}nav button.on svg{color:var(--accent)}
 .fabc{border-radius:2px}
+.savebar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(62px + env(safe-area-inset-bottom));width:100%;max-width:480px;display:flex;gap:8px;padding:10px var(--gut);background:var(--bg);border-top:1px solid var(--line);z-index:6}.savebar .btn{margin-top:0;min-height:52px}.savebar .btn.ghost{width:auto;flex:0 0 96px}
 input[type=number].input,.code-in{background:var(--card);border:1px solid var(--line);border-bottom:2px solid var(--line);border-radius:2px;padding:12px;font-family:var(--mono);font-size:20px;font-weight:700}
 input[type=number].input:focus{border-bottom-color:var(--accent)}
 .hero{display:flex;align-items:flex-end;gap:18px;padding:4px 0 22px}
@@ -243,7 +244,7 @@ const isTrainer=()=>st.me?.role==='trainer';
 const coaching=()=>isTrainer()&&st.mode==='trainer';
 const targetId=()=>coaching()?st.sel?.id:st.me.id;
 const targetProfile=()=>coaching()?st.sel:st.me;
-const newDraft=()=>({date:today(),part:'가슴',exercise:'',custom:false,customName:'',sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}],feedback:'',note:''});
+const newDraft=()=>({date:today(),part:'가슴',exercise:'',custom:false,customName:'',sets:[{w:'',r:''}],feedback:'',note:''});
 st.draft=newDraft();
 
 /* ===== 인증 ===== */
@@ -475,7 +476,7 @@ const tabList=()=>coaching()?[['home','','홈'],['members','','회원'],['record
 const SUB_TABS={history:'my'};
 const navTab=()=>tabList().some(([k])=>k===st.tab)?st.tab:SUB_TABS[st.tab];
 const navView=()=>`<nav>${tabList().map(([k,i,l])=>k==='record'&&!coaching()
-  ?`<button class="fab ${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}"><i class="fabc">${ico(k,24)}</i>${l}</button>`
+  ?`<button class="fab ${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}"><i class="fabc">${ico(k,20)}</i>${l}</button>`
   :`<button class="${navTab()===k?'on':''}" onclick="go('${k}')" aria-label="${l}">${ico(k)}${l}</button>`).join('')}</nav>`;
 const mLabel=m=>`${esc(m.name)} · ${esc(m.member_code||levelName(m.level))}${m.is_managed?' · 앱 미사용':''}`;
 const memberSelect=()=>st.members.length?`<select class="input" style="margin-bottom:12px" onchange="selectMember(this.value)">${st.members.map(m=>`<option value="${m.id}" ${m.id===st.sel?.id?'selected':''}>${mLabel(m)}</option>`).join('')}</select>`:'';
@@ -540,7 +541,7 @@ function recordOn(d){st.draft=newDraft();st.draft.date=d;go('record')}
 function startEx(p,e){st.routine=null;loadItem({part:p,ex:e,r:suggest(e).r,w:suggest(e).w,text:suggest(e).text})}
 function loadItem(it){
   const d=st.draft=newDraft();d.part=it.part;d.exercise=it.ex;d.hint=it.text;
-  const n=Math.max(3,lastRec(it.ex)?.sets.length||3);d.sets=Array.from({length:n},()=>({w:'',r:it.r}));   /* 무게는 직접 입력 */
+  d.sets=[{w:'',r:it.r}];   /* 무게는 직접 입력 */
   st.tab='record';render();window.scrollTo(0,0);
 }
 function startRoutine(k){const items=recommend().items;if(!items.length)return;st.routine={items,i:k};loadItem(items[k])}
@@ -574,11 +575,12 @@ function recordForm(d,exs,cur){
   <button class="btn ghost sm" onclick="addSet()">+ 세트 추가</button>
   <label class="lbl">피드백 ${coaching()?'(회원에게 전달 · 자세 · 통증 여부)':'(컨디션 · 통증 여부 등)'}</label><textarea class="input" placeholder="통증이나 부상이 있다면 꼭 적어주세요" oninput="st.draft.feedback=this.value">${esc(d.feedback)}</textarea>
   <label class="lbl">노트 ${coaching()?'(수업 메모 · 숙제 · 다음 수업 계획)':'(메모)'}</label><textarea class="input" style="min-height:70px" placeholder="${coaching()?'회원에게 보이는 노트예요':'자유 메모'}" oninput="st.draft.note=this.value">${esc(d.note)}</textarea>
-  <button class="btn primary" onclick="saveLog()">${d.id?'수정 저장':'저장하기'}</button>${d.id?'<button class="btn ghost" onclick="cancelEdit()">취소</button>':''}</div>`;
+  </div><div style="height:76px"></div>
+  <div class="savebar">${d.id?'<button class="btn ghost" onclick="cancelEdit()">취소</button>':''}<button class="btn primary" onclick="saveLog()">${d.id?'수정 저장':'저장하기'}</button></div>`;
 }
 function fillLast(){const d=st.draft,l=lastRec(d.custom?d.customName.trim():d.exercise);if(!l)return;d.sets=l.sets.map(x=>({w:x.w,r:x.r}));render();toast('지난번 기록을 채웠어요. 오늘은 한 개 더.')}
 function recentCard(name){
-  if(!name)return '';const rec=st.logs.filter(l=>l.exercise===name).slice(0,3);
+  if(!name)return '';const rec=st.logs.filter(l=>l.exercise===name).slice(0,1);
   if(!rec.length)return '';
   return `<div class="fb" style="margin-top:10px"><b>최근 기록</b>${rec.map(l=>`<div style="margin-top:6px"><span class="small muted">${fmtDate(l.log_date)}${l.is_pt?' · PT':''}</span><div>${setsHtml(l)}</div></div>`).join('')}${st.draft.id?'':`<button class="btn ghost sm" style="margin-top:10px" onclick="fillLast()">지난번 그대로 채우기</button>`}</div>`;
 }
@@ -587,7 +589,7 @@ function pickEx(e){
   const d=st.draft;
   if(e==='__custom'){d.custom=true;d.exercise='';d.customName=''}
   else if(!e){d.custom=false;d.exercise=''}
-  else{d.custom=false;d.exercise=e;const s=suggest(e),n=Math.max(3,lastRec(e)?.sets.length||3);d.sets=Array.from({length:n},()=>({w:s.w,r:s.r}))}
+  else{d.custom=false;d.exercise=e;const s=suggest(e);d.sets=[{w:s.w,r:s.r}]}
   render();
 }
 function adj(i,k,dv){const s=st.draft.sets[i];s[k]=Math.max(0,Math.round(((+s[k]||0)+dv)*10)/10);render()}
