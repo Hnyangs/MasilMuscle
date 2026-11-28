@@ -389,7 +389,7 @@ const reload=()=>run(async()=>{await loadData();render()});
 /* 화면 상태 보존: 앱을 나갔다 돌아오면(브라우저가 페이지를 다시 불러와도) 보던 탭·작성 중인 기록·필터·스크롤을 복원한다 */
 const UI_KEY='mm-ui',UI_TTL=864e5;
 function saveUi(){if(!st.me||st.me.onboarded===false)return;
-  try{lsSet(UI_KEY,JSON.stringify({uid:st.me.id,t:Date.now(),tab:st.tab,mode:st.mode,sel:st.sel?.id||null,draft:st.draft,routine:st.routine||null,hf:st.hf,week:st.week,ptMode:st.ptMode,ptDate:st.ptDate,classPart:st.classPart||'',editFrom:st.editFrom||null,y:window.scrollY}))}catch(e){}}
+  try{lsSet(UI_KEY,JSON.stringify({uid:st.me.id,t:Date.now(),tab:st.tab,mode:st.mode,sel:st.sel?.id||null,draft:st.draft,routine:st.routine||null,hf:st.hf,classPart:st.classPart||'',editFrom:st.editFrom||null,y:window.scrollY}))}catch(e){}}
 async function restoreUi(){
   let u;try{u=JSON.parse(lsGet(UI_KEY))}catch(e){return}
   if(!u||u.uid!==st.me?.id||Date.now()-u.t>UI_TTL||st.me.onboarded===false)return;
@@ -400,10 +400,9 @@ async function restoreUi(){
   if(u.draft)st.draft={...newDraft(),...u.draft};
   st.routine=u.routine||null;st.editFrom=u.editFrom||null;
   if(u.hf)Object.assign(st.hf,u.hf);
-  st.classPart=u.classPart||'';st.ptMode=u.ptMode||st.ptMode;
-  /* 날짜 기준 화면은 오늘에 맞춘다: 홈 주간 달력은 항상 이번 주, PT 날짜는 같은 날 안에서만 복원 */
-  st.week=0;st.ptDate=localDate(u.t)===today()?(u.ptDate||null):null;
-  if(u.tab)st.tab=u.tab;
+  st.classPart=u.classPart||'';
+  /* 일정(홈 주간 달력, PT 일정 날짜·일/주 보기)은 화면 유지에서 제외: 항상 오늘/이번 주로 시작한다 */
+  if(u.tab&&u.tab!=='pt')st.tab=u.tab;   /* 일정(PT) 탭에서 나갔다 오면 홈에서 시작 */
   st._y=u.y||0;
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveUi()});
