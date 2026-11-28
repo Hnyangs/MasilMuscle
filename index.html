@@ -389,7 +389,7 @@ const reload=()=>run(async()=>{await loadData();render()});
 /* 화면 상태 보존: 앱을 나갔다 돌아오면(브라우저가 페이지를 다시 불러와도) 보던 탭·작성 중인 기록·필터·스크롤을 복원한다 */
 const UI_KEY='mm-ui',UI_TTL=864e5;
 function saveUi(){if(!st.me||st.me.onboarded===false)return;
-  try{lsSet(UI_KEY,JSON.stringify({uid:st.me.id,t:Date.now(),tab:st.tab,mode:st.mode,sel:st.sel?.id||null,draft:st.draft,routine:st.routine||null,hf:st.hf,week:st.week,ptMode:st.ptMode,ptDate:st.ptDate,editFrom:st.editFrom||null,y:window.scrollY}))}catch(e){}}
+  try{lsSet(UI_KEY,JSON.stringify({uid:st.me.id,t:Date.now(),tab:st.tab,mode:st.mode,sel:st.sel?.id||null,draft:st.draft,routine:st.routine||null,hf:st.hf,week:st.week,ptMode:st.ptMode,ptDate:st.ptDate,classPart:st.classPart||'',editFrom:st.editFrom||null,y:window.scrollY}))}catch(e){}}
 async function restoreUi(){
   let u;try{u=JSON.parse(lsGet(UI_KEY))}catch(e){return}
   if(!u||u.uid!==st.me?.id||Date.now()-u.t>UI_TTL||st.me.onboarded===false)return;
@@ -400,7 +400,7 @@ async function restoreUi(){
   if(u.draft)st.draft={...newDraft(),...u.draft};
   st.routine=u.routine||null;st.editFrom=u.editFrom||null;
   if(u.hf)Object.assign(st.hf,u.hf);
-  st.week=u.week||0;st.ptMode=u.ptMode||st.ptMode;st.ptDate=u.ptDate||null;
+  st.classPart=u.classPart||'';st.week=u.week||0;st.ptMode=u.ptMode||st.ptMode;st.ptDate=u.ptDate||null;
   if(u.tab)st.tab=u.tab;
   st._y=u.y||0;
 }
@@ -934,22 +934,26 @@ function delInbody(id){const r=st.inbody.find(x=>x.id===id);if(!confirm(`${r?fmt
 /* ===== 수업 (회원) ===== */
 function classView(){
   const t=st.myTrainer,ups=nextPT(),req=st.pts.filter(p=>p.status==='requested');
-  const by={};st.logs.filter(l=>l.is_pt).forEach(l=>(by[l.log_date]??=[]).push(l));
+  const ptLogs=st.logs.filter(l=>l.is_pt),have=new Set(ptLogs.map(l=>l.part)),cp=have.has(st.classPart)?st.classPart:'';
+  const parts=[...PARTS,...have].filter((x,i,a)=>have.has(x)&&a.indexOf(x)===i);
+  const by={};ptLogs.filter(l=>!cp||l.part===cp).forEach(l=>(by[l.log_date]??=[]).push(l));
   const all=Object.keys(by).sort().reverse(),dates=all.slice(0,st.classLimit);
   const goalOf=d=>st.pts.find(p=>p.pt_date===d&&p.status!=='canceled')?.goal;
   const tm=p=>`${fmtDate(p.pt_date)} ${esc((p.pt_time||'').slice(0,5))}`;
   return `<h2>수업</h2>
   <div class="card hl"><div class="row between"><div><div class="small muted">1:1 PT</div><b style="font-size:18px">${t?esc(t.name)+' 트레이너':'연결된 강사가 없어요'}</b>${t?.center_name?`<div class="small muted">${esc(t.center_name)}</div>`:''}</div>${t?'':`<button class="btn sm primary" onclick="go('my')">강사 연결</button>`}</div>
-  <div class="stats" style="margin-top:14px"><div><b>${all.length}</b><span>누적 수업</span></div><div><b>${ups.length}</b><span>예정</span></div><div><b>${req.length}</b><span>신청 중</span></div></div></div>
+  <div class="stats" style="margin-top:14px"><div><b>${new Set(ptLogs.map(l=>l.log_date)).size}</b><span>누적 수업</span></div><div><b>${ups.length}</b><span>예정</span></div><div><b>${req.length}</b><span>신청 중</span></div></div></div>
   ${t?`<div class="card"><h3>PT 신청</h3><div class="row"><input id="r-date" type="date" class="input" value="${today()}"><input id="r-time" type="time" class="input" value="19:00"></div>
   <label class="lbl">요청사항</label><input id="r-goal" class="input" placeholder="예) 하체 위주로 하고 싶어요"><button class="btn primary" onclick="requestPT()">신청하기</button></div>`:''}
   ${ups.length?`<div class="card"><h3>다가오는 수업</h3>${ups.map(p=>`<div class="item"><div><b>${tm(p)}</b>${p.goal?`<div class="small muted">${esc(p.goal)}</div>`:''}</div>${ptTag(p)}</div>`).join('')}</div>`:''}
   ${(()=>{const done=st.pts.filter(p=>p.status==='completed').slice(-5).reverse();return done.length?`<div class="card"><h3>지난 수업</h3>${done.map(p=>`<div class="item"><div><b>${tm(p)}</b>${p.goal?`<div class="small muted">${esc(p.goal)}</div>`:''}</div>${ptTag(p)}</div>`).join('')}</div>`:''})()}
   ${req.length?`<div class="card"><h3>신청 내역</h3>${req.map(p=>`<div class="item"><div><b>${tm(p)}</b><div class="small muted">${esc(p.goal)}</div></div><button class="btn sm" onclick="cancelReq('${p.id}')">신청 취소</button></div>`).join('')}</div>`:''}
   <h3 class="sec">수업 기록 · 트레이너 피드백</h3>
-  ${dates.length?dates.map(d=>`<div class="date">${fmtDate(d)}${goalOf(d)?` · ${esc(goalOf(d))}`:''}</div>${by[d].map(l=>logCard(l,true)).join('')}`).join(''):'<div class="card center muted">아직 PT 수업 기록이 없어요</div>'}
+  ${parts.length>1?`<div class="chips" style="margin-bottom:6px"><button class="chip ${cp?'':'on'}" onclick="classPartSet('')">전체</button>${parts.map(x=>`<button class="chip ${cp===x?'on':''}" onclick="classPartSet('${x}')">${partLabel(x)}</button>`).join('')}</div>`:''}
+  ${dates.length?dates.map(d=>`<div class="date">${fmtDate(d)}${goalOf(d)?` · ${esc(goalOf(d))}`:''}</div>${by[d].map(l=>logCard(l,true)).join('')}`).join(''):`<div class="card center muted">${cp?partLabel(cp)+' 수업 기록이 없어요':'아직 PT 수업 기록이 없어요'}</div>`}
   ${all.length>dates.length?`<button class="btn" onclick="st.classLimit+=10;render()">더 보기 (${all.length-dates.length}회 남음)</button>`:''}`;
 }
+function classPartSet(p){st.classPart=p;st.classLimit=10;render()}
 function requestPT(){return run(async()=>{
   const date=$('#r-date').value,time=$('#r-time').value,goal=$('#r-goal').value.trim();
   if(!date||!time)return toast('날짜와 시간을 입력해주세요');
