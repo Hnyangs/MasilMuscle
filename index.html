@@ -400,7 +400,9 @@ async function restoreUi(){
   if(u.draft)st.draft={...newDraft(),...u.draft};
   st.routine=u.routine||null;st.editFrom=u.editFrom||null;
   if(u.hf)Object.assign(st.hf,u.hf);
-  st.classPart=u.classPart||'';st.week=u.week||0;st.ptMode=u.ptMode||st.ptMode;st.ptDate=u.ptDate||null;
+  st.classPart=u.classPart||'';st.ptMode=u.ptMode||st.ptMode;
+  /* 날짜 기준 화면은 오늘에 맞춘다: 홈 주간 달력은 항상 이번 주, PT 날짜는 같은 날 안에서만 복원 */
+  st.week=0;st.ptDate=localDate(u.t)===today()?(u.ptDate||null):null;
   if(u.tab)st.tab=u.tab;
   st._y=u.y||0;
 }
